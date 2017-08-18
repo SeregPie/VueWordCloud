@@ -87,8 +87,8 @@
 
 		data() {
 			return {
-				//wordElements: [],
 				size: [500, 500],
+				placedWords: [],
 				drawId: null,
 			};
 		},
