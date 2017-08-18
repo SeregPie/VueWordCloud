@@ -8,6 +8,8 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.1/css/bulma.min.css"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.4/d3.layout.cloud.min.js"></script>
 	</head>
 	<body>
 		<div class="hero is-fullheight" id="demo">
@@ -53,7 +55,12 @@
 							</div>
 						</div>
 						<div class="column" style="background-color: red;">
-							<vue-word-cloud :words="words" :font-family="fontFamily"></vue-word-cloud>
+							<vue-word-cloud
+								:words="words"
+								:font-family="fontFamily"
+								enter-active-class="animated rotateIn"
+								leave-active-class="animated fadeOutDown"
+							></vue-word-cloud>
 						</div>
 					</div>
 				</div>
