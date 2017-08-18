@@ -11,6 +11,10 @@
 // Word cloud layout by Jason Davies, https://www.jasondavies.com/wordcloud/
 // Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
 
+let _zip = function(array, ...otherArrays) {
+	return array.map((value, index) => [value, ...otherArrays[index]]);
+};
+
 let cw = 1 << 11 >> 5;
 let ch = 1 << 11;
 
@@ -147,7 +151,7 @@ function cloudSprite(context, d, data, di) {
 			if (y + h >= ch) {
 				break;
 			}
-			context.translate((x + (w / 2)), (y + (h  / 2)));
+			context.translate((x + (w / 2)), (y + (h / 2)));
 			if (rotate) {
 				context.rotate(rotate * 2 * Math.PI);
 			}
