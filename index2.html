@@ -15,9 +15,6 @@ let _zip = function(array, ...otherArrays) {
 	return array.map((value, index) => [value, ...otherArrays[index]]);
 };
 
-let cw = 1 << 11 >> 5;
-let ch = 1 << 11;
-
 this.VueWordCloud = function() {
   let size = [256, 256],
 	  text = cloudText,
@@ -44,11 +41,12 @@ this.VueWordCloud = function() {
 	cloud.start = function() {
 		let canvas = document.createElement('canvas');
 		let context = canvas.getContext('2d');
-		canvas.width = (cw << 5);
-		canvas.height = ch;
+		canvas.width = Math.pow(2, 11);
+		canvas.height = Math.pow(2, 11);
 		context.fillStyle = context.strokeStyle = 'red';
 		context.textAlign = 'center';
-		let board = Array((size[0] >> 5) * size[1]).fill(0);
+
+		let board = Array(size[0] * size[1]).fill(0);
 		let bounds = null;
 
 		let wordElements = [];
@@ -143,12 +141,12 @@ function cloudSprite(context, d, data, di) {
 			if (h > maxh) {
 				maxh = h;
 			}
-			if (x + w >= (cw << 5)) {
+			if (x + w >= context.canvas.width) {
 				x = 0;
 				y += maxh;
 				maxh = 0;
 			}
-			if (y + h >= ch) {
+			if (y + h >= context.canvas.height) {
 				break;
 			}
 			context.translate((x + (w / 2)), (y + (h / 2)));
@@ -172,7 +170,7 @@ function cloudSprite(context, d, data, di) {
 			d.hasText = true;
 			x += w;
 		}
-		let pixels = context.getImageData(0, 0, (cw << 5), ch).data;
+		let pixels = context.getImageData(0, 0, context.canvas.width, context.canvas.height).data;
 		let sprite = [];
 		while (--di >= 0) {
 			d = data[di];
@@ -191,7 +189,7 @@ function cloudSprite(context, d, data, di) {
 			for (let j = 0; j < h; j++) {
 				for (let i = 0; i < w; i++) {
 					let k = w32 * j + (i >> 5);
-					let m = pixels[((y + j) * (cw << 5) + (x + i)) << 2] ? 1 << (31 - (i % 32)) : 0;
+					let m = pixels[((y + j) * context.canvas.width + (x + i)) << 2] ? 1 << (31 - (i % 32)) : 0;
 					sprite[k] |= m;
 					seen |= m;
 				}
@@ -410,13 +408,13 @@ let spirals = {
 
 let words = Array.from({length: 100}, () => Math.random().toString(36))
 	.map(function(d) {
-	  return {text: d, size: 10 + Math.random() * 50};
+	  return {text: d, size: 5 + Math.random() * 10};
 	});
 
 let layout;
 setTimeout(() => {
 	layout = VueWordCloud()
-		.size([700, 700])
+		.size([250, 250])
 		.canvas(document.createElement('canvas'))
 		.words(words)
 		.timeInterval(100)

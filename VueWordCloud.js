@@ -4,7 +4,7 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let generateWordElements = function(cancelable, {words, size}) {
+	let computePlacedWords = function(cancelable, {words, size}) {
 		if (cancelable.canceled) {
 			throw 0;
 		}
