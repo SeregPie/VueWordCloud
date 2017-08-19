@@ -57,7 +57,7 @@
 
 			fontSize: {
 				type: [Number, Function],
-				default: 16,
+				default: 1,
 			},
 
 			fontFamily: {
