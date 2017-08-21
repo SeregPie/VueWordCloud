@@ -1,46 +1,200 @@
-(function(Vue) {
+(function(factory) {
+	if (typeof module !== 'undefined' && typeof exports !== 'undefined' && this === exports) {
+		factory(
+			require('vue'),
+			module
+		);
+	} else {
+		let module = {};
+		factory(
+			this.Vue,
+			module
+		);
+		Vue.component('VueWordCloud', module.exports);
+	}
+}).call(this, function(Vue, module) {
 
-	let timeout = function(ms) {
+	let _zip = function(array, ...otherArrays) {
+		return array.map(array, (v, i) => [v, ...otherArrays.map(a => a[i])]);
+	};
+
+	let _delay = function(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
 	let generateWordItems = (function() {
 
+		let getFont = function(fontStyle, fontWeight, fontSize, fontFamily) {
+			return [fontStyle, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+		};
 
-		return async function(context, {words, containerSize}) {
-			await timeout(1);
+		let getTextPixels = function(text, fontSize, fontFamily, fontStyle, fontWeight, rotate) {
+			/*let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
+			let canvas = document.createElement('canvas');
+			let ctx = canvas.getContext('2d', {willReadFrequently: true});
+			ctx.font = font;
+			let textSize = [
+				ctx.measureText(text).width,
+				fontSize
+				//Math.max(fontSize, ctx.measureText('m').width, ctx.measureText('\uFF37').width),
+			];
+
+			let boxWidth = fw + fh * 2;
+			let boxHeight = fh * 3;
+			let fgw = Math.ceil(boxWidth / g);
+			let fgh = Math.ceil(boxHeight / g);
+			boxWidth = fgw * g;
+			boxHeight = fgh * g;
+
+			let fillTextOffsetX = - fw / 2;
+
+			let fillTextOffsetY = - fh * 0.4;
+
+			let cgh = Math.ceil((boxWidth * Math.abs(Math.sin(rotateDeg)) + boxHeight * Math.abs(Math.cos(rotateDeg))) / g);
+			let cgw = Math.ceil((boxWidth * Math.abs(Math.cos(rotateDeg)) + boxHeight * Math.abs(Math.sin(rotateDeg))) / g);
+			let width = cgw * g;
+			let height = cgh * g;
+
+			canvas.setAttribute('width', width);
+			canvas.setAttribute('height', height);
+			ctx.translate(width / 2, height / 2);
+			ctx.rotate(- rotate);
+			ctx.font = font;
+
+			ctx.fillStyle = '#000';
+			ctx.textBaseline = 'middle';
+			ctx.fillText(word, fillTextOffsetX, fillTextOffsetY + fontSize * 0.5);
+
+			let imageData = ctx.getImageData(0, 0, width, height).data;
+
+			let textPixels = [];
+			let gx = cgw, gy, x, y;
+			while (gx--) {
+				gy = cgh;
+				while (gy--) {
+					y = g;
+					singleGridLoop: {
+						while (y--) {
+							x = g;
+							while (x--) {
+								if (imageData[((gy * g + y) * width + (gx * g + x)) * 4 + 3]) {
+									occupied.push([gx, gy]);
+									break singleGridLoop;
+								}
+							}
+						}
+
+					}
+				}
+			}
+
+			return textPixels;*/
+		};
+
+		let canFitText = function canFitText(textPosition, textPixels) {
+			for (let textPixel of textPixels) {
+				let pixelPosition = _zip(textPosition, textPixel).map(([textPosition, textPixel]) => textPosition + textPixel);
+				if (grid[pixelPosition[0]][pixelPosition[1]]) {
+					return false;
+				}
+			}
+			return true;
+		};
+
+		let updateGrid = function updateGrid(gx, gy, gw, gh, info, item) {
+			for (let textPixel of textPixels) {
+				let pixelPosition = _zip(textPosition, textPixel).map(([textPosition, textPixel]) => textPosition + textPixel);
+
+				if (px < ngx && py < ngy && px >= 0 && py >= 0) {
+					grid[x][y] = true;
+				}
+			}
+		};
+
+		let getPointsAtRadius = function(cachedPointsAtRadius, radius, gridOrigin, shape, ellipticity) {
+			if (cachedPointsAtRadius[radius]) {
+				return cachedPointsAtRadius[radius];
+			}
+			let points = [];
+			if (radius === 0) {
+				points.push([gridOrigin[0], gridOrigin[1], 0]);
+			}
+			let aaa = radius * 8;
+			let bbb = aaa * 2 * Math.PI;
+			while (aaa-- > 0) {
+				let ccc = aaa / bbb;
+				let ddd = shape(ccc);
+				points.push([
+					gridOrigin[0] + radius * ddd * Math.cos(-ccc),
+					gridOrigin[1] + radius * ddd * Math.sin(-ccc) * ellipticity,
+					ccc,
+				]);
+			}
+			cachedPointsAtRadius[radius] = points;
+			return points;
+		};
+
+		return /*async*/ function(context, {words, containerSize}) {
+			/*await*/ _delay(1);
 			if (context.canceled) {
 				throw 0;
 			}
+
+			let pixelSize = 4;
+			let gridSize = containerSize.map(() => Math.ceil(Math.pow(2, 11) / pixelSize));
+			let gridOrigin = gridSize.map(v => v / 2);
+			let gridRadius = Math.floor(Math.sqrt(gridSize.reduce((a, v) => a + v * v, 0)));
+			let grid = [];
+			for (let x = gridSize[0]; x-- > 0;) {
+				grid[x] = [];
+				for (let y = gridSize[1]; y-- > 0;) {
+					grid[x][y] = false;
+				}
+			}
+			let shape = function() {
+				return 1;
+			};
+
 			let wordItems = [];
-			for (let {text, font} of words) {
-				let rotate = Math.round(Math.random() * 180);
-				let position = [
-					Math.round(Math.random() * 500),
-					Math.round(Math.random() * 500),
-				];
-				let wordItem = {
-					key: text,
-					html: text,
-					style: {
-						font,
-						transform: [
-							`translate(${position.map(v => `${v}px`).join(',')})`,
-							`rotate(${rotate}deg)`,
-						].join(' '),
-					},
-				};
-				wordItems.push(wordItem);
-				await timeout(1);
+			for (let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} of words) {
+				let textPixels = getTextPixels(text, fontSize, fontFamily, fontStyle, fontWeight, rotate);
+
+				/*await*/ _delay(1);
 				if (context.canceled) {
 					throw 0;
+				}
+
+				for (let watchRadius = 1; watchRadius < gridRadius; watchRadius++) {
+					let points = getPointsAtRadius(watchRadius);
+					for (let point of points) {
+						let wordPosition = _zip(point, textBoxSize).map(([point, textBoxSize]) => Math.floor(point - textBoxSize / 2));
+						if (canFitText(wordPosition, textBoxSize, textPixels)) {
+							updateGrid(gx, gy, gw, gh, info, item);
+							wordItems.push({
+								key: text,
+								html: text,
+								style: {
+									font: getFont(fontStyle, fontWeight, fontSize, fontFamily),
+									transform: [
+										`translate(${wordPosition.map(v => `${v}px`).join(',')})`,
+										//`rotate(${rotate}deg)`,
+									].join(' '),
+								},
+							});
+
+							/*await*/ _delay(1);
+							if (context.canceled) {
+								throw 0;
+							}
+						}
+					}
 				}
 			}
 			return wordItems;
 		};
 	})();
 
-	Vue.component('VueWordCloud', {
+	module.exports = {
 		template: `
 			<div
 				style="position: relative; width: 100%; height: 100%;"
@@ -174,8 +328,8 @@
 								rotate = this.rotate;
 							}
 						}
-						let font = [fontStyle, fontWeight, `${fontSize}px`, fontFamily].join(' ');
-						return {text, font, rotate};
+						rotate = 0;
+						return {text, fontSize, fontFamily, fontStyle, fontWeight, rotate};
 					})
 					.filter(({text}) => {
 						if (uniqueTexts.has(text)) {
@@ -220,9 +374,9 @@
 
 		watch: {
 			wordItemsPromise: {
-				async handler(promise) {
+				/*async*/ handler(promise) {
 					try {
-						this.wordItems = await promise;
+						this.wordItems = /*await*/ promise;
 					} catch (error) {}
 				},
 				immediate: true,
@@ -241,6 +395,6 @@
 				}, 1000);
 			},
 		},
-	});
+	};
 
-})(Vue);
+});
