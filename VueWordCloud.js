@@ -4,27 +4,39 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let computePlacedWords = function(cancelable, {words, size}) {
-		if (cancelable.canceled) {
-			throw 0;
-		}
-
-		let cloudRadians = Math.PI / 180;
-		let cw = 1 << 11 >> 5;
-		let ch = 1 << 11;
-
-		let spiral = archimedeanSpiral;
-
-		let canvas = document.createElement('canvas');
-		canvas.width = canvas.height = 1;
-		let context = canvas.getContext('2d');
-		let ratio = Math.sqrt(context.getImageData(0, 0, 1, 1).data.length >> 2);
-		canvas.width = (cw << 5) / ratio;
-		canvas.height = ch / ratio;
-		context.fillStyle = context.strokeStyle = 'red';
-		context.textAlign = 'center';
-
-	};
+	let generateWordItems = (function() {
+		return async function(cancelable, {words, containerSize}) {
+			await timeout(1);
+			if (cancelable.canceled) {
+				throw 0;
+			}
+			let wordItems = [];
+			for (let {text, font} of words) {
+				let rotate = Math.round(Math.random() * 180);
+				let position = [
+					Math.round(Math.random() * 500),
+					Math.round(Math.random() * 500),
+				];
+				let wordItem = {
+					key: text,
+					html: text,
+					style: {
+						font,
+						transform: [
+							`translate(${position.map(v => `${v}px`).join(',')})`,
+							`rotate(${rotate}deg)`,
+						].join(' '),
+					},
+				};
+				wordItems.push(wordItem);
+				await timeout(1);
+				if (cancelable.canceled) {
+					throw 0;
+				}
+			}
+			return wordItems;
+		};
+	})();
 
 	Vue.component('VueWordCloud', {
 		template: `
@@ -32,12 +44,12 @@
 				style="position: absolute; width: 100%; height: 100%;"
 			>
 				<div
-					v-for="word in wordElements"
-					:key="word.key"
+					v-for="item in wordItems"
+					:key="item.key"
 					style="position: absolute; transition: all 1s;"
-					:class="word.class"
-					:style="word.style"
-					v-html="word.html"
+					:class="item.class"
+					:style="item.style"
+					v-html="item.html"
 				></div>
 			</div>
 		`,
@@ -87,10 +99,13 @@
 
 		data() {
 			return {
-				size: [500, 500],
-				placedWords: [],
-				drawId: null,
+				elProps: {width: 0, height: 0},
+				wordItems: [],
 			};
+		},
+
+		mounted() {
+			this.updateElProps();
 		},
 
 		computed: {
@@ -157,7 +172,8 @@
 								rotate = this.rotate;
 							}
 						}
-						return {text, fontSize, fontFamily, fontStyle, fontWeight, rotate};
+						let font = [fontStyle, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+						return {text, font, rotate};
 					})
 					.filter(({text}) => {
 						if (uniqueTexts.has(text)) {
@@ -168,61 +184,51 @@
 					});
 			},
 
-			wordElements() {
-				return this.normalizedWords.map(({text, fontSize, fontFamily, fontStyle, fontWeight, rotate}) => ({
-					key: text,
-					html: text,
-					style: {
-						//left: `${Math.random() * 500}px`,
-						//top: `${Math.random() * 500}px`,
-						transform: [
-							`translate(${[Math.random() * 500, Math.random() * 500].map(i => `${Math.round(i)}px`).join(',')})`,
-							`rotate(${Math.round(Math.random() * 180)}deg)`,
-						].join(' '),
-						fontSize: `${fontSize}px`,
-						fontFamily,
-						fontStyle,
-						fontWeight,
-					},
-				}));
+			containerSize() {
+				return [this.elProps.width, this.elProps.height];
+			},
+
+			generatorData() {
+				return {
+					words: this.normalizedWords,
+					containerSize: this.containerSize,
+				};
+			},
+
+			dummy() {
+				let token;
+				return async function(data) {
+					token = {};
+					try {
+						this.wordItems = await generateWordItems({
+							token,
+							get canceled() {
+								return this.token !== token;
+							},
+						}, data);
+					} catch (error) {}
+				};
 			},
 		},
 
 		watch: {
-			wordElements: {
-				handler(words) {
-					console.log(words);
-				},
-				immediate: true,
+			generatorData(data) {
+				this.dummy(data);
 			},
 		},
 
-		/*methods: {
-			async computewordElements(id, words) {
-				if (this.drawId !== id) {
-					return;
+		methods: {
+			updateElProps() {
+				if (this.$el) {
+					let {width, height} = this.$el.getBoundingClientRect();
+					this.elProps.width = width;
+					this.elProps.height = height;
 				}
-				let returns = [];
-				for (let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} of words) {
-					returns.push({
-						text,
-						style: {
-							left: `${Math.random() * 500}px`,
-							top: `${Math.random() * 500}px`,
-							fontSize: `${fontSize}px`,
-							fontFamily,
-							fontStyle,
-							fontWeight,
-						},
-					});
-					await timeout(1);
-					if (this.drawId !== id) {
-						return;
-					}
-				}
-				this.wordElements = returns;
+				setTimeout(() => {
+					this.updateElProps();
+				}, 1000);
 			},
-		},*/
+		},
 	});
 
 })(Vue);
