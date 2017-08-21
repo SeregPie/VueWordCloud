@@ -5,9 +5,11 @@
 	};
 
 	let generateWordItems = (function() {
-		return async function(cancelable, {words, containerSize}) {
+
+
+		return async function(context, {words, containerSize}) {
 			await timeout(1);
-			if (cancelable.canceled) {
+			if (context.canceled) {
 				throw 0;
 			}
 			let wordItems = [];
@@ -30,7 +32,7 @@
 				};
 				wordItems.push(wordItem);
 				await timeout(1);
-				if (cancelable.canceled) {
+				if (context.canceled) {
 					throw 0;
 				}
 			}
@@ -41,7 +43,7 @@
 	Vue.component('VueWordCloud', {
 		template: `
 			<div
-				style="position: absolute; width: 100%; height: 100%;"
+				style="position: relative; width: 100%; height: 100%;"
 			>
 				<div
 					v-for="item in wordItems"
@@ -195,25 +197,35 @@
 				};
 			},
 
-			dummy() {
-				let token;
-				return async function(data) {
-					token = {};
-					try {
-						this.wordItems = await generateWordItems({
-							token,
-							get canceled() {
-								return this.token !== token;
-							},
-						}, data);
-					} catch (error) {}
+			wordItemsPromise() {
+				return this.promisifyWordItems();
+			},
+
+			promisifyWordItems() {
+				let id;
+				return function() {
+					id = {};
+					let words = this.normalizedWords;
+					let containerSize = this.containerSize;
+					let context = {
+						id,
+						get canceled() {
+							return this.id !== id;
+						},
+					};
+					return generateWordItems(context, {words, containerSize});
 				};
 			},
 		},
 
 		watch: {
-			generatorData(data) {
-				this.dummy(data);
+			wordItemsPromise: {
+				async handler(promise) {
+					try {
+						this.wordItems = await promise;
+					} catch (error) {}
+				},
+				immediate: true,
 			},
 		},
 
