@@ -10,7 +10,7 @@
 			this.Vue,
 			module
 		);
-		Vue.component('VueWordCloud', module.exports);
+		this.Vue.component('VueWordCloud', module.exports);
 	}
 }).call(this, function(Vue, module) {
 
@@ -28,8 +28,8 @@
 			return [fontStyle, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 		};
 
-		let getTextPixels = function(text, fontSize, fontFamily, fontStyle, fontWeight, rotate) {
-			/*let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
+		/*let getTextBounds = function(text, fontSize, fontFamily, fontStyle, fontWeight, rotate) {
+			let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
 			let canvas = document.createElement('canvas');
 			let ctx = canvas.getContext('2d', {willReadFrequently: true});
 			ctx.font = font;
@@ -50,8 +50,8 @@
 
 			let fillTextOffsetY = - fh * 0.4;
 
-			let cgh = Math.ceil((boxWidth * Math.abs(Math.sin(rotateDeg)) + boxHeight * Math.abs(Math.cos(rotateDeg))) / g);
-			let cgw = Math.ceil((boxWidth * Math.abs(Math.cos(rotateDeg)) + boxHeight * Math.abs(Math.sin(rotateDeg))) / g);
+			let cgh = Math.ceil((boxWidth * Math.abs(Math.sin(rotate)) + boxHeight * Math.abs(Math.cos(rotateDeg))) / g);
+			let cgw = Math.ceil((boxWidth * Math.abs(Math.cos(rotate)) + boxHeight * Math.abs(Math.sin(rotateDeg))) / g);
 			let width = cgw * g;
 			let height = cgh * g;
 
@@ -88,8 +88,8 @@
 				}
 			}
 
-			return textPixels;*/
-		};
+			return textPixels;
+		};*/
 
 		let canFitText = function canFitText(textPosition, textPixels) {
 			for (let textPixel of textPixels) {
@@ -134,13 +134,13 @@
 			return points;
 		};
 
-		return /*async*/ function(context, {words, containerSize}) {
-			/*await*/ _delay(1);
+		return async function(context, {words, containerSize}) {
+			await _delay(1);
 			if (context.canceled) {
 				throw 0;
 			}
 
-			let pixelSize = 4;
+			/*let pixelSize = 4;
 			let gridSize = containerSize.map(() => Math.ceil(Math.pow(2, 11) / pixelSize));
 			let gridOrigin = gridSize.map(v => v / 2);
 			let gridRadius = Math.floor(Math.sqrt(gridSize.reduce((a, v) => a + v * v, 0)));
@@ -153,18 +153,68 @@
 			}
 			let shape = function() {
 				return 1;
-			};
+			};*/
 
 			let wordItems = [];
 			for (let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} of words) {
-				let textPixels = getTextPixels(text, fontSize, fontFamily, fontStyle, fontWeight, rotate);
+				rotate = 0;
 
-				/*await*/ _delay(1);
+				let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
+
+				let canvas = document.createElement('canvas');
+				let ctx = canvas.getContext('2d', {willReadFrequently: true});
+				ctx.font = font;
+				let textSize = [
+					ctx.measureText(text).width,
+					fontSize
+					//Math.max(fontSize, ctx.measureText('m').width, ctx.measureText('\uFF37').width),
+				];
+
+				/*let cgh = Math.ceil((boxWidth * Math.abs(Math.sin(rotate)) + boxHeight * Math.abs(Math.cos(rotateDeg))) / g);
+				let cgw = Math.ceil((boxWidth * Math.abs(Math.cos(rotate)) + boxHeight * Math.abs(Math.sin(rotateDeg))) / g);
+				let width = cgw * g;
+				let height = cgh * g;*/
+
+				canvas.width = textSize[0];
+				canvas.height = textSize[1];
+				canvas.setAttribute('height', height);
+				//ctx.translate(width / 2, height / 2);
+				//ctx.rotate(- rotate);
+				ctx.font = font;
+
+				ctx.textBaseline = 'middle';
+				ctx.fillStyle = 'white';
+				ctx.fillText(word, 0, textSize[1] / 2);
+
+				document.body.appendChild(canvas);
+
+				//let imageData = ctx.getImageData(0, 0, width, height).data;
+
+				await _delay(1);
 				if (context.canceled) {
 					throw 0;
 				}
 
-				for (let watchRadius = 1; watchRadius < gridRadius; watchRadius++) {
+				let position = [Math.round(Math.random() * 500), Math.round(Math.random() * 500)];
+
+				wordItems.push({
+					key: text,
+					html: text,
+					style: {
+						font: font,
+						transform: [
+							`translate(${position.map(v => `${v}px`).join(',')})`,
+							//`rotate(${rotate}deg)`,
+						].join(' '),
+					},
+				});
+
+				await _delay(1);
+				if (context.canceled) {
+					throw 0;
+				}
+
+				/*for (let watchRadius = 1; watchRadius < gridRadius; watchRadius++) {
 					let points = getPointsAtRadius(watchRadius);
 					for (let point of points) {
 						let wordPosition = _zip(point, textBoxSize).map(([point, textBoxSize]) => Math.floor(point - textBoxSize / 2));
@@ -182,13 +232,10 @@
 								},
 							});
 
-							/*await*/ _delay(1);
-							if (context.canceled) {
-								throw 0;
-							}
+
 						}
 					}
-				}
+				}*/
 			}
 			return wordItems;
 		};
@@ -374,9 +421,9 @@
 
 		watch: {
 			wordItemsPromise: {
-				/*async*/ handler(promise) {
+				async handler(promise) {
 					try {
-						this.wordItems = /*await*/ promise;
+						this.wordItems = await promise;
 					} catch (error) {}
 				},
 				immediate: true,
