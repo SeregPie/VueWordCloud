@@ -91,7 +91,7 @@
 			return textPixels;
 		};*/
 
-		let canFitText = function canFitText(textPosition, textPixels) {
+		/*let canFitText = function canFitText(textPosition, textPixels) {
 			for (let textPixel of textPixels) {
 				let pixelPosition = _zip(textPosition, textPixel).map(([textPosition, textPixel]) => textPosition + textPixel);
 				if (grid[pixelPosition[0]][pixelPosition[1]]) {
@@ -132,7 +132,7 @@
 			}
 			cachedPointsAtRadius[radius] = points;
 			return points;
-		};
+		};*/
 
 		return async function(context, {words, containerSize}) {
 			await _delay(1);
@@ -150,10 +150,10 @@
 				for (let y = gridSize[1]; y-- > 0;) {
 					grid[x][y] = false;
 				}
-			}
+			}*/
 			let shape = function() {
 				return 1;
-			};*/
+			};
 
 			let wordItems = [];
 			for (let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} of words) {
@@ -161,34 +161,31 @@
 
 				let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
 
-				let canvas = document.createElement('canvas');
-				let ctx = canvas.getContext('2d', {willReadFrequently: true});
+				let ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
 				ctx.font = font;
 				let textSize = [
 					ctx.measureText(text).width,
-					fontSize
+					fontSize,
 					//Math.max(fontSize, ctx.measureText('m').width, ctx.measureText('\uFF37').width),
 				];
+				console.log(textSize);
 
 				/*let cgh = Math.ceil((boxWidth * Math.abs(Math.sin(rotate)) + boxHeight * Math.abs(Math.cos(rotateDeg))) / g);
 				let cgw = Math.ceil((boxWidth * Math.abs(Math.cos(rotate)) + boxHeight * Math.abs(Math.sin(rotateDeg))) / g);
 				let width = cgw * g;
 				let height = cgh * g;*/
 
-				canvas.width = textSize[0];
-				canvas.height = textSize[1];
-				canvas.setAttribute('height', height);
+				ctx.canvas.width = textSize[0];
+				ctx.canvas.height = textSize[1];
 				//ctx.translate(width / 2, height / 2);
 				//ctx.rotate(- rotate);
 				ctx.font = font;
 
 				ctx.textBaseline = 'middle';
-				ctx.fillStyle = 'white';
-				ctx.fillText(word, 0, textSize[1] / 2);
+				ctx.fillStyle = 'black';
+				ctx.fillText(text, 0, textSize[1] / 2);
 
-				document.body.appendChild(canvas);
-
-				//let imageData = ctx.getImageData(0, 0, width, height).data;
+				let imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
 
 				await _delay(1);
 				if (context.canceled) {
