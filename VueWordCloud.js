@@ -134,6 +134,26 @@
 			return points;
 		};*/
 
+		let zzzz1 = function(grid, gridSizeX, gridSizeY, textPositionX, textPositionY, textPixels) {
+			for (let [textPositionX, textPositionY] of textPositions) {
+				let gridPixels = [];
+				for (let [textPixelX, textPixelY] of textPixels) {
+					let gridPixelX = textPositionX + textPixelX;
+					let gridPixelY = textPositionY + textPixelY;
+					if (gridPixelX >= 0 && gridPixelY >= 0 && gridPixelX < gridSizeX && gridPixelY < gridSizeY) {
+						if (grid[gridPixelX][gridPixelY]) {
+							return false;
+						}
+						gridPixels.push([gridPixelX, gridPixelY]);
+					}
+				}
+				for (let [gridPixelX, gridPixelY] of gridPixels) {
+					grid[gridPixelX][gridPixelY] = true;
+				}
+				return true;
+			}
+		};
+
 		return async function(cancelable, {words, containerSize}) {
 			await _delay(1);
 			if (cancelable.canceled) {
@@ -189,35 +209,30 @@
 
 				for (let gridRadius = 0; gridRadius <= gridMaxRadius; gridRadius++) {
 
-					let pointsAtRadius = [];
-	let getPointsAtRadius = function(radius) {
-	  if (pointsAtRadius[radius]) {
-		return pointsAtRadius[radius];
-	  }
+					let textPositionX;
+					let textPositionY;
+					for (let [textPositionX, textPositionY] of textPositions) {
+						let gridPixels = [];
+						for (let [textPixelX, textPixelY] of textPixels) {
+							let gridPixelX = textPositionX + textPixelX;
+							let gridPixelY = textPositionY + textPixelY;
+							if (gridPixelX >= 0 && gridPixelY >= 0 && gridPixelX < ngx && gridPixelY < ngy) {
+								if (grid[gridPixelX][gridPixelY]) {
+									return false;
+								}
+								gridPixels.push([gridPixelX, gridPixelY]);
+							}
+						}
+						for (let [gridPixelX, gridPixelY] of gridPixels) {
+							grid[gridPixelX][gridPixelY] = true;
+						}
+						return true;
+					}
 
-	  // Look for these number of points on each radius
-	  let T = radius * 8;
 
-	  // Getting all the points at this radius
-	  let t = T;
-	  let points = [];
 
-	  if (radius === 0) {
-		points.push([center[0], center[1], 0]);
-	  }
 
-	  while (t--) {
-		let rx = settings.shape(t / T * 2 * Math.PI);
 
-		points.push([
-		  center[0] + radius * rx * Math.cos(-t / T * 2 * Math.PI),
-		  center[1] + radius * rx * Math.sin(-t / T * 2 * Math.PI) * settings.ellipticity,
-		  t / T * 2 * Math.PI]);
-	  }
-
-	  pointsAtRadius[radius] = points;
-	  return points;
-	};
 
 					let points = getPointsAtRadius(r);
 					if (points.some(tryToPutWordAtPoint)) {
@@ -225,16 +240,13 @@
 					}
 				}
 
-				let position = [Math.round(Math.random() * 500), Math.round(Math.random() * 500)];
-
 				wordItems.push({
 					text,
 					style: {
+						left: `${textPositionX - textSizeX / 2}px`,
+						top: `${textPositionY}px`,
 						font: font,
-						transform: [
-							`translate(${position.map(v => `${v}px`).join(',')})`,
-							`rotate(${rotate}turn)`,
-						].join(' '),
+						transform: `rotate(${rotate}turn)`,
 					},
 				});
 
@@ -278,7 +290,7 @@
 				<div
 					v-for="item in wordItems"
 					:key="item.text"
-					style="position: absolute; transition: all 1s;"
+					style="position: absolute; line-height: 0; white-space: nowrap; transition: all 1s;"
 					:class="item.class"
 					:style="item.style"
 					v-html="item.text"
