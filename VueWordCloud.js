@@ -28,15 +28,15 @@
 			return [fontStyle, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 		};
 
-		/*let getTextBounds = function(text, fontSize, fontFamily, fontStyle, fontWeight, rotate) {
-			let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
+		/*let getTextBounds = function(text, weight, fontFamily, fontStyle, fontWeight, rotate) {
+			let font = getFont(fontStyle, fontWeight, weight, fontFamily);
 			let canvas = document.createElement('canvas');
 			let ctx = canvas.getContext('2d', {willReadFrequently: true});
 			ctx.font = font;
 			let textSize = [
 				ctx.measureText(text).width,
-				fontSize
-				//Math.max(fontSize, ctx.measureText('m').width, ctx.measureText('\uFF37').width),
+				weight
+				//Math.max(weight, ctx.measureText('m').width, ctx.measureText('\uFF37').width),
 			];
 
 			let boxWidth = fw + fh * 2;
@@ -63,7 +63,7 @@
 
 			ctx.fillStyle = '#000';
 			ctx.textBaseline = 'middle';
-			ctx.fillText(word, fillTextOffsetX, fillTextOffsetY + fontSize * 0.5);
+			ctx.fillText(word, fillTextOffsetX, fillTextOffsetY + weight * 0.5);
 
 			let imageData = ctx.getImageData(0, 0, width, height).data;
 
@@ -134,80 +134,112 @@
 			return points;
 		};*/
 
-		return async function(context, {words, containerSize}) {
+		return async function(cancelable, {words, containerSize}) {
 			await _delay(1);
-			if (context.canceled) {
+			if (cancelable.canceled) {
 				throw 0;
 			}
 
-			/*let pixelSize = 4;
-			let gridSize = containerSize.map(() => Math.ceil(Math.pow(2, 11) / pixelSize));
-			let gridOrigin = gridSize.map(v => v / 2);
-			let gridRadius = Math.floor(Math.sqrt(gridSize.reduce((a, v) => a + v * v, 0)));
-			let grid = [];
-			for (let x = gridSize[0]; x-- > 0;) {
-				grid[x] = [];
-				for (let y = gridSize[1]; y-- > 0;) {
-					grid[x][y] = false;
-				}
-			}*/
+			let gridSizeX = Math.pow(2, 11);
+			let gridSizeY = Math.pow(2, 11);
+			let gridOriginX = gridSizeX / 2;
+			let gridOriginY = gridSizeY / 2;
+			let gridMaxRadius = Math.floor(Math.sqrt(Math.pow(gridSizeX, 2), Math.pow(gridSizeY, 2)));
+			let grid = Array(gridSizeX * gridSizeY).fill(false);
+
 			let shape = function() {
 				return 1;
 			};
 
 			let wordItems = [];
-			for (let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} of words) {
-				rotate = 0;
-
-				let font = getFont(fontStyle, fontWeight, fontSize, fontFamily);
+			for (let {text, weight, fontFamily, fontStyle, fontWeight, rotate} of words) {
+				let rotateRad = rotate * 2 * Math.PI;
+				let font = getFont(fontStyle, fontWeight, weight, fontFamily);
 
 				let ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+
 				ctx.font = font;
-				let textSize = [
-					ctx.measureText(text).width,
-					fontSize,
-					//Math.max(fontSize, ctx.measureText('m').width, ctx.measureText('\uFF37').width),
-				];
-				console.log(textSize);
+				let textSizeX = ctx.measureText(text).width;
+				let textSizeY = weight;
+				let rectSizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotateRad)) + textSizeY * Math.abs(Math.sin(rotateRad))));
+				let rectSizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotateRad)) + textSizeY * Math.abs(Math.cos(rotateRad))));
 
-				/*let cgh = Math.ceil((boxWidth * Math.abs(Math.sin(rotate)) + boxHeight * Math.abs(Math.cos(rotateDeg))) / g);
-				let cgw = Math.ceil((boxWidth * Math.abs(Math.cos(rotate)) + boxHeight * Math.abs(Math.sin(rotateDeg))) / g);
-				let width = cgw * g;
-				let height = cgh * g;*/
-
-				ctx.canvas.width = textSize[0];
-				ctx.canvas.height = textSize[1];
-				//ctx.translate(width / 2, height / 2);
-				//ctx.rotate(- rotate);
+				ctx.canvas.width = rectSizeX;
+				ctx.canvas.height = rectSizeY;
+				ctx.translate(rectSizeX / 2, rectSizeY / 2);
+				ctx.rotate(rotateRad);
 				ctx.font = font;
-
+				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
-				ctx.fillStyle = 'black';
-				ctx.fillText(text, 0, textSize[1] / 2);
-
-				let imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
+				ctx.fillText(text, 0, 0);
+				let imageData = ctx.getImageData(0, 0, rectSizeX, rectSizeY).data;
+				let textPixels = [];
+				for (let textPixelX = rectSizeX; textPixelX-- > 0;) {
+					for (let textPixelY = rectSizeY; textPixelY-- > 0;) {
+						if (imageData[(textPixelY * rectSizeX + textPixelX) * 4 + 3]) {
+							textPixels.push([textPixelX, textPixelY]);
+						}
+					}
+				}
 
 				await _delay(1);
-				if (context.canceled) {
+				if (cancelable.canceled) {
 					throw 0;
+				}
+
+				for (let gridRadius = 0; gridRadius <= gridMaxRadius; gridRadius++) {
+
+					let pointsAtRadius = [];
+	let getPointsAtRadius = function(radius) {
+	  if (pointsAtRadius[radius]) {
+		return pointsAtRadius[radius];
+	  }
+
+	  // Look for these number of points on each radius
+	  let T = radius * 8;
+
+	  // Getting all the points at this radius
+	  let t = T;
+	  let points = [];
+
+	  if (radius === 0) {
+		points.push([center[0], center[1], 0]);
+	  }
+
+	  while (t--) {
+		let rx = settings.shape(t / T * 2 * Math.PI);
+
+		points.push([
+		  center[0] + radius * rx * Math.cos(-t / T * 2 * Math.PI),
+		  center[1] + radius * rx * Math.sin(-t / T * 2 * Math.PI) * settings.ellipticity,
+		  t / T * 2 * Math.PI]);
+	  }
+
+	  pointsAtRadius[radius] = points;
+	  return points;
+	};
+
+					let points = getPointsAtRadius(r);
+					if (points.some(tryToPutWordAtPoint)) {
+						return true;
+					}
 				}
 
 				let position = [Math.round(Math.random() * 500), Math.round(Math.random() * 500)];
 
 				wordItems.push({
-					key: text,
-					html: text,
+					text,
 					style: {
 						font: font,
 						transform: [
 							`translate(${position.map(v => `${v}px`).join(',')})`,
-							//`rotate(${rotate}deg)`,
+							`rotate(${rotate}turn)`,
 						].join(' '),
 					},
 				});
 
 				await _delay(1);
-				if (context.canceled) {
+				if (cancelable.canceled) {
 					throw 0;
 				}
 
@@ -221,7 +253,7 @@
 								key: text,
 								html: text,
 								style: {
-									font: getFont(fontStyle, fontWeight, fontSize, fontFamily),
+									font: getFont(fontStyle, fontWeight, weight, fontFamily),
 									transform: [
 										`translate(${wordPosition.map(v => `${v}px`).join(',')})`,
 										//`rotate(${rotate}deg)`,
@@ -245,11 +277,11 @@
 			>
 				<div
 					v-for="item in wordItems"
-					:key="item.key"
+					:key="item.text"
 					style="position: absolute; transition: all 1s;"
 					:class="item.class"
 					:style="item.style"
-					v-html="item.html"
+					v-html="item.text"
 				></div>
 			</div>
 		`,
@@ -267,7 +299,7 @@
 				default: '',
 			},
 
-			fontSize: {
+			weight: {
 				type: [Number, Function],
 				default: 1,
 			},
@@ -291,7 +323,7 @@
 				type: [String, Function],
 				default() {
 					return function() {
-						return (~~(Math.random() * 6) - 3) * 30;
+						return Math.random();
 					};
 				},
 			},
@@ -313,7 +345,7 @@
 				let uniqueTexts = new Set();
 				return this.words
 					.map(word => {
-						let text, fontSize, fontFamily, fontStyle, fontWeight, rotate;
+						let text, weight, fontFamily, fontStyle, fontWeight, rotate;
 						if (word) {
 							switch (typeof word) {
 								case 'string': {
@@ -322,9 +354,9 @@
 								}
 								case 'object': {
 									if (Array.isArray(word)) {
-										([text, fontSize, fontFamily, fontStyle, fontWeight, rotate] = word);
+										([text, weight, fontFamily, fontStyle, fontWeight, rotate] = word);
 									} else {
-										({text, fontSize, fontFamily, fontStyle, fontWeight, rotate} = word);
+										({text, weight, fontFamily, fontStyle, fontWeight, rotate} = word);
 									}
 									break;
 								}
@@ -337,11 +369,11 @@
 								text = this.text;
 							}
 						}
-						if (fontSize === undefined) {
-							if (typeof this.fontSize === 'function') {
-								fontSize = this.fontSize(word);
+						if (weight === undefined) {
+							if (typeof this.weight === 'function') {
+								weight = this.weight(word);
 							} else {
-								fontSize = this.fontSize;
+								weight = this.weight;
 							}
 						}
 						if (fontFamily === undefined) {
@@ -372,8 +404,7 @@
 								rotate = this.rotate;
 							}
 						}
-						rotate = 0;
-						return {text, fontSize, fontFamily, fontStyle, fontWeight, rotate};
+						return {text, weight, fontFamily, fontStyle, fontWeight, rotate};
 					})
 					.filter(({text}) => {
 						if (uniqueTexts.has(text)) {
@@ -381,7 +412,8 @@
 						}
 						uniqueTexts.add(text);
 						return true;
-					});
+					})
+					.sort((word, otherWord) => otherWord.weight - word.weight);
 			},
 
 			containerSize() {
@@ -405,13 +437,13 @@
 					id = {};
 					let words = this.normalizedWords;
 					let containerSize = this.containerSize;
-					let context = {
+					let cancelable = {
 						id,
 						get canceled() {
 							return this.id !== id;
 						},
 					};
-					return generateWordItems(context, {words, containerSize});
+					return generateWordItems(cancelable, {words, containerSize});
 				};
 			},
 		},
@@ -421,7 +453,9 @@
 				async handler(promise) {
 					try {
 						this.wordItems = await promise;
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 				},
 				immediate: true,
 			},
