@@ -29,7 +29,7 @@
 
 			return {
 				wordsText: [
-					[randomText(), 12],
+					[randomText(), 30],
 					...Array.from({length: 64}, () => [randomText(), 5]),
 					...Array.from({length: 64}, () => [randomText(), 4]),
 					...Array.from({length: 64}, () => [randomText(), 3]),

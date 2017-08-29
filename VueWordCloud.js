@@ -15,7 +15,7 @@
 	};
 
 	let _buildFont = function(fontStyle, fontWeight, fontSize, fontFamily) {
-		return [fontStyle, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+		return [fontStyle, fontWeight, `${fontSize}px/0`, fontFamily].join(' ');
 	};
 
 	let _convertTurnToRad = function(turn) {
@@ -32,7 +32,7 @@
 				<div
 					v-for="item in wordItems"
 					:key="item.text"
-					style="position: absolute; line-height: 0; white-space: nowrap; transition: all 1s;"
+					style="position: absolute; white-space: nowrap; transition: all 1s;"
 					:class="item.class"
 					:style="item.style"
 					v-html="item.text"
@@ -358,7 +358,7 @@
 						text,
 						style: {
 							left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
-							top: `${positionY + sizeY / 2 - textSizeY / 2}px`,
+							top: `${positionY + sizeY / 2}px`,
 							font: _buildFont(fontStyle, fontWeight, fontSize, fontFamily),
 							transform: `rotate(${rotate}turn)`,
 						},
