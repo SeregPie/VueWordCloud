@@ -1,18 +1,10 @@
 (function(factory) {
 	if (typeof module !== 'undefined' && typeof exports !== 'undefined' && this === exports) {
-		factory(
-			require('vue'),
-			module
-		);
+		module.exports = factory(require('vue'));
 	} else {
-		let module = {};
-		factory(
-			this.Vue,
-			module
-		);
-		this.Vue.component('VueWordCloud', module.exports);
+		this.Vue.component('VueWordCloud', factory(this.Vue));
 	}
-}).call(this, function(Vue, module) {
+}).call(this, function(Vue) {
 
 	let _zip = function(array, ...otherArrays) {
 		return array.map(array, (v, i) => [v, ...otherArrays.map(a => a[i])]);
@@ -32,7 +24,7 @@
 
 
 
-	module.exports = {
+	return {
 		template: `
 			<div
 				style="position: relative; width: 100%; height: 100%;"
@@ -114,7 +106,7 @@
 					let canceled = function() {
 						return my_id !== id;
 					};
-					return this.generateWordItems(canceled);
+					return this.getWordItems(canceled);
 				};
 			},
 		},
@@ -144,7 +136,7 @@
 				}, 1000);
 			},
 
-			async generateWordItems(canceled) {
+			async getWordItems(canceled) {
 				let containerSizeX = this.elProps.width;
 				let containerSizeY = this.elProps.height;
 
@@ -238,7 +230,7 @@
 
 				for (let word of words) {
 					let {weight} = word;
-					let fontSize = weight * 4;
+					let fontSize = weight;
 					Object.assign(word, {fontSize});
 				}
 
@@ -252,9 +244,9 @@
 				let grid = Array(gridSizeX * gridSizeY).fill(false);
 
 				let minOccupiedGridPixelX = Infinity;
-				let maxOccupiedGridPixelX = 0;
 				let minOccupiedGridPixelY = Infinity;
 				let maxOccupiedGridPixelY = 0;
+				let maxOccupiedGridPixelX = 0;
 
 				for (let word of words) {
 					let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} = word;
@@ -280,22 +272,60 @@
 					ctx.fillText(text, 0, 0);
 					let imageData = ctx.getImageData(0, 0, sizeX, sizeY).data;
 					let occupiedPixels = [];
-					for (let wordPixelX = sizeX; wordPixelX-- > 0;) {
-						for (let wordPixelY = sizeY; wordPixelY-- > 0;) {
-							if (imageData[(sizeX * wordPixelY + wordPixelX) * 4 + 3]) {
-								occupiedPixels.push([wordPixelX, wordPixelY]);
+					for (let pixelX = sizeX; pixelX-- > 0;) {
+						for (let pixelY = sizeY; pixelY-- > 0;) {
+							if (imageData[(sizeX * pixelY + pixelX) * 4 + 3]) {
+								occupiedPixels.push([pixelX, pixelY]);
 							}
 						}
 					}
 
 					await loose();
 
-					let positionX = Math.round(Math.random() * gridSizeX);
-					let positionY = Math.round(Math.random() * gridSizeY);
+					let positionX;
+					let positionY;
+					(() => {
+						let check = () => {
+							let occupiedGridPixels = [];
+							for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
+								let occupiedGridPixelX = positionX + occupiedPixelX;
+								let occupiedGridPixelY = positionY + occupiedPixelY;
+								if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridSizeX && occupiedGridPixelY < gridSizeY) {
+									if (grid[gridSizeX * occupiedGridPixelY + occupiedGridPixelX]) {
+										return false;
+									}
+									occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
+								}
+							}
+							for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
+								grid[gridSizeX * occupiedGridPixelY + occupiedGridPixelX] = true;
+							}
+							return true;
+						};
+
+						for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
+							positionX = i;
+							for (positionY = 0; positionY < i; positionY++) {
+								if (check()) {
+									return;
+								}
+							}
+							positionY = i;
+							for (positionX = 0; positionX < i; positionX++) {
+								if (check()) {
+									return;
+								}
+							}
+							positionX = positionY = i;
+							if (check()) {
+								return;
+							}
+						}
+					})();
 
 					minOccupiedGridPixelX = Math.min(positionX, minOccupiedGridPixelX);
-					maxOccupiedGridPixelX = Math.max(positionX + sizeX, maxOccupiedGridPixelX);
 					minOccupiedGridPixelY = Math.min(positionY, minOccupiedGridPixelY);
+					maxOccupiedGridPixelX = Math.max(positionX + sizeX, maxOccupiedGridPixelX);
 					maxOccupiedGridPixelY = Math.max(positionY + sizeY, maxOccupiedGridPixelY);
 
 					await loose();
@@ -307,15 +337,16 @@
 
 				let scaleX = containerSizeX / (maxOccupiedGridPixelX - minOccupiedGridPixelX);
 				let scaleY = containerSizeY / (maxOccupiedGridPixelY - minOccupiedGridPixelY);
+				let scale = Math.min(scaleX, scaleY);
 
 				for (let word of words) {
 					word.positionX -= minOccupiedGridPixelX
 					word.positionY -= minOccupiedGridPixelY;
-					word.positionX *= scaleX;
-					word.positionY *= scaleY;
-					word.sizeX *= scaleX;
-					word.sizeY *= scaleY;
-					word.fontSize *= Math.min(scaleX, scaleY);
+					word.positionX *= scale;
+					word.positionY *= scale;
+					word.sizeX *= scale;
+					word.sizeY *= scale;
+					word.fontSize *= scale;
 				}
 
 				await loose();
@@ -324,8 +355,8 @@
 					return {
 						text,
 						style: {
-							left: `${positionX - sizeX / 2}px`,
-							top: `${positionY}px`,
+							left: `${positionX}px`,
+							top: `${positionY + sizeY / 2}px`,
 							font: _buildFont(fontStyle, fontWeight, fontSize, fontFamily),
 							transform: `rotate(${rotate}turn)`,
 						},
