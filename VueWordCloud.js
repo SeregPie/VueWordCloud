@@ -206,7 +206,7 @@
 				let loose = async function() {
 					await _delay(1);
 					if (canceled()) {
-						throw 0;
+						throw new Error();
 					}
 				};
 
@@ -272,10 +272,10 @@
 					ctx.fillText(text, 0, 0);
 					let imageData = ctx.getImageData(0, 0, sizeX, sizeY).data;
 					let occupiedPixels = [];
-					for (let pixelX = sizeX; pixelX-- > 0;) {
-						for (let pixelY = sizeY; pixelY-- > 0;) {
-							if (imageData[(sizeX * pixelY + pixelX) * 4 + 3]) {
-								occupiedPixels.push([pixelX, pixelY]);
+					for (let occupiedPixelX = sizeX; occupiedPixelX-- > 0;) {
+						for (let occupiedPixelY = sizeY; occupiedPixelY-- > 0;) {
+							if (imageData[(sizeX * occupiedPixelY + occupiedPixelX) * 4 + 3]) {
+								occupiedPixels.push([occupiedPixelX, occupiedPixelY]);
 							}
 						}
 					}
@@ -330,7 +330,7 @@
 
 					await loose();
 
-					Object.assign(word, {positionX, positionY, sizeX, sizeY});
+					Object.assign(word, {positionX, positionY, sizeX, sizeY, textSizeX, textSizeY});
 				}
 
 				await loose();
@@ -346,17 +346,19 @@
 					word.positionY *= scale;
 					word.sizeX *= scale;
 					word.sizeY *= scale;
+					word.textSizeX *= scale;
+					word.textSizeY *= scale;
 					word.fontSize *= scale;
 				}
 
 				await loose();
 
-				return words.map(({positionX, positionY, sizeX, sizeY, text, fontStyle, fontWeight, fontSize, fontFamily, rotate}) => {
+				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, fontStyle, fontWeight, fontSize, fontFamily, rotate}) => {
 					return {
 						text,
 						style: {
-							left: `${positionX}px`,
-							top: `${positionY + sizeY / 2}px`,
+							left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
+							top: `${positionY + sizeY / 2 - textSizeY / 2}px`,
 							font: _buildFont(fontStyle, fontWeight, fontSize, fontFamily),
 							transform: `rotate(${rotate}turn)`,
 						},
