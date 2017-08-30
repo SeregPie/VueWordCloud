@@ -33,9 +33,7 @@
 
 	return {
 		template: `
-			<div
-				style="position: relative; width: 100%; height: 100%;"
-			>
+			<div style="position: relative; width: 100%; height: 100%; overflow: hidden;">
 				<div
 					v-for="item in wordItems"
 					:key="item.text"
@@ -304,6 +302,9 @@
 
 					ctx.canvas.width = sizeX;
 					ctx.canvas.height = sizeY;
+					if (!ctx.canvas.width) {
+						console.log(text, sizeX, sizeY);
+					}
 					ctx.translate(sizeX / 2, sizeY / 2);
 					ctx.rotate(rotateRad);
 					ctx.font = font;

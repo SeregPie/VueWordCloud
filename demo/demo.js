@@ -13,14 +13,14 @@
 
 		data() {
 			let availableFontFamilyValues = [
-				'Abril Fatface', 'Annie Use Your Telescope', 'Anton', 'Bahiana', 'Baloo Bhaijaan', 'Barrio', 'Bungee Inline', 'Cabin Sketch', 'Fredericka the Great', 'Gloria Hallelujah', 'Indie Flower', 'Kranky', 'Life Savers', 'Londrina Sketch', 'Lora', 'Love Ya Like A Sister', 'Merienda', 'Nothing You Could Do', 'Pacifico', 'Quicksand', 'Righteous', 'Roboto', 'Sacramento', 'Shadows Into Light', 'Sue Ellen Francisco',
+				'Abril Fatface', 'Annie Use Your Telescope', 'Anton', 'Bahiana', 'Baloo Bhaijaan', 'Barrio', 'Cabin Sketch', 'Fredericka the Great', 'Gloria Hallelujah', 'Indie Flower', 'Life Savers', 'Londrina Sketch', 'Lora', 'Love Ya Like A Sister', 'Merienda', 'Nothing You Could Do', 'Pacifico', 'Quicksand', 'Righteous', 'Roboto', 'Sacramento', 'Shadows Into Light', 'Sue Ellen Francisco',
 			];
 
 			let randomText = function() {
 				let size = _randomInt(3, 9);
 				let returns = '';
 				while (size-- > 0) {
-					returns += _randomValue('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
+					returns += _randomValue('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ');
 				}
 				return returns;
 			};
@@ -42,9 +42,15 @@
 			words() {
 				return this.wordsText
 					.split(/[\r\n]+/)
-					.map(v => v.split(/\s+/).filter(v => v))
-					.filter(v => v.length)
-					.map(([text, size]) => [text, parseInt(size)]);
+					.map(line => /^(.+)\s+(\d+)$/.exec(line))
+					.filter(matched => matched)
+					.map(([_, text, size]) => [text, parseInt(size)]);
+			},
+		},
+
+		methods: {
+			chooseColor(word) {
+				return `rgb(${Array.from({length: 3}, () => Math.round(Math.random() * 255)).join(',')})`;
 			},
 		},
 	});

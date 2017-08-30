@@ -55,11 +55,7 @@
 							</div>
 						</div>
 						<div class="column" style="background-color: red;">
-							<vue-word-cloud
-								:words="words"
-								:color="() => `rgb(${Array.from({length: 3}, () => Math.round(Math.random() * 255)).join(',')})`"
-								:font-family="fontFamily"
-							></vue-word-cloud>
+							<vue-word-cloud :words="words" :color="chooseColor" :font-family="fontFamily"></vue-word-cloud>
 						</div>
 					</div>
 				</div>
