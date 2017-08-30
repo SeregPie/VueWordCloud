@@ -25,8 +25,8 @@
 		return [fontStyle, fontVariant, fontWeight, `${fontSize}/${lineHeight}`, fontFamily].join(' ');
 	};
 
-	let _turnToRad = function(turn) {
-		return turn * 2 * Math.PI;
+	let _turnToRad = function(v) {
+		return v * 2 * Math.PI;
 	};
 
 
@@ -241,15 +241,21 @@
 
 				await loose();
 
-				let uniqueTexts = new Set();
+				words = words.filter(({weight}) => weight > 0);
 
-				words = words.filter(({text}) => {
-					if (uniqueTexts.has(text)) {
-						return false;
-					}
-					uniqueTexts.add(text);
-					return true;
-				});
+				await loose();
+
+				{
+					let uniqueTexts = new Set();
+
+					words = words.filter(({text}) => {
+						if (uniqueTexts.has(text)) {
+							return false;
+						}
+						uniqueTexts.add(text);
+						return true;
+					});
+				}
 
 				await loose();
 
@@ -267,7 +273,6 @@
 
 				for (let {fontFamily, fontStyle, fontVariant, fontWeight} of words) {
 					await _loadFont(fontFamily, fontStyle, fontVariant, fontWeight);
-					await loose();
 				}
 
 				await loose();
@@ -279,133 +284,132 @@
 				let gridOriginX = gridSizeX / 2;
 				let gridOriginY = gridSizeY / 2;
 
-				let grid = Array(gridSizeX * gridSizeY).fill(false);
+				let gridData = Array(gridSizeX * gridSizeY).fill(false);
 
-				let minOccupiedGridPixelX = Infinity;
-				let minOccupiedGridPixelY = Infinity;
-				let maxOccupiedGridPixelY = 0;
-				let maxOccupiedGridPixelX = 0;
+				{
+					let out = [];
+					for (let word of words) {
+						let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate} = word;
+						let rotateRad = _turnToRad(rotate);
+						let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
 
-				for (let word of words) {
-					let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate} = word;
-					let rotateRad = _turnToRad(rotate);
-					let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
+						let ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
 
-					let ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+						ctx.font = font;
+						let textSizeX = ctx.measureText(text).width;
+						let textSizeY = fontSize;
 
-					ctx.font = font;
-					let textSizeX = ctx.measureText(text).width;
-					let textSizeY = fontSize;
+						let sizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotateRad)) + textSizeY * Math.abs(Math.sin(rotateRad))));
+						let sizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotateRad)) + textSizeY * Math.abs(Math.cos(rotateRad))));
 
-					let sizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotateRad)) + textSizeY * Math.abs(Math.sin(rotateRad))));
-					let sizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotateRad)) + textSizeY * Math.abs(Math.cos(rotateRad))));
+						await loose();
 
-					ctx.canvas.width = sizeX;
-					ctx.canvas.height = sizeY;
-					if (!ctx.canvas.width) {
-						console.log(text, sizeX, sizeY);
-					}
-					ctx.translate(sizeX / 2, sizeY / 2);
-					ctx.rotate(rotateRad);
-					ctx.font = font;
-					ctx.textAlign = 'center';
-					ctx.textBaseline = 'middle';
-					ctx.fillText(text, 0, 0);
-					let imageData = ctx.getImageData(0, 0, sizeX, sizeY).data;
-					let occupiedPixels = [];
-					for (let occupiedPixelX = sizeX; occupiedPixelX-- > 0;) {
-						for (let occupiedPixelY = sizeY; occupiedPixelY-- > 0;) {
-							if (imageData[(sizeX * occupiedPixelY + occupiedPixelX) * 4 + 3]) {
-								occupiedPixels.push([occupiedPixelX, occupiedPixelY]);
-							}
-						}
-					}
-
-					await loose();
-
-					let positionX;
-					let positionY;
-					(() => {
-						let check = () => {
-							let occupiedGridPixels = [];
-							for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
-								let occupiedGridPixelX = positionX + occupiedPixelX;
-								let occupiedGridPixelY = positionY + occupiedPixelY;
-								if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridSizeX && occupiedGridPixelY < gridSizeY) {
-									if (grid[gridSizeX * occupiedGridPixelY + occupiedGridPixelX]) {
-										return false;
+						if (sizeX > 0 && sizeY > 0) {
+							ctx.canvas.width = sizeX;
+							ctx.canvas.height = sizeY;
+							ctx.translate(sizeX / 2, sizeY / 2);
+							ctx.rotate(rotateRad);
+							ctx.font = font;
+							ctx.textAlign = 'center';
+							ctx.textBaseline = 'middle';
+							ctx.fillText(text, 0, 0);
+							let imageData = ctx.getImageData(0, 0, sizeX, sizeY).data;
+							let occupiedPixels = [];
+							for (let occupiedPixelX = sizeX; occupiedPixelX-- > 0;) {
+								for (let occupiedPixelY = sizeY; occupiedPixelY-- > 0;) {
+									if (imageData[(sizeX * occupiedPixelY + occupiedPixelX) * 4 + 3]) {
+										occupiedPixels.push([occupiedPixelX, occupiedPixelY]);
 									}
-									occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
 								}
 							}
-							for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
-								grid[gridSizeX * occupiedGridPixelY + occupiedGridPixelX] = true;
-							}
-							return true;
-						};
 
-						for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
-							positionX = i;
-							for (positionY = 0; positionY < i; positionY++) {
-								if (check()) {
-									return;
+							await loose();
+
+							let c = 0;
+							for (let [positionX, positionY] of (function* () {
+								for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
+									for (let positionY = 0; positionY < i; positionY++) {
+										yield [i, positionY];
+									}
+									for (let positionX = 0; positionX < i; positionX++) {
+										yield [positionX, i];
+									}
+									yield [i, i];
+								}
+							})()) {
+								c++;
+								if ((() => {
+									let occupiedGridPixels = [];
+									for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
+										let occupiedGridPixelX = positionX + occupiedPixelX;
+										let occupiedGridPixelY = positionY + occupiedPixelY;
+										if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridSizeX && occupiedGridPixelY < gridSizeY) {
+											if (gridData[gridSizeX * occupiedGridPixelY + occupiedGridPixelX]) {
+												return false;
+											}
+											occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
+										}
+									}
+									for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
+										gridData[gridSizeX * occupiedGridPixelY + occupiedGridPixelX] = true;
+									}
+									return true;
+								})()) {
+									Object.assign(word, {positionX, positionY, sizeX, sizeY, textSizeX, textSizeY});
+									out.push(word);
+									break;
 								}
 							}
-							positionY = i;
-							for (positionX = 0; positionX < i; positionX++) {
-								if (check()) {
-									return;
-								}
-							}
-							positionX = positionY = i;
-							if (check()) {
-								return;
-							}
+							//console.log(c);
 						}
-					})();
-
-					minOccupiedGridPixelX = Math.min(positionX, minOccupiedGridPixelX);
-					minOccupiedGridPixelY = Math.min(positionY, minOccupiedGridPixelY);
-					maxOccupiedGridPixelX = Math.max(positionX + sizeX, maxOccupiedGridPixelX);
-					maxOccupiedGridPixelY = Math.max(positionY + sizeY, maxOccupiedGridPixelY);
-
-					await loose();
-
-					Object.assign(word, {positionX, positionY, sizeX, sizeY, textSizeX, textSizeY});
+					}
+					words = out;
 				}
 
 				await loose();
 
-				let scaleX = containerSizeX / (maxOccupiedGridPixelX - minOccupiedGridPixelX);
-				let scaleY = containerSizeY / (maxOccupiedGridPixelY - minOccupiedGridPixelY);
-				let scale = Math.min(scaleX, scaleY);
+				{
+					let minOccupiedGridPixelX = Infinity;
+					let minOccupiedGridPixelY = Infinity;
+					let maxOccupiedGridPixelY = 0;
+					let maxOccupiedGridPixelX = 0;
 
-				for (let word of words) {
-					word.positionX -= minOccupiedGridPixelX
-					word.positionY -= minOccupiedGridPixelY;
-					word.positionX *= scale;
-					word.positionY *= scale;
-					word.sizeX *= scale;
-					word.sizeY *= scale;
-					word.textSizeX *= scale;
-					word.textSizeY *= scale;
-					word.fontSize *= scale;
+					for (let {positionX, positionY, sizeX, sizeY} of words) {
+						minOccupiedGridPixelX = Math.min(positionX, minOccupiedGridPixelX);
+						minOccupiedGridPixelY = Math.min(positionY, minOccupiedGridPixelY);
+						maxOccupiedGridPixelX = Math.max(positionX + sizeX, maxOccupiedGridPixelX);
+						maxOccupiedGridPixelY = Math.max(positionY + sizeY, maxOccupiedGridPixelY);
+					}
+
+					let scaleX = containerSizeX / (maxOccupiedGridPixelX - minOccupiedGridPixelX);
+					let scaleY = containerSizeY / (maxOccupiedGridPixelY - minOccupiedGridPixelY);
+					let scale = Math.min(scaleX, scaleY);
+
+					for (let word of words) {
+						word.positionX -= minOccupiedGridPixelX
+						word.positionY -= minOccupiedGridPixelY;
+						word.positionX *= scale;
+						word.positionY *= scale;
+						word.sizeX *= scale;
+						word.sizeY *= scale;
+						word.textSizeX *= scale;
+						word.textSizeY *= scale;
+						word.fontSize *= scale;
+					}
 				}
 
 				await loose();
 
-				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate}) => {
-					return {
-						text,
-						style: {
-							left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
-							top: `${positionY + sizeY / 2}px`,
-							color: color,
-							font: _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 0),
-							transform: `rotate(${rotate}turn)`,
-						},
-					};
-				});
+				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate}) => ({
+					text,
+					style: {
+						left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
+						top: `${positionY + sizeY / 2}px`,
+						color,
+						font: _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 0),
+						transform: `rotate(${rotate}turn)`,
+					},
+				}));
 			},
 		},
 	};

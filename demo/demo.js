@@ -49,8 +49,8 @@
 		},
 
 		methods: {
-			chooseColor(word) {
-				return `rgb(${Array.from({length: 3}, () => Math.round(Math.random() * 255)).join(',')})`;
+			generateRandomColor() {
+				return _randomValue(['RoyalBlue', 'OrangeRed', 'MediumOrchid']);
 			},
 		},
 	});
