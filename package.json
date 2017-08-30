@@ -1,0 +1,24 @@
+{
+	"name": "vuewordcloud",
+	"version": "17.8.30",
+	"description": "A word cloud generator.",
+	"main": "VueWordCloud.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SeregPie/VueWordCloud.git"
+	},
+	"keywords": [
+		"vue",
+		"component",
+		"wordcloud"
+	],
+	"author": "Sergej Sintschilin",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/SeregPie/VueWordCloud/issues"
+	},
+	"homepage": "https://github.com/SeregPie/VueWordCloud#readme",
+	"dependencies": {
+		"vue": "^2.4.2"
+	}
+}
