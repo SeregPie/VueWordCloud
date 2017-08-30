@@ -12,10 +12,8 @@
 		el: '#demo',
 
 		data() {
-			let fontFamilyValues = [
-				'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Georgia',
-				'Impact', 'Lucida Console', 'Tahoma', 'Times New Roman', 'Verdana',
-				'serif', 'sans-serif', 'monospace',
+			let availableFontFamilyValues = [
+				'Abril Fatface', 'Annie Use Your Telescope', 'Anton', 'Bahiana', 'Baloo Bhaijaan', 'Barrio', 'Bungee Inline', 'Cabin Sketch', 'Fredericka the Great', 'Gloria Hallelujah', 'Indie Flower', 'Kranky', 'Life Savers', 'Londrina Sketch', 'Lora', 'Love Ya Like A Sister', 'Merienda', 'Nothing You Could Do', 'Pacifico', 'Quicksand', 'Righteous', 'Roboto', 'Sacramento', 'Shadows Into Light', 'Sue Ellen Francisco',
 			];
 
 			let randomText = function() {
@@ -35,8 +33,8 @@
 					...Array.from({length: 64}, () => [randomText(), 3]),
 					...Array.from({length: 64}, () => [randomText(), 2]),
 				].map(v => v.join(' ')).join('\n'),
-				fontFamily: fontFamilyValues[0],
-				fontFamilyValues,
+				fontFamily: _randomValue(availableFontFamilyValues),
+				availableFontFamilyValues,
 			};
 		},
 

@@ -14,11 +14,18 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let _buildFont = function(fontStyle, fontWeight, fontSize, fontFamily) {
-		return [fontStyle, fontWeight, `${fontSize}px/0`, fontFamily].join(' ');
+	let _loadFont = async function(fontFamily, fontStyle, fontVariant, fontWeight) {
+		let font = _toFont(fontFamily, '16px', fontStyle, fontVariant, fontWeight, 1);
+		try {
+			await document.fonts.load(font,  'a');
+		} catch (error) {}
 	};
 
-	let _convertTurnToRad = function(turn) {
+	let _toFont = function(fontFamily, fontSize, fontStyle, fontVariant, fontWeight, lineHeight) {
+		return [fontStyle, fontVariant, fontWeight, `${fontSize}/${lineHeight}`, fontFamily].join(' ');
+	};
+
+	let _turnToRad = function(turn) {
 		return turn * 2 * Math.PI;
 	};
 
@@ -58,9 +65,19 @@
 				default: 1,
 			},
 
+			color: {
+				type: [String, Function],
+				default: 'Inherit',
+			},
+
 			fontFamily: {
 				type: [String, Function],
 				default: 'serif',
+			},
+
+			fontVariant: {
+				type: [String, Function],
+				default: 'normal',
 			},
 
 			fontStyle: {
@@ -102,7 +119,7 @@
 			promisifyWordItems() {
 				let id;
 				return function() {
-					let my_id = id = {};
+					let my_id = (id = {});
 					let canceled = function() {
 						return my_id !== id;
 					};
@@ -141,7 +158,7 @@
 				let containerSizeY = this.elProps.height;
 
 				let words = this.words.map(word => {
-					let text, weight, fontFamily, fontStyle, fontWeight, rotate;
+					let text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate;
 					if (word) {
 						switch (typeof word) {
 							case 'string': {
@@ -150,9 +167,9 @@
 							}
 							case 'object': {
 								if (Array.isArray(word)) {
-									([text, weight, fontFamily, fontStyle, fontWeight, rotate] = word);
+									([text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate] = word);
 								} else {
-									({text, weight, fontFamily, fontStyle, fontWeight, rotate} = word);
+									({text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate} = word);
 								}
 								break;
 							}
@@ -172,11 +189,25 @@
 							weight = this.weight;
 						}
 					}
+					if (color === undefined) {
+						if (typeof this.color === 'function') {
+							color = this.color(word);
+						} else {
+							color = this.color;
+						}
+					}
 					if (fontFamily === undefined) {
 						if (typeof this.fontFamily === 'function') {
 							fontFamily = this.fontFamily(word);
 						} else {
 							fontFamily = this.fontFamily;
+						}
+					}
+					if (fontVariant === undefined) {
+						if (typeof this.fontVariant === 'function') {
+							fontVariant = this.fontVariant(word);
+						} else {
+							fontVariant = this.fontVariant;
 						}
 					}
 					if (fontStyle === undefined) {
@@ -200,7 +231,7 @@
 							rotate = this.rotate;
 						}
 					}
-					return {text, weight, fontFamily, fontStyle, fontWeight, rotate};
+					return {text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate};
 				});
 
 				let loose = async function() {
@@ -236,8 +267,17 @@
 
 				await loose();
 
-				let gridSizeX = Math.pow(2, 11);
-				let gridSizeY = Math.pow(2, 11);
+				for (let {fontFamily, fontStyle, fontVariant, fontWeight} of words) {
+					await _loadFont(fontFamily, fontStyle, fontVariant, fontWeight);
+					await loose();
+				}
+
+				await loose();
+
+				let gridResolution = Math.pow(2, 22);
+				let gridSizeX = Math.floor(Math.sqrt(containerSizeX / containerSizeY * gridResolution));
+				let gridSizeY = Math.floor(gridResolution / gridSizeX);
+
 				let gridOriginX = gridSizeX / 2;
 				let gridOriginY = gridSizeY / 2;
 
@@ -249,9 +289,9 @@
 				let maxOccupiedGridPixelX = 0;
 
 				for (let word of words) {
-					let {text, fontSize, fontFamily, fontStyle, fontWeight, rotate} = word;
-					let rotateRad = _convertTurnToRad(rotate);
-					let font = _buildFont(fontStyle, fontWeight, fontSize, fontFamily);
+					let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate} = word;
+					let rotateRad = _turnToRad(rotate);
+					let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
 
 					let ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
 
@@ -353,13 +393,14 @@
 
 				await loose();
 
-				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, fontStyle, fontWeight, fontSize, fontFamily, rotate}) => {
+				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate}) => {
 					return {
 						text,
 						style: {
 							left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
 							top: `${positionY + sizeY / 2}px`,
-							font: _buildFont(fontStyle, fontWeight, fontSize, fontFamily),
+							color: color,
+							font: _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 0),
 							transform: `rotate(${rotate}turn)`,
 						},
 					};
