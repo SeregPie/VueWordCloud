@@ -6,6 +6,14 @@
 	}
 }).call(this, function(Vue) {
 
+	let _sample = function(array) {
+		return array[Math.floor(array.length * Math.random())];
+	};
+
+	let _randomValue = function(values) {
+		return values[_randomInt(0, values.length)];
+	};
+
 	let _zip = function(array, ...otherArrays) {
 		return array.map(array, (v, i) => [v, ...otherArrays.map(a => a[i])]);
 	};
@@ -91,8 +99,9 @@
 			rotate: {
 				type: [String, Function],
 				default() {
+					let values = [0, 3/4, 7/8];
 					return function() {
-						return Math.random();
+						return _sample(values);
 					};
 				},
 			},
@@ -110,52 +119,8 @@
 		},
 
 		computed: {
-			promisedWordItems() {
-				return this.promisifyWordItems();
-			},
-
-			promisifyWordItems() {
-				let id;
-				return function() {
-					let my_id = (id = {});
-					let canceled = function() {
-						return my_id !== id;
-					};
-					return this.getWordItems(canceled);
-				};
-			},
-		},
-
-		watch: {
-			promisedWordItems: {
-				async handler(promise) {
-					try {
-						this.wordItems = await promise;
-					} catch (error) {
-						console.log(error);
-					}
-				},
-				immediate: true,
-			},
-		},
-
-		methods: {
-			updateElProps() {
-				if (this.$el) {
-					let {width, height} = this.$el.getBoundingClientRect();
-					this.elProps.width = width;
-					this.elProps.height = height;
-				}
-				setTimeout(() => {
-					this.updateElProps();
-				}, 1000);
-			},
-
-			async getWordItems(canceled) {
-				let containerSizeX = this.elProps.width;
-				let containerSizeY = this.elProps.height;
-
-				let words = this.words.map(word => {
+			normalizedWords() {
+				return this.words.map(word => {
 					let text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate;
 					if (word) {
 						switch (typeof word) {
@@ -231,6 +196,53 @@
 					}
 					return {text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate};
 				});
+			},
+
+			promisedWordItems() {
+				return this.promisifyWordItems();
+			},
+
+			promisifyWordItems() {
+				let id;
+				return function() {
+					let my_id = (id = {});
+					let canceled = function() {
+						return my_id !== id;
+					};
+					return this.computeWordItems(canceled);
+				};
+			},
+		},
+
+		watch: {
+			promisedWordItems: {
+				async handler(promise) {
+					try {
+						this.wordItems = await promise;
+					} catch (error) {
+						console.log(error);
+					}
+				},
+				immediate: true,
+			},
+		},
+
+		methods: {
+			updateElProps() {
+				if (this.$el) {
+					let {width, height} = this.$el.getBoundingClientRect();
+					this.elProps.width = width;
+					this.elProps.height = height;
+				}
+				setTimeout(() => {
+					this.updateElProps();
+				}, 1000);
+			},
+
+			async computeWordItems(canceled) {
+				let containerSizeX = this.elProps.width;
+				let containerSizeY = this.elProps.height;
+				let words = this.normalizedWords;
 
 				let loose = async function() {
 					await _delay(1);
@@ -277,17 +289,18 @@
 
 				await loose();
 
-				let gridResolution = Math.pow(2, 22);
-				let gridSizeX = Math.floor(Math.sqrt(containerSizeX / containerSizeY * gridResolution));
-				let gridSizeY = Math.floor(gridResolution / gridSizeX);
-
-				let gridOriginX = gridSizeX / 2;
-				let gridOriginY = gridSizeY / 2;
-
-				let gridData = Array(gridSizeX * gridSizeY).fill(false);
-
 				{
 					let out = [];
+
+					let gridResolution = Math.pow(2, 22);
+					let gridSizeX = Math.floor(Math.sqrt(containerSizeX / containerSizeY * gridResolution));
+					let gridSizeY = Math.floor(gridResolution / gridSizeX);
+
+					let gridOriginX = gridSizeX / 2;
+					let gridOriginY = gridSizeY / 2;
+
+					let gridData = Array(gridSizeX * gridSizeY).fill(false);
+
 					for (let word of words) {
 						let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate} = word;
 						let rotateRad = _turnToRad(rotate);
@@ -363,6 +376,7 @@
 							//console.log(c);
 						}
 					}
+
 					words = out;
 				}
 

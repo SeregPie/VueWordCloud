@@ -13,7 +13,7 @@
 
 		data() {
 			let availableFontFamilyValues = [
-				'Abril Fatface', 'Annie Use Your Telescope', 'Anton', 'Bahiana', 'Baloo Bhaijaan', 'Barrio', 'Cabin Sketch', 'Fredericka the Great', 'Gloria Hallelujah', 'Indie Flower', 'Life Savers', 'Londrina Sketch', 'Lora', 'Love Ya Like A Sister', 'Merienda', 'Nothing You Could Do', 'Pacifico', 'Quicksand', 'Righteous', 'Roboto', 'Sacramento', 'Shadows Into Light', 'Sue Ellen Francisco',
+				'Abril Fatface', 'Annie Use Your Telescope', 'Anton', 'Bahiana', 'Baloo Bhaijaan', 'Barrio', 'Cabin Sketch', 'Fredericka the Great', 'Gloria Hallelujah', 'Indie Flower', 'Life Savers', 'Londrina Sketch', 'Lora', 'Love Ya Like A Sister', 'Merienda', 'Nothing You Could Do', 'Pacifico', 'Quicksand', 'Righteous', 'Roboto', 'Sacramento', 'Shadows Into Light',
 			];
 
 			let randomText = function() {
@@ -28,10 +28,9 @@
 			return {
 				wordsText: [
 					[randomText(), 30],
-					...Array.from({length: 64}, () => [randomText(), 5]),
-					...Array.from({length: 64}, () => [randomText(), 4]),
+					...Array.from({length: 16}, () => [randomText(), 9]),
 					...Array.from({length: 64}, () => [randomText(), 3]),
-					...Array.from({length: 64}, () => [randomText(), 2]),
+					...Array.from({length: 128}, () => [randomText(), 1]),
 				].map(v => v.join(' ')).join('\n'),
 				fontFamily: _randomValue(availableFontFamilyValues),
 				availableFontFamilyValues,
