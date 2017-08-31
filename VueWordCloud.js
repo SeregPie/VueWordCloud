@@ -296,8 +296,8 @@
 					let gridSizeX = Math.floor(Math.sqrt(containerSizeX / containerSizeY * gridResolution));
 					let gridSizeY = Math.floor(gridResolution / gridSizeX);
 
-					let gridOriginX = gridSizeX / 2;
-					let gridOriginY = gridSizeY / 2;
+					let gridOriginX = Math.floor(gridSizeX / 2);
+					let gridOriginY = Math.floor(gridSizeY / 2);
 
 					let gridData = Array(gridSizeX * gridSizeY).fill(false);
 
@@ -340,7 +340,7 @@
 
 							let c = 0;
 							for (let [positionX, positionY] of (function* () {
-								for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
+								/*for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
 									for (let positionY = 0; positionY < i; positionY++) {
 										yield [i, positionY];
 									}
@@ -348,8 +348,23 @@
 										yield [positionX, i];
 									}
 									yield [i, i];
+								}*/
+
+								let x = Math.floor(sizeX / 2);
+								let y = Math.floor(sizeY / 2);
+								yield [gridOriginX - x, gridOriginY - y];
+								for (let radius = 1; radius < 999999; radius++) {
+									let a = radius * 8;
+									let b = (2 * Math.PI) / a;
+									while (a--) {
+										yield [
+											Math.floor(gridOriginX + radius * Math.cos(a * b)) - x,
+											Math.floor(gridOriginY + radius * Math.sin(a * b)) - y,
+										];
+									}
 								}
 							})()) {
+								//console.log(positionX, positionY);
 								c++;
 								if ((() => {
 									let occupiedGridPixels = [];
