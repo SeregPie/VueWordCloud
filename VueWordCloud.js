@@ -251,6 +251,8 @@
 					}
 				};
 
+				let c = 0;
+
 				await loose();
 
 				words = words.filter(({weight}) => weight > 0);
@@ -336,9 +338,14 @@
 								}
 							}
 
+							let array = occupiedPixels;
+							for (let i = array.length; i > 0; i--) {
+								let j = Math.floor(Math.random() * i);
+								[array[i - 1], array[j]] = [array[j], array[i - 1]];
+							}
+
 							await loose();
 
-							let c = 0;
 							for (let [positionX, positionY] of (function* () {
 								/*for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
 									for (let positionY = 0; positionY < i; positionY++) {
@@ -388,7 +395,6 @@
 									break;
 								}
 							}
-							//console.log(c);
 						}
 					}
 
@@ -428,6 +434,8 @@
 				}
 
 				await loose();
+
+				console.log(c);
 
 				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate}) => ({
 					text,
