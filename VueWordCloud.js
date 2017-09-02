@@ -40,7 +40,7 @@
 		return [fontStyle, fontVariant, fontWeight, `${fontSize}/${lineHeight}`, fontFamily].join(' ');
 	};
 
-	let _turnToRad = function(v) {
+	let _convertTurnToRad = function(v) {
 		return v * 2 * Math.PI;
 	};
 
@@ -305,7 +305,7 @@
 
 					for (let word of words) {
 						let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate} = word;
-						let rotateRad = _turnToRad(rotate);
+						let rotateRad = _convertTurnToRad(rotate);
 						let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
 
 						let ctx = document.createElement('canvas').getContext('2d');
@@ -337,7 +337,7 @@
 							}
 							//_shuffleArray(occupiedPixels);
 
-							for (let [positionX, positionY] of (function* (sizeX, sizeY) {
+							for (let [positionX, positionY] of (function*(sizeX, sizeY) {
 								let x = Math.round(sizeX / 2);
 								let y = Math.round(sizeY / 2);
 
