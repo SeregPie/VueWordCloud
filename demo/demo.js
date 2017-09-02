@@ -1,11 +1,11 @@
 (function() {
 
-	let _randomInt = function(start, end) {
+	let _randomInteger = function(start, end) {
 		return Math.floor(start + (end - start) * Math.random());
 	};
 
-	let _randomValue = function(values) {
-		return values[_randomInt(0, values.length)];
+	let _randomArrayValue = function(values) {
+		return values[_randomInteger(0, values.length)];
 	};
 
 	new Vue({
@@ -17,22 +17,22 @@
 			];
 
 			let randomText = function() {
-				let size = _randomInt(3, 9);
+				let size = _randomInteger(3, 9);
 				let returns = '';
 				while (size-- > 0) {
-					returns += _randomValue('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+					returns += _randomArrayValue('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ');
 				}
 				return returns;
 			};
 
 			return {
 				wordsText: [
-					[randomText(), 30],
-					...Array.from({length: 16}, () => [randomText(), 9]),
+					[randomText(), 25],
+					...Array.from({length: 16}, () => [randomText(), 7]),
 					...Array.from({length: 64}, () => [randomText(), 3]),
 					...Array.from({length: 128}, () => [randomText(), 1]),
 				].map(v => v.join(' ')).join('\n'),
-				fontFamily: _randomValue(availableFontFamilyValues),
+				fontFamily: _randomArrayValue(availableFontFamilyValues),
 				availableFontFamilyValues,
 			};
 		},
@@ -49,7 +49,7 @@
 
 		methods: {
 			generateRandomColor() {
-				return _randomValue(['RoyalBlue', 'OrangeRed', 'MediumOrchid']);
+				return _randomArrayValue(['RoyalBlue', 'OrangeRed', 'MediumOrchid']);
 			},
 		},
 	});

@@ -6,16 +6,24 @@
 	}
 }).call(this, function(Vue) {
 
-	let _sample = function(array) {
-		return array[Math.floor(array.length * Math.random())];
+	let _randomInteger = function(start, end) {
+		return Math.floor(start + (end - start) * Math.random());
 	};
 
-	let _randomValue = function(values) {
-		return values[_randomInt(0, values.length)];
+	let _randomArrayValue = function(values) {
+		return values[_randomInteger(0, values.length)];
 	};
 
-	let _zip = function(array, ...otherArrays) {
+	let _zipArrays = function(array, ...otherArrays) {
 		return array.map(array, (v, i) => [v, ...otherArrays.map(a => a[i])]);
+	};
+
+	let _shuffleArray = function(array, ...otherArrays) {
+		for (let i = array.length; i > 0;) {
+			let j = Math.floor(Math.random() * i);
+			i--;
+			[array[i], array[j]] = [array[j], array[i]];
+		}
 	};
 
 	let _delay = function(ms) {
@@ -23,9 +31,8 @@
 	};
 
 	let _loadFont = async function(fontFamily, fontStyle, fontVariant, fontWeight) {
-		let font = _toFont(fontFamily, '16px', fontStyle, fontVariant, fontWeight, 1);
 		try {
-			await document.fonts.load(font,  'a');
+			await document.fonts.load(_toFont(fontFamily, '16px', fontStyle, fontVariant, fontWeight, 1),  'a');
 		} catch (error) {}
 	};
 
@@ -101,7 +108,7 @@
 				default() {
 					let values = [0, 3/4, 7/8];
 					return function() {
-						return _sample(values);
+						return _randomArrayValue(values);
 					};
 				},
 			},
@@ -244,20 +251,16 @@
 				let containerSizeY = this.elProps.height;
 				let words = this.normalizedWords;
 
-				let loose = async function() {
+				let breakIfCanceled = async function() {
 					await _delay(1);
 					if (canceled()) {
 						throw new Error();
 					}
 				};
 
-				let c = 0;
-
-				await loose();
+				await breakIfCanceled();
 
 				words = words.filter(({weight}) => weight > 0);
-
-				await loose();
 
 				{
 					let uniqueTexts = new Set();
@@ -271,25 +274,26 @@
 					});
 				}
 
-				await loose();
-
 				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
-				await loose();
+				{
+					let minWeight = Infinity;
+					let maxWeight = 0;
 
-				for (let word of words) {
-					let {weight} = word;
-					let fontSize = weight;
-					Object.assign(word, {fontSize});
+					for (let word of words) {
+						let {weight} = word;
+						let fontSize = weight;
+						Object.assign(word, {fontSize});
+					}
 				}
 
-				await loose();
+				await breakIfCanceled();
 
 				for (let {fontFamily, fontStyle, fontVariant, fontWeight} of words) {
 					await _loadFont(fontFamily, fontStyle, fontVariant, fontWeight);
 				}
 
-				await loose();
+				await breakIfCanceled();
 
 				{
 					let out = [];
@@ -297,10 +301,6 @@
 					let gridResolution = Math.pow(2, 22);
 					let gridSizeX = Math.floor(Math.sqrt(containerSizeX / containerSizeY * gridResolution));
 					let gridSizeY = Math.floor(gridResolution / gridSizeX);
-
-					let gridOriginX = Math.floor(gridSizeX / 2);
-					let gridOriginY = Math.floor(gridSizeY / 2);
-
 					let gridData = Array(gridSizeX * gridSizeY).fill(false);
 
 					for (let word of words) {
@@ -308,7 +308,7 @@
 						let rotateRad = _turnToRad(rotate);
 						let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
 
-						let ctx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+						let ctx = document.createElement('canvas').getContext('2d');
 
 						ctx.font = font;
 						let textSizeX = ctx.measureText(text).width;
@@ -316,8 +316,6 @@
 
 						let sizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotateRad)) + textSizeY * Math.abs(Math.sin(rotateRad))));
 						let sizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotateRad)) + textSizeY * Math.abs(Math.cos(rotateRad))));
-
-						await loose();
 
 						if (sizeX > 0 && sizeY > 0) {
 							ctx.canvas.width = sizeX;
@@ -337,42 +335,37 @@
 									}
 								}
 							}
+							//_shuffleArray(occupiedPixels);
 
-							let array = occupiedPixels;
-							for (let i = array.length; i > 0; i--) {
-								let j = Math.floor(Math.random() * i);
-								[array[i - 1], array[j]] = [array[j], array[i - 1]];
-							}
+							for (let [positionX, positionY] of (function* (sizeX, sizeY) {
+								let x = Math.round(sizeX / 2);
+								let y = Math.round(sizeY / 2);
 
-							await loose();
+								yield [x, y];
 
-							for (let [positionX, positionY] of (function* () {
-								/*for (let i = 0, ii = Math.max(gridSizeX, gridSizeY); i < ii; i++) {
-									for (let positionY = 0; positionY < i; positionY++) {
-										yield [i, positionY];
+								let direction = 1;
+								let distance = 1;
+								let b = true;
+								while (b) {
+									b = false;
+									for (let i = distance; i > 0; i--) {
+										x += direction;
+										if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
+											yield [x, y];
+											b = true;
+										}
 									}
-									for (let positionX = 0; positionX < i; positionX++) {
-										yield [positionX, i];
+									for (let i = distance; i > 0; i--) {
+										y += direction;
+										if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
+											yield [x, y];
+											b = true;
+										}
 									}
-									yield [i, i];
-								}*/
-
-								let x = Math.floor(sizeX / 2);
-								let y = Math.floor(sizeY / 2);
-								yield [gridOriginX - x, gridOriginY - y];
-								for (let radius = 1; radius < 999999; radius++) {
-									let a = radius * 8;
-									let b = (2 * Math.PI) / a;
-									while (a--) {
-										yield [
-											Math.floor(gridOriginX + radius * Math.cos(a * b)) - x,
-											Math.floor(gridOriginY + radius * Math.sin(a * b)) - y,
-										];
-									}
+									distance++;
+									direction *= -1;
 								}
-							})()) {
-								//console.log(positionX, positionY);
-								c++;
+							})(gridSizeX - sizeX, gridSizeY - sizeY)) {
 								if ((() => {
 									let occupiedGridPixels = [];
 									for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
@@ -401,7 +394,7 @@
 					words = out;
 				}
 
-				await loose();
+				await breakIfCanceled();
 
 				{
 					let minOccupiedGridPixelX = Infinity;
@@ -433,9 +426,7 @@
 					}
 				}
 
-				await loose();
-
-				console.log(c);
+				await breakIfCanceled();
 
 				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate}) => ({
 					text,
