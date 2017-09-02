@@ -14,6 +14,7 @@
 		return values[_randomInteger(0, values.length)];
 	};
 
+	/*
 	let _zipArrays = function(array, ...otherArrays) {
 		return array.map(array, (v, i) => [v, ...otherArrays.map(a => a[i])]);
 	};
@@ -25,6 +26,7 @@
 			[array[i], array[j]] = [array[j], array[i]];
 		}
 	};
+	*/
 
 	let _delay = function(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
@@ -210,11 +212,11 @@
 			},
 
 			promisifyWordItems() {
-				let id;
+				let outerToken;
 				return function() {
-					let my_id = (id = {});
+					let innerToken = (outerToken = {});
 					let canceled = function() {
-						return my_id !== id;
+						return innerToken !== outerToken;
 					};
 					return this.computeWordItems(canceled);
 				};
@@ -365,7 +367,9 @@
 									distance++;
 									direction *= -1;
 								}
-							})(gridSizeX - sizeX, gridSizeY - sizeY)) {
+							})(gridSizeX, gridSizeY)) {
+								positionX -= Math.floor(sizeX / 2);
+								positionY -= Math.floor(sizeY / 2);
 								if ((() => {
 									let occupiedGridPixels = [];
 									for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
