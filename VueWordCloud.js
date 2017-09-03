@@ -49,18 +49,27 @@
 
 
 	return {
-		template: `
-			<div style="position: relative; width: 100%; height: 100%; overflow: hidden;">
-				<div
-					v-for="item in wordItems"
-					:key="item.text"
-					style="position: absolute; white-space: nowrap; transition: all 1s;"
-					:class="item.class"
-					:style="item.style"
-					v-html="item.text"
-				></div>
-			</div>
-		`,
+		render(createElement) {
+			return(
+				createElement('div', {
+					style: {
+						position: 'relative',
+						width: '100%',
+						height: '100%',
+						overflow: 'hidden',
+					},
+				}, this.wordItems.map(item =>
+					createElement('div', {
+						key: item.text,
+						style: Object.assign({
+							position: 'absolute',
+							whiteSpace: 'nowrap',
+							transition: 'all 1s',
+						}, item.style),
+					}, item.text)
+				))
+			);
+		},
 
 		props: {
 			words: {
