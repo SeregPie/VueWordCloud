@@ -289,11 +289,17 @@
 
 				{
 					let minWeight = Infinity;
-					let maxWeight = 0;
 
 					for (let word of words) {
 						let {weight} = word;
-						let fontSize = weight;
+						minWeight = Math.min(weight, minWeight);
+					}
+
+					let minFontSize = 2;
+
+					for (let word of words) {
+						let {weight} = word;
+						let fontSize = weight / minWeight * minFontSize;
 						Object.assign(word, {fontSize});
 					}
 				}
