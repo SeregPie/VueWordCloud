@@ -53,32 +53,46 @@ An array of words. A value of the array is either an object, a string or an arra
 
 `text`
 
+A string or a function for the text of each word.
+
 ---
 
 `weight`
+
+A number or a function for the weight of each word.
 
 ---
 
 `color`
 
+A string or a function for the color of each word.
+
 ---
 
 `fontFamily`
+
+A string or a function for the font style of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
 
 ---
 
 `fontVariant`
 
+A string or a function for the font variant of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
+
 ---
 
 `fontStyle`
 
-A string or a function for the font style. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
+A string or a function for the font style of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'` and `'small-caps'`. The value is set for each word, where the value is not already set.
 
 ---
 
 `fontWeight`
 
+A string or a function for the font weight of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`. The value is set for each word, where the value is not already set.
+
 ---
 
 `rotate`
+
+A number or a function for the rotation of each word. The unit for the rotation is in turns. 1 turn is 360 degrees.
