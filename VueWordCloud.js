@@ -6,40 +6,26 @@
 	}
 }).call(this, function(Vue) {
 
-	let _randomInteger = function(start, end) {
+	let _randomInt = function(start, end) {
 		return Math.floor(start + (end - start) * Math.random());
 	};
 
-	let _randomArrayValue = function(values) {
-		return values[_randomInteger(0, values.length)];
+	let _randomValue = function(values) {
+		return values[_randomInt(0, values.length)];
 	};
-
-	/*
-	let _zipArrays = function(array, ...otherArrays) {
-		return array.map(array, (v, i) => [v, ...otherArrays.map(a => a[i])]);
-	};
-
-	let _shuffleArray = function(array, ...otherArrays) {
-		for (let i = array.length; i > 0;) {
-			let j = Math.floor(Math.random() * i);
-			i--;
-			[array[i], array[j]] = [array[j], array[i]];
-		}
-	};
-	*/
 
 	let _delay = function(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
+	};
+
+	let _toFont = function(fontFamily, fontSize, fontStyle, fontVariant, fontWeight, lineHeight) {
+		return [fontStyle, fontVariant, fontWeight, `${fontSize}/${lineHeight}`, fontFamily].join(' ');
 	};
 
 	let _loadFont = async function(fontFamily, fontStyle, fontVariant, fontWeight) {
 		try {
 			await document.fonts.load(_toFont(fontFamily, '16px', fontStyle, fontVariant, fontWeight, 1),  'a');
 		} catch (error) {}
-	};
-
-	let _toFont = function(fontFamily, fontSize, fontStyle, fontVariant, fontWeight, lineHeight) {
-		return [fontStyle, fontVariant, fontWeight, `${fontSize}/${lineHeight}`, fontFamily].join(' ');
 	};
 
 	let _convertTurnToRad = function(v) {
@@ -119,7 +105,7 @@
 				default() {
 					let values = [0, 3/4, 7/8];
 					return function() {
-						return _randomArrayValue(values);
+						return _randomValue(values);
 					};
 				},
 			},
@@ -237,9 +223,7 @@
 				async handler(promise) {
 					try {
 						this.wordItems = await promise;
-					} catch (error) {
-						console.log(error);
-					}
+					} catch (error) {}
 				},
 				immediate: true,
 			},
@@ -352,7 +336,6 @@
 									}
 								}
 							}
-							//_shuffleArray(occupiedPixels);
 
 							for (let [positionX, positionY] of (function*(sizeX, sizeY) {
 								let x = Math.round(sizeX / 2);

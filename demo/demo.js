@@ -1,11 +1,54 @@
 (function() {
 
-	let _randomInteger = function(start, end) {
+	try {
+		console.log('--- 1 ---');
+		{
+			let sizeX = 7;
+			let sizeY = 4;
+			for (let x0 = 0, y0 = 0, x1 = sizeX - 1, y1 = sizeY - 1; x0 < x1 && y0 < y1; x0++, y0++, x1--, y1--) {
+				for (let i = x0; i < x1; i++) {
+					console.log(JSON.stringify([i, y0]));
+				}
+				for (let i = y0; i < y1; i++) {
+					console.log(JSON.stringify([x1, i]));
+				}
+				for (let i = x1; i > x0; i--) {
+					console.log(JSON.stringify([i, y1]));
+				}
+				for (let i = y1; i > y0; i--) {
+					console.log(JSON.stringify([x0, i]));
+				}
+			}
+		}
+		console.log('--- 2 ---');
+		{
+			let sizeX = 7;
+			let sizeY = 4;
+			for (let x0 = 0, y0 = 0, x1 = sizeX - 1, y1 = sizeY - 1; x0 < x1 && y0 < y1; x0++, y0++, x1--, y1--) {
+				for (let i = x0; i < x1; i++) {
+					console.log(JSON.stringify([i, y0]));
+				}
+				for (let i = y0; i < y1; i++) {
+					console.log(JSON.stringify([x1, i]));
+				}
+				for (let i = x1; i > x0; i--) {
+					console.log(JSON.stringify([i, y1]));
+				}
+				for (let i = y1; i > y0; i--) {
+					console.log(JSON.stringify([x0, i]));
+				}
+			}
+		}
+	} catch (error) {
+		console.log(error);
+	}
+
+	let _randomInt = function(start, end) {
 		return Math.floor(start + (end - start) * Math.random());
 	};
 
-	let _randomArrayValue = function(values) {
-		return values[_randomInteger(0, values.length)];
+	let _randomValue = function(values) {
+		return values[_randomInt(0, values.length)];
 	};
 
 	new Vue({
@@ -17,10 +60,10 @@
 			];
 
 			let randomText = function() {
-				let size = _randomInteger(3, 9);
+				let size = _randomInt(3, 9);
 				let returns = '';
 				while (size-- > 0) {
-					returns += _randomArrayValue('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+					returns += _randomValue('abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ');
 				}
 				return returns;
 			};
@@ -28,11 +71,11 @@
 			return {
 				wordsText: [
 					[randomText(), 25],
-					...Array.from({length: 16}, () => [randomText(), 7]),
-					...Array.from({length: 64}, () => [randomText(), 3]),
+					...Array.from({length: 8}, () => [randomText(), 7]),
+					...Array.from({length: 32}, () => [randomText(), 3]),
 					...Array.from({length: 128}, () => [randomText(), 1]),
 				].map(v => v.join(' ')).join('\n'),
-				fontFamily: _randomArrayValue(availableFontFamilyValues),
+				fontFamily: _randomValue(availableFontFamilyValues),
 				availableFontFamilyValues,
 			};
 		},
@@ -49,7 +92,7 @@
 
 		methods: {
 			generateRandomColor() {
-				return _randomArrayValue(['RoyalBlue', 'OrangeRed', 'MediumOrchid']);
+				return _randomValue(['RoyalBlue', 'OrangeRed', 'MediumOrchid']);
 			},
 		},
 	});
