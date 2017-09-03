@@ -80,6 +80,16 @@
 				default: 'Inherit',
 			},
 
+			rotate: {
+				type: [String, Function],
+				default() {
+					let values = [0, 3/4, 7/8];
+					return function() {
+						return _randomValue(values);
+					};
+				},
+			},
+
 			fontFamily: {
 				type: [String, Function],
 				default: 'serif',
@@ -99,16 +109,6 @@
 				type: [String, Function],
 				default: 'normal',
 			},
-
-			rotate: {
-				type: [String, Function],
-				default() {
-					let values = [0, 3/4, 7/8];
-					return function() {
-						return _randomValue(values);
-					};
-				},
-			},
 		},
 
 		data() {
@@ -125,7 +125,7 @@
 		computed: {
 			normalizedWords() {
 				return this.words.map(word => {
-					let text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate;
+					let text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight;
 					if (word) {
 						switch (typeof word) {
 							case 'string': {
@@ -134,9 +134,9 @@
 							}
 							case 'object': {
 								if (Array.isArray(word)) {
-									([text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate] = word);
+									([text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight] = word);
 								} else {
-									({text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate} = word);
+									({text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight} = word);
 								}
 								break;
 							}
@@ -161,6 +161,13 @@
 							color = this.color(word);
 						} else {
 							color = this.color;
+						}
+					}
+					if (rotate === undefined) {
+						if (typeof this.rotate === 'function') {
+							rotate = this.rotate(word);
+						} else {
+							rotate = this.rotate;
 						}
 					}
 					if (fontFamily === undefined) {
@@ -191,14 +198,7 @@
 							fontWeight = this.fontWeight;
 						}
 					}
-					if (rotate === undefined) {
-						if (typeof this.rotate === 'function') {
-							rotate = this.rotate(word);
-						} else {
-							rotate = this.rotate;
-						}
-					}
-					return {text, weight, color, fontFamily, fontVariant, fontStyle, fontWeight, rotate};
+					return {text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight};
 				});
 			},
 
@@ -338,32 +338,54 @@
 							}
 
 							for (let [positionX, positionY] of (function*(sizeX, sizeY) {
-								let x = Math.round(sizeX / 2);
-								let y = Math.round(sizeY / 2);
-
-								yield [x, y];
-
-								let direction = 1;
-								let distance = 1;
+								let stepX, stepY;
+								if (sizeX > sizeY) {
+									stepX = 1;
+									stepY = sizeY / sizeX;
+								} else
+								if (sizeY > sizeX) {
+									stepY = 1;
+									stepX = sizeX / sizeY;
+								} else {
+									stepX = stepY = 1;
+								}
+								let startX = Math.floor(sizeX / 2);
+								let startY = Math.floor(sizeY / 2);
+								let endX = startX - 1;
+								let endY = startY - 1;
 								let b = true;
 								while (b) {
 									b = false;
-									for (let i = distance; i > 0; i--) {
-										x += direction;
-										if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
-											yield [x, y];
-											b = true;
+									if (endX < sizeX - 1) {
+										endX++;
+										for (let i = startY; i <= endY; i++) {
+											yield [endX, i];
 										}
+										b = true;
 									}
-									for (let i = distance; i > 0; i--) {
-										y += direction;
-										if (x >= 0 && x < sizeX && y >= 0 && y < sizeY) {
-											yield [x, y];
-											b = true;
+									if (endY < sizeY - 1) {
+										//reverse
+										endY++;
+										for (let i = startX; i <= endX; i++) {
+											yield [i, endY];
 										}
+										b = true;
 									}
-									distance++;
-									direction *= -1;
+									if (startX > 0) {
+										//reverse
+										startX--;
+										for (let i = startY; i <= endY; i++) {
+											yield [startX, i];
+										}
+										b = true;
+									}
+									if (startY > 0) {
+										startY--;
+										for (let i = startX; i <= endX; i++) {
+											yield [i, startY];
+										}
+										b = true;
+									}
 								}
 							})(gridSizeX - sizeX, gridSizeY - sizeY)) {
 								if ((() => {

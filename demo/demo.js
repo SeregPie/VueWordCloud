@@ -3,8 +3,8 @@
 	try {
 		console.log('--- 1 ---');
 		{
-			let sizeX = 7;
-			let sizeY = 4;
+			let sizeX = 5;
+			let sizeY = 3;
 			for (let x0 = 0, y0 = 0, x1 = sizeX - 1, y1 = sizeY - 1; x0 < x1 && y0 < y1; x0++, y0++, x1--, y1--) {
 				for (let i = x0; i < x1; i++) {
 					console.log(JSON.stringify([i, y0]));
@@ -18,24 +18,60 @@
 				for (let i = y1; i > y0; i--) {
 					console.log(JSON.stringify([x0, i]));
 				}
+				console.log(x0, y0, x1, y1);
 			}
 		}
 		console.log('--- 2 ---');
 		{
-			let sizeX = 7;
-			let sizeY = 4;
-			for (let x0 = 0, y0 = 0, x1 = sizeX - 1, y1 = sizeY - 1; x0 < x1 && y0 < y1; x0++, y0++, x1--, y1--) {
-				for (let i = x0; i < x1; i++) {
-					console.log(JSON.stringify([i, y0]));
+			let sizeX = 5;
+			let sizeY = 3;
+			let stepX, stepY;
+			if (sizeX > sizeY) {
+				stepX = 1;
+				stepY = sizeY / sizeX;
+			} else
+			if (sizeY > sizeX) {
+				stepY = 1;
+				stepX = sizeX / sizeY;
+			} else {
+				stepX = stepY = 1;
+			}
+			let startX = Math.floor(sizeX / 2);
+			let startY = Math.floor(sizeY / 2);
+			let endX = startX - 1;
+			let endY = startY - 1;
+			let b = true;
+			while (b) {
+				b = false;
+				if (endX < sizeX - 1) {
+					endX++;
+					for (let i = startY; i <= endY; i++) {
+						console.log(JSON.stringify([endX, i]));
+					}
+					b = true;
 				}
-				for (let i = y0; i < y1; i++) {
-					console.log(JSON.stringify([x1, i]));
+				if (endY < sizeY - 1) {
+					//reverse
+					endY++;
+					for (let i = startX; i <= endX; i++) {
+						console.log(JSON.stringify([i, endY]));
+					}
+					b = true;
 				}
-				for (let i = x1; i > x0; i--) {
-					console.log(JSON.stringify([i, y1]));
+				if (startX > 0) {
+					//reverse
+					startX--;
+					for (let i = startY; i <= endY; i++) {
+						console.log(JSON.stringify([startX, i]));
+					}
+					b = true;
 				}
-				for (let i = y1; i > y0; i--) {
-					console.log(JSON.stringify([x0, i]));
+				if (startY > 0) {
+					startY--;
+					for (let i = startX; i <= endX; i++) {
+						console.log(JSON.stringify([i, startY]));
+					}
+					b = true;
 				}
 			}
 		}
