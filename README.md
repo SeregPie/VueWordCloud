@@ -47,6 +47,8 @@ Include the code in your page via a CDN.
 
 `words`
 
+An array of words. A value of the array is either an object, a string or an array.
+
 ---
 
 `text`
@@ -71,7 +73,7 @@ Include the code in your page via a CDN.
 
 `fontStyle`
 
-If the property is a function, it will be called with a given word as the first paramater, awaiting font style in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
+A string or a function for the font style. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
 
 ---
 
@@ -80,5 +82,3 @@ If the property is a function, it will be called with a given word as the first 
 ---
 
 `rotate`
-
----
