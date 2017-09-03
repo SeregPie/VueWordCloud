@@ -382,9 +382,7 @@
 									distance++;
 									direction *= -1;
 								}
-							})(gridSizeX, gridSizeY)) {
-								positionX -= Math.floor(sizeX / 2);
-								positionY -= Math.floor(sizeY / 2);
+							})(gridSizeX - sizeX, gridSizeY - sizeY)) {
 								if ((() => {
 									let occupiedGridPixels = [];
 									for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
