@@ -40,7 +40,7 @@
 							<div class="field">
 								<label class="label">words</label>
 								<div class="control">
-									<textarea class="textarea" v-model="wordsText" rows="12"></textarea>
+									<textarea class="textarea" v-model="wordsInput" rows="12"></textarea>
 								</div>
 							</div>
 							<div class="field">
@@ -48,14 +48,50 @@
 								<div class="control">
 									<div class="select is-fullwidth">
 										<select v-model="fontFamily">
-											<option v-for="v in availableFontFamilyValues" :value="v" :style="{fontFamily: v}">{{ v }}</option>
+											<option v-for="fontFamily in supportedFontFamilies" :value="fontFamily" :style="{fontFamily}">{{ fontFamily }}</option>
 										</select>
 									</div>
 								</div>
 							</div>
+							<div class="field">
+								<label class="label">rotation</label>
+								<div class="control">
+									<label class="radio">
+										<input type="radio" v-model="rotation" :value="horizontalRotation"/> horizontal
+									</label>
+								</div>
+							</div>
+							<div class="field">
+								<div class="control">
+									<label class="radio">
+										<input type="radio" v-model="rotation" :value="diagonalRotation"/> diagonal
+									</label>
+								</div>
+							</div>
+							<div class="field">
+								<div class="control">
+									<label class="radio">
+										<input type="radio" v-model="rotation" :value="randomHorizontalVerticalRotation"/> horizontal and vertical
+									</label>
+								</div>
+							</div>
+							<div class="field">
+								<div class="control">
+									<label class="radio">
+										<input type="radio" v-model="rotation" :value="randomHorizontalVerticalDiagonalRotation"/> horizontal, vertical and diagonal
+									</label>
+								</div>
+							</div>
+							<div class="field">
+								<div class="control">
+									<label class="radio">
+										<input type="radio" v-model="rotation" :value="randomRotation"/> fully random
+									</label>
+								</div>
+							</div>
 						</div>
 						<div class="column">
-							<vue-word-cloud :words="words" :color="generateRandomColor" :font-family="fontFamily" style="background-color: yellow;"></vue-word-cloud>
+							<vue-word-cloud :words="words" :color="randomColor" :font-family="fontFamily" :rotation="rotation" style="background-color: yellow;"></vue-word-cloud>
 						</div>
 					</div>
 				</div>

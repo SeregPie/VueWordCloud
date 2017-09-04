@@ -93,6 +93,6 @@ A string or a function for the font weight of each word. If the property is a fu
 
 ---
 
-`rotate`
+`rotation`
 
 A number or a function for the rotation of each word. The unit for the rotation is in turns. 1 turn is 360 degrees.

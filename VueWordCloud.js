@@ -80,10 +80,10 @@
 				default: 'Inherit',
 			},
 
-			rotate: {
+			rotation: {
 				type: [String, Function],
 				default() {
-					let values = [0, 3/4, 7/8];
+					let values = [0, 3/4]; //7/8
 					return function() {
 						return _randomValue(values);
 					};
@@ -125,7 +125,7 @@
 		computed: {
 			normalizedWords() {
 				return this.words.map(word => {
-					let text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight;
+					let text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight;
 					if (word) {
 						switch (typeof word) {
 							case 'string': {
@@ -134,9 +134,9 @@
 							}
 							case 'object': {
 								if (Array.isArray(word)) {
-									([text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight] = word);
+									([text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight] = word);
 								} else {
-									({text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight} = word);
+									({text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight} = word);
 								}
 								break;
 							}
@@ -163,11 +163,11 @@
 							color = this.color;
 						}
 					}
-					if (rotate === undefined) {
-						if (typeof this.rotate === 'function') {
-							rotate = this.rotate(word);
+					if (rotation === undefined) {
+						if (typeof this.rotation === 'function') {
+							rotation = this.rotation(word);
 						} else {
-							rotate = this.rotate;
+							rotation = this.rotation;
 						}
 					}
 					if (fontFamily === undefined) {
@@ -198,7 +198,7 @@
 							fontWeight = this.fontWeight;
 						}
 					}
-					return {text, weight, color, rotate, fontFamily, fontVariant, fontStyle, fontWeight};
+					return {text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight};
 				});
 			},
 
@@ -305,8 +305,8 @@
 					let gridData = Array(gridSizeX * gridSizeY).fill(false);
 
 					for (let word of words) {
-						let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate} = word;
-						let rotateRad = _convertTurnToRad(rotate);
+						let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation} = word;
+						let rotationRad = _convertTurnToRad(rotation);
 						let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
 
 						let ctx = document.createElement('canvas').getContext('2d');
@@ -315,14 +315,14 @@
 						let textSizeX = ctx.measureText(text).width;
 						let textSizeY = fontSize;
 
-						let sizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotateRad)) + textSizeY * Math.abs(Math.sin(rotateRad))));
-						let sizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotateRad)) + textSizeY * Math.abs(Math.cos(rotateRad))));
+						let sizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotationRad)) + textSizeY * Math.abs(Math.sin(rotationRad))));
+						let sizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotationRad)) + textSizeY * Math.abs(Math.cos(rotationRad))));
 
 						if (sizeX > 0 && sizeY > 0) {
 							ctx.canvas.width = sizeX;
 							ctx.canvas.height = sizeY;
 							ctx.translate(sizeX / 2, sizeY / 2);
-							ctx.rotate(rotateRad);
+							ctx.rotate(rotationRad);
 							ctx.font = font;
 							ctx.textAlign = 'center';
 							ctx.textBaseline = 'middle';
@@ -450,14 +450,14 @@
 
 				await breakIfCanceled();
 
-				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotate}) => ({
+				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
 					text,
 					style: {
 						left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
 						top: `${positionY + sizeY / 2}px`,
 						color,
 						font: _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 0),
-						transform: `rotate(${rotate}turn)`,
+						transform: `rotate(${rotation}turn)`,
 					},
 				}));
 			},
