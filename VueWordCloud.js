@@ -305,7 +305,7 @@
 					let gridData = Array(gridSizeX * gridSizeY).fill(false);
 
 					for (let word of words) {
-						let {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation} = word;
+						let {text, color, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
 						let rotationRad = _convertTurnToRad(rotation);
 						let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
 

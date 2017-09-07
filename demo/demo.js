@@ -2,89 +2,85 @@
 
 	/*try {
 		console.log('--- 1 ---');
-		{
-			let sizeX = 5;
-			let sizeY = 3;
-			for (let x0 = 0, y0 = 0, x1 = sizeX - 1, y1 = sizeY - 1; x0 < x1 && y0 < y1; x0++, y0++, x1--, y1--) {
-				for (let i = x0; i < x1; i++) {
-					console.log(JSON.stringify([i, y0]));
+		for (let sizeX of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+			for (let sizeY of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+				let grid = Array(sizeX * sizeY).fill(false);
+				let count = 0;
+				let fillGrid = function(x, y) {
+					let index = sizeX * y + x;
+					if (grid[index]) {
+						throw 'ERROR';
+					}
+					grid[index] = true;
+					count++;
+					//console.log(JSON.stringify([x, y]));
+				};
+				let x0 = 0, y0 = 0, x1 = sizeX - 1, y1 = sizeY - 1;
+				for (;;) {
+					if (y0 > y1) break;
+					for (let i = x0; i <= x1; i++) {
+						fillGrid(i, y0);
+					}
+					y0++;
+					if (x0 > x1) break;
+					for (let i = y0; i <= y1; i++) {
+						fillGrid(x1, i);
+					}
+					x1--;
+					if (y0 > y1) break;
+					for (let i = x1; i >= x0; i--) {
+						fillGrid(i, y1);
+					}
+					y1--;
+					if (x0 > x1) break;
+					for (let i = y1; i >= y0; i--) {
+						fillGrid(x0, i);
+					}
+					x0++;
+					//console.log(x0, y0, x1, y1);
 				}
-				for (let i = y0; i < y1; i++) {
-					console.log(JSON.stringify([x1, i]));
-				}
-				for (let i = x1; i > x0; i--) {
-					console.log(JSON.stringify([i, y1]));
-				}
-				for (let i = y1; i > y0; i--) {
-					console.log(JSON.stringify([x0, i]));
-				}
-				console.log(x0, y0, x1, y1);
+				console.log(`${sizeX} x ${sizeY}`, count === sizeX * sizeY);
 			}
 		}
 		console.log('--- 2 ---');
-		{
-			let sizeX = 5;
-			let sizeY = 3;
-			let stepX, stepY;
-			if (sizeX > sizeY) {
-				stepX = 1;
-				stepY = sizeY / sizeX;
-			} else
-			if (sizeY > sizeX) {
-				stepY = 1;
-				stepX = sizeX / sizeY;
-			} else {
-				stepX = stepY = 1;
-			}
-			let x0 = Math.floor(sizeX / 2);
-			let y0 = Math.floor(sizeY / 2);
-			let x1 = x0;
-			let y1 = y0;
-			while (x0 > 0 || y0 > 0 || x1 < sizeX - 1 || y1 < sizeY - 1) {
-				let x0i = Math.floor(x0);
-				let y0i = Math.floor(y0);
-				let x1i = Math.floor(x1);
-				let y1i = Math.floor(y1);
-				x0 -= stepX;
-				y0 -= stepY;
-				x1 += stepX;
-				y1 += stepY;
-				let x0ii = Math.floor(x0);
-				let y0ii = Math.floor(y0);
-				let x1ii = Math.floor(x1);
-				let y1ii = Math.floor(y1);
-				while (x0i >= x0ii) {
-					for (let i = Math.floor(y0); i <= y1; i++) {
-						console.log(JSON.stringify([x0i, i]));
+		for (let sizeX of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+			for (let sizeY of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+				let grid = Array(sizeX * sizeY).fill(false);
+				let count = 0;
+				let fillGrid = function(x, y) {
+					let index = sizeX * y + x;
+					if (grid[index]) {
+						throw 'ERROR';
 					}
-					x0i--;
-				}
-				if (x1 < sizeX - 1) {
-					x1 += stepX;
-					for (let i = Math.floor(y0); i <= y1; i++) {
-						console.log(JSON.stringify([Math.floor(x1), i]));
+					grid[index] = true;
+					count++;
+					//console.log(JSON.stringify([x, y]));
+				};
+				let x0 = Math.floor(sizeX / 2), y0 = Math.floor(sizeY / 2), x1 = x0, y1 = y0;
+				for (;;) {
+					if (y1 - y0 >= sizeY) break;
+					for (let i = x0; i <= x1; i++) {
+						fillGrid(i, y0);
 					}
-				}
-				if (y1 < sizeY - 1) {
-					//reverse
-					y1 += stepY;
-					for (let i = Math.floor(x0); i <= x1; i++) {
-						console.log(JSON.stringify([i, Math.floor(y1)]));
+					x1++;
+					if (x1 - x0 >= sizeX) break;
+					for (let i = y0; i <= y1; i++) {
+						fillGrid(x1, i);
 					}
-				}
-				if (x0 > 0) {
-					//reverse
-					x0 -= stepX;
-					for (let i = Math.floor(y0); i <= y1; i++) {
-						console.log(JSON.stringify([Math.floor(x0), i]));
+					y1++;
+					if (y1 - y0 >= sizeY) break;
+					for (let i = x0; i <= x1; i++) {
+						fillGrid(i, y1);
 					}
-				}
-				if (y0 > 0) {
-					y0 -= stepY;
-					for (let i = Math.floor(x0); i <= x1; i++) {
-						console.log(JSON.stringify([i, Math.floor(y0)]));
+					x0--;
+					if (x1 - x0 >= sizeX) break;
+					for (let i = y0; i <= y1; i++) {
+						fillGrid(x0, i);
 					}
+					y0--;
+					//console.log(x0, y0, x1, y1);
 				}
+				console.log(`${sizeX} x ${sizeY}`, count === sizeX * sizeY);
 			}
 		}
 	} catch (error) {

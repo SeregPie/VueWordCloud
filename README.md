@@ -69,30 +69,36 @@ A string or a function for the color of each word.
 
 ---
 
+`rotation`
+
+A number or a function for the rotation of each word. The units for the rotation are turns (1 turn is 360 degrees).
+
+---
+
 `fontFamily`
 
-A string or a function for the font style of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
+A string or a function for the font style of each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.
 
 ---
 
 `fontVariant`
 
-A string or a function for the font variant of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'italic'` and `'oblique'`. The value is set for each word, where the value is not already set.
+A string or a function for the font variant of each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.
 
 ---
 
 `fontStyle`
 
-A string or a function for the font style of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'` and `'small-caps'`. The value is set for each word, where the value is not already set.
+A string or a function for the font style of each word. Possible values are `'normal'` and `'small-caps'`.
 
 ---
 
 `fontWeight`
 
-A string or a function for the font weight of each word. If the property is a function, it will be called with a given word as the first paramater, awaiting a string in return. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`. The value is set for each word, where the value is not already set.
+A string or a function for the font weight of each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.
 
 ---
 
-`rotation`
+`text`, `weight`, `color`, `rotation`, `fontFamily`, `fontVariant`, `fontStyle`, `fontWeight`
 
-A number or a function for the rotation of each word. The unit for the rotation is in turns. 1 turn is 360 degrees.
+If the property is a function, it will be called with a given word as the first paramater, awaiting a value in return. The value is set for each word, where the value is not already set.
