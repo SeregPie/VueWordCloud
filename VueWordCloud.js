@@ -77,7 +77,7 @@
 
 			color: {
 				type: [String, Function],
-				default: 'Inherit',
+				default: 'inherit',
 			},
 
 			rotation: {
