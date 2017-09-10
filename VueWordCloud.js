@@ -55,33 +55,47 @@
 			let textHeight = fontSize;
 			fontSize = `${fontSize}px`;
 			let textWidth = await _Font$measureTextWidth(text, {fontFamily, fontSize, fontStyle, fontVariant, fontWeight});
-
-
-			let width = Math.ceil((textWidth * Math.abs(Math.cos(rotation)) + textHeight * Math.abs(Math.sin(rotation))));
-			let height = Math.ceil((textWidth * Math.abs(Math.sin(rotation)) + textHeight * Math.abs(Math.cos(rotation))));
-			let data = new Int8Array(width * height);
-			if (width > 0 && height > 0) {
+			let rectWidth = Math.ceil((textWidth * Math.abs(Math.cos(rotation)) + textHeight * Math.abs(Math.sin(rotation))));
+			let rectHeight = Math.ceil((textWidth * Math.abs(Math.sin(rotation)) + textHeight * Math.abs(Math.cos(rotation))));
+			let rectData = new Int8Array(rectWidth * rectHeight);
+			if (rectWidth > 0 && rectHeight > 0) {
 				let ctx = document.createElement('canvas').getContext('2d');
-				ctx.canvas.width = width;
-				ctx.canvas.height = height;
-				ctx.translate(width / 2, height / 2);
+				ctx.canvas.width = rectWidth;
+				ctx.canvas.height = rectHeight;
+				ctx.translate(rectWidth / 2, rectHeight / 2);
 				ctx.rotate(rotation);
 				let font = _Font$join({fontFamily, fontSize, fontStyle, fontVariant, fontWeight});
 				ctx.font = font;
 				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
 				ctx.fillText(text, 0, 0);
-				let imageData = ctx.getImageData(0, 0, width, height).data;
-				for (let x = 0; x < width; ++x) {
-					for (let y = 0; y < height; ++y) {
-						let index = width * y + x;
-						data[index] = imageData[index * 4 + 3];
+				let imageData = ctx.getImageData(0, 0, rectWidth, rectHeight).data;
+				for (let x = 0; x < rectWidth; ++x) {
+					for (let y = 0; y < rectHeight; ++y) {
+						let index = rectWidth * y + x;
+						rectData[index] = imageData[index * 4 + 3];
 					}
 				}
 			}
-			return {textWidth, textHeight, width, height, data};
+			return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 		};
 	})();
+
+	let _Iterable$minOf = function(values, iteratee) {
+		let returns = Infinity;
+		for (let value of values) {
+			returns = Math.min(iteratee(value), returns);
+		}
+		return returns;
+	};
+
+	let _Iterable$maxOf = function(values, iteratee) {
+		let returns = -Infinity;
+		for (let value of values) {
+			returns = Math.max(iteratee(value), returns);
+		}
+		return returns;
+	};
 
 	let _Math$convertTurnToRad = function(v) {
 		return v * 2 * Math.PI;
@@ -327,13 +341,7 @@
 				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
 				{
-					let minWeight = Infinity;
-
-					for (let word of words) {
-						let {weight} = word;
-						minWeight = Math.min(weight, minWeight);
-					}
-
+					let minWeight = _Iterable$minOf(words, ({weight}) => weight);
 					let minFontSize = 2;
 
 					for (let word of words) {
@@ -351,43 +359,43 @@
 						self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
 							let gridData = Array(gridWidth * gridHeight).fill(0);
 
-							self.addEventListener('message', function({data: {width, height, data}}) {
+							self.addEventListener('message', function({data: {rectWidth, rectHeight, rectData}}) {
 								let occupiedPixels = [];
-								for (let x = 0; x < width; ++x) {
-									for (let y = 0; y < height; ++y) {
-										if (data[width * y + x]) {
+								for (let x = 0; x < rectWidth; ++x) {
+									for (let y = 0; y < rectHeight; ++y) {
+										if (rectData[rectWidth * y + x]) {
 											occupiedPixels.push([x, y]);
 										}
 									}
 								}
 								self.postMessage((function() {
-									for (let [positionX, positionY] of (function*(width, height) {
+									for (let [positionX, positionY] of (function*(rectWidth, rectHeight) {
 										let stepX, stepY;
-										if (width > height) {
+										if (rectWidth > rectHeight) {
 											stepX = 1;
-											stepY = height / width;
+											stepY = rectHeight / rectWidth;
 										} else
-										if (height > width) {
+										if (rectHeight > rectWidth) {
 											stepY = 1;
-											stepX = width / height;
+											stepX = rectWidth / rectHeight;
 										} else {
 											stepX = stepY = 1;
 										}
-										let startX = Math.floor(width / 2);
-										let startY = Math.floor(height / 2);
+										let startX = Math.floor(rectWidth / 2);
+										let startY = Math.floor(rectHeight / 2);
 										let endX = startX - 1;
 										let endY = startY - 1;
 										let b = true;
 										while (b) {
 											b = false;
-											if (endX < width - 1) {
+											if (endX < rectWidth - 1) {
 												endX++;
 												for (let i = startY; i <= endY; i++) {
 													yield [endX, i];
 												}
 												b = true;
 											}
-											if (endY < height - 1) {
+											if (endY < rectHeight - 1) {
 												//reverse
 												endY++;
 												for (let i = startX; i <= endX; i++) {
@@ -411,7 +419,7 @@
 												b = true;
 											}
 										}
-									})(gridWidth - width, gridHeight - height)) {
+									})(gridWidth - rectWidth, gridHeight - rectHeight)) {
 										if ((function() {
 											let occupiedGridPixels = [];
 											for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
@@ -429,7 +437,7 @@
 											}
 											return true;
 										})()) {
-											return {left: positionX, top: positionY};
+											return {rectLeft: positionX, rectTop: positionY};
 										}
 									}
 									throw new Error();
@@ -447,10 +455,10 @@
 							try {
 								let {text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
 								let rotationRad = _Math$convertTurnToRad(rotation);
-								let {textWidth, textHeight, width, height, data} = await _Font$computeTextData(text, {fontFamily, fontSize: fontSize, fontStyle, fontVariant, fontWeight, rotation: rotationRad});
-								worker.postMessage({width, height, data});
-								let {left, top} = await _Worker$getMessage(worker);
-								Object.assign(word, {left, top, width, height, textWidth, textHeight});
+								let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await _Font$computeTextData(text, {fontFamily, fontSize: fontSize, fontStyle, fontVariant, fontWeight, rotation: rotationRad});
+								worker.postMessage({rectWidth, rectHeight, rectData});
+								let {rectLeft, rectTop} = await _Worker$getMessage(worker);
+								Object.assign(word, {rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
 								out.push(word);
 							} catch (error) {
 								console.log(error);
@@ -465,29 +473,24 @@
 				await throwIfCanceled();
 
 				{
-					let minOccupiedGridPixelX = Infinity;
-					let minOccupiedGridPixelY = Infinity;
-					let maxOccupiedGridPixelY = 0;
-					let maxOccupiedGridPixelX = 0;
+					let minLeft = _Iterable$minOf(words, ({rectLeft}) => rectLeft);
+					let maxLeft = _Iterable$maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+					let cloudWidth = maxLeft - minLeft;
 
-					for (let {left, top, width, height} of words) {
-						minOccupiedGridPixelX = Math.min(left, minOccupiedGridPixelX);
-						minOccupiedGridPixelY = Math.min(top, minOccupiedGridPixelY);
-						maxOccupiedGridPixelX = Math.max(left + width, maxOccupiedGridPixelX);
-						maxOccupiedGridPixelY = Math.max(top + height, maxOccupiedGridPixelY);
-					}
+					let minTop = _Iterable$minOf(words, ({rectTop}) => rectTop);
+					let maxTop = _Iterable$maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
+					let cloudHeight = maxTop - minTop;
 
-					let scaleX = containerWidth / (maxOccupiedGridPixelX - minOccupiedGridPixelX);
-					let scaleY = containerHeight / (maxOccupiedGridPixelY - minOccupiedGridPixelY);
-					let scale = Math.min(scaleX, scaleY);
+					let scale = Math.min(containerWidth / cloudWidth, containerHeight / cloudHeight);
 
 					for (let word of words) {
-						word.left -= minOccupiedGridPixelX
-						word.top -= minOccupiedGridPixelY;
-						word.left *= scale;
-						word.top *= scale;
-						word.width *= scale;
-						word.height *= scale;
+						word.rectLeft = (word.rectLeft + containerWidth / scale  / 2 - maxLeft / 2 - minLeft  / 2) * scale;
+
+						word.rectTop -= minTop;
+
+						word.rectTop *= scale;
+						word.rectWidth *= scale;
+						word.rectHeight *= scale;
 						word.textWidth *= scale;
 						word.textHeight *= scale;
 						word.fontSize *= scale;
@@ -496,11 +499,11 @@
 
 				await throwIfCanceled();
 
-				return words.map(({left, top, width, height, text, textWidth, textHeight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
+				return words.map(({rectLeft, rectTop, rectWidth, rectHeight, text, textWidth, textHeight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
 					text,
 					style: {
-						left: `${left + width / 2 - textWidth / 2}px`,
-						top: `${top + height / 2}px`,
+						left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
+						top: `${rectTop + rectHeight / 2}px`,
 						color,
 						font: _Font$join({fontFamily, fontSize: `${fontSize}px`, fontStyle, fontVariant, fontWeight, lineHeight: 0}),
 						transform: `rotate(${rotation}turn)`,

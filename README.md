@@ -99,6 +99,13 @@ A string or a function for the font weight of each word. Possible values are `'n
 
 ---
 
-`text`, `weight`, `color`, `rotation`, `fontFamily`, `fontVariant`, `fontStyle`, `fontWeight`
+`text`<br/>
+`weight`<br/>
+`color`<br/>
+`rotation`<br/>
+`fontFamily`<br/>
+`fontVariant`<br/>
+`fontStyle`<br/>
+`fontWeight`<br/>
 
 If the property is a function, it will be called with a given word as the first paramater, awaiting a value in return. The value is set for each word, where the value is not already set.
