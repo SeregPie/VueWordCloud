@@ -6,29 +6,84 @@
 	}
 }).call(this, function(Vue) {
 
-	let _randomInt = function(start, end) {
-		return Math.floor(start + (end - start) * Math.random());
+	let _Worker$fromFunction = function(f) {
+		let code = `(${f.toString()})()`;
+		let blob = new Blob([code]);
+		let blobURL = URL.createObjectURL(blob);
+		return new Worker(blobURL);
 	};
 
-	let _randomValue = function(values) {
-		return values[_randomInt(0, values.length)];
+	let _Worker$getMessage = function(worker) {
+		return new Promise((resolve, reject) => {
+			worker.addEventListener('message', function(event) {
+				event.preventDefault();
+				resolve(event.data);
+			}, {once: true});
+			worker.addEventListener('error', function(event) {
+				event.preventDefault();
+				reject(event);
+			}, {once: true});
+		});
 	};
 
-	let _delay = function(ms) {
+	let _Async$delay = function(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let _toFont = function(fontFamily, fontSize, fontStyle, fontVariant, fontWeight, lineHeight) {
+	let _Font$join = function({fontFamily = 'serif', fontSize = '16px', fontStyle = 'normal', fontVariant = 'normal', fontWeight = 'normal', lineHeight = 1}) {
 		return [fontStyle, fontVariant, fontWeight, `${fontSize}/${lineHeight}`, fontFamily].join(' ');
 	};
 
-	let _loadFont = async function(fontFamily, fontStyle, fontVariant, fontWeight) {
-		try {
-			await document.fonts.load(_toFont(fontFamily, '16px', fontStyle, fontVariant, fontWeight, 1),  'a');
-		} catch (error) {}
+	let _Font$load = async function(fontFamily) {
+		let font = _Font$join({fontFamily});
+		await document.fonts.load(font,  'a');
 	};
 
-	let _convertTurnToRad = function(v) {
+	let _Font$measureTextWidth = (function() {
+		let ctx = document.createElement('canvas').getContext('2d');
+
+		return async function(text, {fontFamily, fontSize, fontStyle, fontVariant, fontWeight}) {
+			await _Font$load(fontFamily);
+			let font = _Font$join({fontFamily, fontSize, fontStyle, fontVariant, fontWeight});
+			ctx.font = font;
+			return ctx.measureText(text).width;
+		};
+	})();
+
+	let _Font$computeTextData = (function() {
+		return async function(text, {fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation = 0}) {
+			let textHeight = fontSize;
+			fontSize = `${fontSize}px`;
+			let textWidth = await _Font$measureTextWidth(text, {fontFamily, fontSize, fontStyle, fontVariant, fontWeight});
+
+
+			let width = Math.ceil((textWidth * Math.abs(Math.cos(rotation)) + textHeight * Math.abs(Math.sin(rotation))));
+			let height = Math.ceil((textWidth * Math.abs(Math.sin(rotation)) + textHeight * Math.abs(Math.cos(rotation))));
+			let data = new Int8Array(width * height);
+			if (width > 0 && height > 0) {
+				let ctx = document.createElement('canvas').getContext('2d');
+				ctx.canvas.width = width;
+				ctx.canvas.height = height;
+				ctx.translate(width / 2, height / 2);
+				ctx.rotate(rotation);
+				let font = _Font$join({fontFamily, fontSize, fontStyle, fontVariant, fontWeight});
+				ctx.font = font;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(text, 0, 0);
+				let imageData = ctx.getImageData(0, 0, width, height).data;
+				for (let x = 0; x < width; ++x) {
+					for (let y = 0; y < height; ++y) {
+						let index = width * y + x;
+						data[index] = imageData[index * 4 + 3];
+					}
+				}
+			}
+			return {textWidth, textHeight, width, height, data};
+		};
+	})();
+
+	let _Math$convertTurnToRad = function(v) {
 		return v * 2 * Math.PI;
 	};
 
@@ -83,9 +138,9 @@
 			rotation: {
 				type: [String, Function],
 				default() {
-					let values = [0, 3/4]; //7/8
+					let values = [0, 3/4];
 					return function() {
-						return _randomValue(values);
+						return values[Math.floor(Math.random() * values.length)];
 					};
 				},
 			},
@@ -242,18 +297,18 @@
 			},
 
 			async computeWordItems(canceled) {
-				let containerSizeX = this.elProps.width;
-				let containerSizeY = this.elProps.height;
+				let containerWidth = this.elProps.width;
+				let containerHeight = this.elProps.height;
 				let words = this.normalizedWords;
 
-				let breakIfCanceled = async function() {
-					await _delay(1);
+				let throwIfCanceled = async function() {
+					await _Async$delay(1);
 					if (canceled()) {
 						throw new Error();
 					}
 				};
 
-				await breakIfCanceled();
+				await throwIfCanceled();
 
 				words = words.filter(({weight}) => weight > 0);
 
@@ -288,135 +343,126 @@
 					}
 				}
 
-				await breakIfCanceled();
-
-				for (let {fontFamily, fontStyle, fontVariant, fontWeight} of words) {
-					await _loadFont(fontFamily, fontStyle, fontVariant, fontWeight);
-				}
-
-				await breakIfCanceled();
+				await throwIfCanceled();
 
 				{
 					let out = [];
+					let worker = _Worker$fromFunction(function() {
+						self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
+							let gridData = Array(gridWidth * gridHeight).fill(0);
 
-					let gridResolution = Math.pow(2, 22);
-					let gridSizeX = Math.floor(Math.sqrt(containerSizeX / containerSizeY * gridResolution));
-					let gridSizeY = Math.floor(gridResolution / gridSizeX);
-					let gridData = Array(gridSizeX * gridSizeY).fill(false);
-
-					for (let word of words) {
-						let {text, color, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
-						let rotationRad = _convertTurnToRad(rotation);
-						let font = _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 1);
-
-						let ctx = document.createElement('canvas').getContext('2d');
-
-						ctx.font = font;
-						let textSizeX = ctx.measureText(text).width;
-						let textSizeY = fontSize;
-
-						let sizeX = Math.ceil((textSizeX * Math.abs(Math.cos(rotationRad)) + textSizeY * Math.abs(Math.sin(rotationRad))));
-						let sizeY = Math.ceil((textSizeX * Math.abs(Math.sin(rotationRad)) + textSizeY * Math.abs(Math.cos(rotationRad))));
-
-						if (sizeX > 0 && sizeY > 0) {
-							ctx.canvas.width = sizeX;
-							ctx.canvas.height = sizeY;
-							ctx.translate(sizeX / 2, sizeY / 2);
-							ctx.rotate(rotationRad);
-							ctx.font = font;
-							ctx.textAlign = 'center';
-							ctx.textBaseline = 'middle';
-							ctx.fillText(text, 0, 0);
-							let imageData = ctx.getImageData(0, 0, sizeX, sizeY).data;
-							let occupiedPixels = [];
-							for (let occupiedPixelX = sizeX; occupiedPixelX-- > 0;) {
-								for (let occupiedPixelY = sizeY; occupiedPixelY-- > 0;) {
-									if (imageData[(sizeX * occupiedPixelY + occupiedPixelX) * 4 + 3]) {
-										occupiedPixels.push([occupiedPixelX, occupiedPixelY]);
+							self.addEventListener('message', function({data: {width, height, data}}) {
+								let occupiedPixels = [];
+								for (let x = 0; x < width; ++x) {
+									for (let y = 0; y < height; ++y) {
+										if (data[width * y + x]) {
+											occupiedPixels.push([x, y]);
+										}
 									}
 								}
-							}
-
-							for (let [positionX, positionY] of (function*(sizeX, sizeY) {
-								let stepX, stepY;
-								if (sizeX > sizeY) {
-									stepX = 1;
-									stepY = sizeY / sizeX;
-								} else
-								if (sizeY > sizeX) {
-									stepY = 1;
-									stepX = sizeX / sizeY;
-								} else {
-									stepX = stepY = 1;
-								}
-								let startX = Math.floor(sizeX / 2);
-								let startY = Math.floor(sizeY / 2);
-								let endX = startX - 1;
-								let endY = startY - 1;
-								let b = true;
-								while (b) {
-									b = false;
-									if (endX < sizeX - 1) {
-										endX++;
-										for (let i = startY; i <= endY; i++) {
-											yield [endX, i];
+								self.postMessage((function() {
+									for (let [positionX, positionY] of (function*(width, height) {
+										let stepX, stepY;
+										if (width > height) {
+											stepX = 1;
+											stepY = height / width;
+										} else
+										if (height > width) {
+											stepY = 1;
+											stepX = width / height;
+										} else {
+											stepX = stepY = 1;
 										}
-										b = true;
-									}
-									if (endY < sizeY - 1) {
-										//reverse
-										endY++;
-										for (let i = startX; i <= endX; i++) {
-											yield [i, endY];
-										}
-										b = true;
-									}
-									if (startX > 0) {
-										//reverse
-										startX--;
-										for (let i = startY; i <= endY; i++) {
-											yield [startX, i];
-										}
-										b = true;
-									}
-									if (startY > 0) {
-										startY--;
-										for (let i = startX; i <= endX; i++) {
-											yield [i, startY];
-										}
-										b = true;
-									}
-								}
-							})(gridSizeX - sizeX, gridSizeY - sizeY)) {
-								if ((() => {
-									let occupiedGridPixels = [];
-									for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
-										let occupiedGridPixelX = positionX + occupiedPixelX;
-										let occupiedGridPixelY = positionY + occupiedPixelY;
-										if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridSizeX && occupiedGridPixelY < gridSizeY) {
-											if (gridData[gridSizeX * occupiedGridPixelY + occupiedGridPixelX]) {
-												return false;
+										let startX = Math.floor(width / 2);
+										let startY = Math.floor(height / 2);
+										let endX = startX - 1;
+										let endY = startY - 1;
+										let b = true;
+										while (b) {
+											b = false;
+											if (endX < width - 1) {
+												endX++;
+												for (let i = startY; i <= endY; i++) {
+													yield [endX, i];
+												}
+												b = true;
 											}
-											occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
+											if (endY < height - 1) {
+												//reverse
+												endY++;
+												for (let i = startX; i <= endX; i++) {
+													yield [i, endY];
+												}
+												b = true;
+											}
+											if (startX > 0) {
+												//reverse
+												startX--;
+												for (let i = startY; i <= endY; i++) {
+													yield [startX, i];
+												}
+												b = true;
+											}
+											if (startY > 0) {
+												startY--;
+												for (let i = startX; i <= endX; i++) {
+													yield [i, startY];
+												}
+												b = true;
+											}
+										}
+									})(gridWidth - width, gridHeight - height)) {
+										if ((function() {
+											let occupiedGridPixels = [];
+											for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
+												let occupiedGridPixelX = positionX + occupiedPixelX;
+												let occupiedGridPixelY = positionY + occupiedPixelY;
+												if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridWidth && occupiedGridPixelY < gridHeight) {
+													if (gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX]) {
+														return false;
+													}
+													occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
+												}
+											}
+											for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
+												gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX] = true;
+											}
+											return true;
+										})()) {
+											return {left: positionX, top: positionY};
 										}
 									}
-									for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
-										gridData[gridSizeX * occupiedGridPixelY + occupiedGridPixelX] = true;
-									}
-									return true;
-								})()) {
-									Object.assign(word, {positionX, positionY, sizeX, sizeY, textSizeX, textSizeY});
-									out.push(word);
-									break;
-								}
+									throw new Error();
+								})());
+							});
+
+						}, {once: true});
+					});
+					try {
+						let gridResolution = Math.pow(2, 22);
+						let gridWidth = Math.floor(Math.sqrt(containerWidth / containerHeight * gridResolution));
+						let gridHeight = Math.floor(gridResolution / gridWidth);
+						worker.postMessage({gridWidth, gridHeight});
+						for (let word of words) {
+							try {
+								let {text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
+								let rotationRad = _Math$convertTurnToRad(rotation);
+								let {textWidth, textHeight, width, height, data} = await _Font$computeTextData(text, {fontFamily, fontSize: fontSize, fontStyle, fontVariant, fontWeight, rotation: rotationRad});
+								worker.postMessage({width, height, data});
+								let {left, top} = await _Worker$getMessage(worker);
+								Object.assign(word, {left, top, width, height, textWidth, textHeight});
+								out.push(word);
+							} catch (error) {
+								console.log(error);
 							}
 						}
+					} finally {
+						worker.terminate();
 					}
-
 					words = out;
 				}
 
-				await breakIfCanceled();
+				await throwIfCanceled();
 
 				{
 					let minOccupiedGridPixelX = Infinity;
@@ -424,39 +470,39 @@
 					let maxOccupiedGridPixelY = 0;
 					let maxOccupiedGridPixelX = 0;
 
-					for (let {positionX, positionY, sizeX, sizeY} of words) {
-						minOccupiedGridPixelX = Math.min(positionX, minOccupiedGridPixelX);
-						minOccupiedGridPixelY = Math.min(positionY, minOccupiedGridPixelY);
-						maxOccupiedGridPixelX = Math.max(positionX + sizeX, maxOccupiedGridPixelX);
-						maxOccupiedGridPixelY = Math.max(positionY + sizeY, maxOccupiedGridPixelY);
+					for (let {left, top, width, height} of words) {
+						minOccupiedGridPixelX = Math.min(left, minOccupiedGridPixelX);
+						minOccupiedGridPixelY = Math.min(top, minOccupiedGridPixelY);
+						maxOccupiedGridPixelX = Math.max(left + width, maxOccupiedGridPixelX);
+						maxOccupiedGridPixelY = Math.max(top + height, maxOccupiedGridPixelY);
 					}
 
-					let scaleX = containerSizeX / (maxOccupiedGridPixelX - minOccupiedGridPixelX);
-					let scaleY = containerSizeY / (maxOccupiedGridPixelY - minOccupiedGridPixelY);
+					let scaleX = containerWidth / (maxOccupiedGridPixelX - minOccupiedGridPixelX);
+					let scaleY = containerHeight / (maxOccupiedGridPixelY - minOccupiedGridPixelY);
 					let scale = Math.min(scaleX, scaleY);
 
 					for (let word of words) {
-						word.positionX -= minOccupiedGridPixelX
-						word.positionY -= minOccupiedGridPixelY;
-						word.positionX *= scale;
-						word.positionY *= scale;
-						word.sizeX *= scale;
-						word.sizeY *= scale;
-						word.textSizeX *= scale;
-						word.textSizeY *= scale;
+						word.left -= minOccupiedGridPixelX
+						word.top -= minOccupiedGridPixelY;
+						word.left *= scale;
+						word.top *= scale;
+						word.width *= scale;
+						word.height *= scale;
+						word.textWidth *= scale;
+						word.textHeight *= scale;
 						word.fontSize *= scale;
 					}
 				}
 
-				await breakIfCanceled();
+				await throwIfCanceled();
 
-				return words.map(({positionX, positionY, sizeX, sizeY, textSizeX, textSizeY, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
+				return words.map(({left, top, width, height, text, textWidth, textHeight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
 					text,
 					style: {
-						left: `${positionX + sizeX / 2 - textSizeX / 2}px`,
-						top: `${positionY + sizeY / 2}px`,
+						left: `${left + width / 2 - textWidth / 2}px`,
+						top: `${top + height / 2}px`,
 						color,
-						font: _toFont(fontFamily, `${fontSize}px`, fontStyle, fontVariant, fontWeight, 0),
+						font: _Font$join({fontFamily, fontSize: `${fontSize}px`, fontStyle, fontVariant, fontWeight, lineHeight: 0}),
 						transform: `rotate(${rotation}turn)`,
 					},
 				}));
