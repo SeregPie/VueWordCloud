@@ -110,7 +110,7 @@
 						height: '100%',
 						overflow: 'hidden',
 					},
-				}, this.wordNodes.map(node =>
+				}, this.animatedWordNodes.map(node =>
 					createElement('div', {
 						key: node.text,
 						style: Object.assign({
@@ -292,9 +292,9 @@
 				immediate: true,
 			},
 
-			wordNodes(newWordNodes, oldWordNodes) {
+			async wordNodes(value) {
 				try {
-					this.animateWordNodes(newWordNodes, oldWordNodes);
+					await this.animateWordNodes(value);
 				} catch (error) {}
 			},
 		},
@@ -521,17 +521,25 @@
 				};
 			})(),
 
-			async _animateWordNodes(context, newWordNodes, oldWordNodes) {
-				let wordNodesToInsert = [];
-				let wordNodesToRemove = [];
-				let wordNodesToUpdate = [];
-
-				await context.delay();
-
+			async _animateWordNodes(context, wordNodes) {
+				let oldWordNodes = this.animatedWordNodes;
+				let newWordNodes = wordNodes.slice();
 				let duration = 1000;
-
-
-				let delay = 1;
+				let delay = duration / Math.max(oldWordNodes.length, newWordNodes.length);
+				for (let oldIndex = oldWordNodes.length; oldIndex-- > 0;) {
+					await context.delay(delay);
+					let oldWordNode = oldWordNodes[oldIndex];
+					let newIndex = newWordNodes.findIndex(newWordNode => newWordNode.text === oldWordNode.text);
+					if (newIndex < 0) {
+						oldWordNodes.splice(oldIndex, 1);
+					} else {
+						oldWordNodes.splice(oldIndex, 1, ...newWordNodes.splice(newIndex, 1));
+					}
+				}
+				for (let newWord of newWordNodes) {
+					await context.delay(delay);
+					oldWordNodes.push(newWord);
+				}
 			},
 		},
 	};
