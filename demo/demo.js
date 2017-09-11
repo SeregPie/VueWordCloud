@@ -125,8 +125,8 @@
 		return _sampleN([0, 3/4], text.length);
 	};
 
-	let randomHorizontalVerticalDiagonalRotation = function([text]) {
-		return _sampleN([0, 3/4, 7/8], text.length);
+	let randomHorizontalVerticalDiagonalsRotation = function([text]) {
+		return _sampleN([0, 1/8, 3/4, 7/8], text.length);
 	};
 
 	let randomRotation = function() {
@@ -149,13 +149,13 @@
 				horizontalRotation,
 				diagonalRotation,
 				randomHorizontalVerticalRotation,
-				randomHorizontalVerticalDiagonalRotation,
+				randomHorizontalVerticalDiagonalsRotation,
 				randomRotation,
 			]),
 			horizontalRotation,
 			diagonalRotation,
 			randomHorizontalVerticalRotation,
-			randomHorizontalVerticalDiagonalRotation,
+			randomHorizontalVerticalDiagonalsRotation,
 			randomRotation,
 
 			fontFamily: _sample(supportedFontFamilies),

@@ -37,7 +37,7 @@ Include the code in your page via a CDN.
 
 <vue-word-cloud
   :words="[['a', 12], ['b', 5], ['c', 5], ['d', 1]]"
-  :color="([text, weight]) => weight > 6 ? 'DeepPink' : weight > 3 ? 'RoyalBlue' : 'Indigo'"
+  :color="([, weight]) => weight > 6 ? 'DeepPink' : weight > 3 ? 'RoyalBlue' : 'Indigo'"
   font-family="Roboto"
 ></vue-word-cloud>
 
@@ -48,6 +48,12 @@ Include the code in your page via a CDN.
 `words`
 
 An array of words. A value of the array is either an object, a string or an array.
+
+If the value is an object: `{text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight}`.
+
+If the value is an array: `[text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight]`.
+
+If the value is a string: `text`;
 
 ---
 
@@ -77,19 +83,19 @@ A number or a function for the rotation of each word. The units for the rotation
 
 `fontFamily`
 
+A string or a function for the font family.
+
+---
+
+`fontStyle`
+
 A string or a function for the font style of each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.
 
 ---
 
 `fontVariant`
 
-A string or a function for the font variant of each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.
-
----
-
-`fontStyle`
-
-A string or a function for the font style of each word. Possible values are `'normal'` and `'small-caps'`.
+A string or a function for the font variant of each word. Possible values are `'normal'` and `'small-caps'`.
 
 ---
 
@@ -104,8 +110,8 @@ A string or a function for the font weight of each word. Possible values are `'n
 `color`<br/>
 `rotation`<br/>
 `fontFamily`<br/>
-`fontVariant`<br/>
 `fontStyle`<br/>
+`fontVariant`<br/>
 `fontWeight`<br/>
 
 If the property is a function, it will be called with a given word as the first paramater, awaiting a value in return. The value is set for each word, where the value is not already set.

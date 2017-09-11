@@ -26,8 +26,44 @@
 		});
 	};
 
-	let _Async$delay = function(ms) {
+	let _Async$delay = function(ms = 1) {
 		return new Promise(resolve => setTimeout(resolve, ms));
+	};
+
+	let _Function$CancelableContext = class {
+		constructor() {
+			this._canceled = false;
+		}
+
+		get canceled() {
+			return this._canceled;
+		}
+
+		cancel() {
+			this._canceled = true;
+		}
+
+		throwIfCanceled() {
+			if (this.canceled) {
+				throw new Error('canceled');
+			}
+		}
+
+		async delay(ms) {
+			this.throwIfCanceled();
+			await _Async$delay(ms);
+			this.throwIfCanceled();
+		}
+	};
+
+	let _Function$makeLastCancelable = function(fn) {
+		let context = null;
+		return function(...args) {
+			if (context) {
+				context.cancel();
+			}
+			return fn.call(this, context = new _Function$CancelableContext(), ...args);
+		};
 	};
 
 	let _Array$uniqueBy = function(array, iteratee) {
@@ -74,15 +110,15 @@
 						height: '100%',
 						overflow: 'hidden',
 					},
-				}, this.wordItems.map(item =>
+				}, this.wordNodes.map(node =>
 					createElement('div', {
-						key: item.text,
+						key: node.text,
 						style: Object.assign({
 							position: 'absolute',
 							whiteSpace: 'nowrap',
 							transition: 'all 1s',
-						}, item.style),
-					}, item.text)
+						}, node.style),
+					}, node.text)
 				))
 			);
 		},
@@ -125,12 +161,12 @@
 				default: 'serif',
 			},
 
-			fontVariant: {
+			fontStyle: {
 				type: [String, Function],
 				default: 'normal',
 			},
 
-			fontStyle: {
+			fontVariant: {
 				type: [String, Function],
 				default: 'normal',
 			},
@@ -144,7 +180,8 @@
 		data() {
 			return {
 				elProps: {width: 0, height: 0},
-				wordItems: [],
+				wordNodes: [],
+				animatedWordNodes: [],
 			};
 		},
 
@@ -155,7 +192,7 @@
 		computed: {
 			normalizedWords() {
 				return this.words.map(word => {
-					let text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight;
+					let text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight;
 					if (word) {
 						switch (typeof word) {
 							case 'string': {
@@ -164,9 +201,9 @@
 							}
 							case 'object': {
 								if (Array.isArray(word)) {
-									([text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight] = word);
+									([text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight] = word);
 								} else {
-									({text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight} = word);
+									({text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight} = word);
 								}
 								break;
 							}
@@ -207,18 +244,18 @@
 							fontFamily = this.fontFamily;
 						}
 					}
-					if (fontVariant === undefined) {
-						if (typeof this.fontVariant === 'function') {
-							fontVariant = this.fontVariant(word);
-						} else {
-							fontVariant = this.fontVariant;
-						}
-					}
 					if (fontStyle === undefined) {
 						if (typeof this.fontStyle === 'function') {
 							fontStyle = this.fontStyle(word);
 						} else {
 							fontStyle = this.fontStyle;
+						}
+					}
+					if (fontVariant === undefined) {
+						if (typeof this.fontVariant === 'function') {
+							fontVariant = this.fontVariant(word);
+						} else {
+							fontVariant = this.fontVariant;
 						}
 					}
 					if (fontWeight === undefined) {
@@ -228,34 +265,37 @@
 							fontWeight = this.fontWeight;
 						}
 					}
-					return {text, weight, color, rotation, fontFamily, fontVariant, fontStyle, fontWeight};
+					return {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight};
 				});
 			},
 
-			promisedWordItems() {
-				return this.promisifyWordItems();
+			promisedWordNodes() {
+				return this.computeWordNodes();
 			},
 
-			promisifyWordItems() {
-				let outerToken;
-				return function() {
-					let innerToken = (outerToken = {});
-					let canceled = function() {
-						return innerToken !== outerToken;
-					};
-					return this.computeWordItems(canceled);
-				};
+			computeWordNodes() {
+				return _Function$makeLastCancelable(this._computeWordNodes);
+			},
+
+			animateWordNodes() {
+				return _Function$makeLastCancelable(this._animateWordNodes);
 			},
 		},
 
 		watch: {
-			promisedWordItems: {
+			promisedWordNodes: {
 				async handler(promise) {
 					try {
-						this.wordItems = await promise;
+						this.wordNodes = await promise;
 					} catch (error) {}
 				},
 				immediate: true,
+			},
+
+			wordNodes(newWordNodes, oldWordNodes) {
+				try {
+					this.animateWordNodes(newWordNodes, oldWordNodes);
+				} catch (error) {}
 			},
 		},
 
@@ -271,7 +311,7 @@
 				}, 1000);
 			},
 
-			computeWordItems: (function() {
+			_computeWordNodes: (function() {
 
 				let _getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
 					await document.fonts.load(`16px ${fontFamily}`,  'a');
@@ -301,23 +341,18 @@
 					return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 				};
 
-				return async function(canceled) {
+				return async function(context) {
 					let containerWidth = this.elProps.width;
 					let containerHeight = this.elProps.height;
 					let words = this.normalizedWords;
 
-					let throwIfCanceled = function() {
-						if (canceled()) {
-							throw new Error();
-						}
-					};
-
-					await _Async$delay(1);
-					throwIfCanceled();
+					await context.delay();
 
 					words = words.filter(({weight}) => weight > 0);
 					words = _Array$uniqueBy(words, ({text}) => text);
 					words.sort((word, otherWord) => otherWord.weight - word.weight);
+
+					await context.delay();
 
 					{
 						let minWeight = _Iterable$minOf(words, ({weight}) => weight);
@@ -329,8 +364,7 @@
 						}
 					}
 
-					await _Async$delay(1);
-					throwIfCanceled();
+					await context.delay();
 
 					{
 						let out = [];
@@ -431,7 +465,7 @@
 							let gridHeight = Math.floor(gridResolution / gridWidth);
 							worker.postMessage({gridWidth, gridHeight});
 							for (let word of words) {
-								throwIfCanceled();
+								context.throwIfCanceled();
 								try {
 									let {text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
 									let rotationRad = _Math$convertTurnToRad(rotation);
@@ -448,8 +482,7 @@
 						words = out;
 					}
 
-					await _Async$delay(1);
-					throwIfCanceled();
+					await context.delay();
 
 					{
 						let minLeft = _Iterable$minOf(words, ({rectLeft}) => rectLeft);
@@ -473,8 +506,7 @@
 						}
 					}
 
-					await _Async$delay(1);
-					throwIfCanceled();
+					await context.delay();
 
 					return words.map(({rectLeft, rectTop, rectWidth, rectHeight, text, textWidth, textHeight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
 						text,
@@ -489,6 +521,18 @@
 				};
 			})(),
 
+			async _animateWordNodes(context, newWordNodes, oldWordNodes) {
+				let wordNodesToInsert = [];
+				let wordNodesToRemove = [];
+				let wordNodesToUpdate = [];
+
+				await context.delay();
+
+				let duration = 1000;
+
+
+				let delay = 1;
+			},
 		},
 	};
 
