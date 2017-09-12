@@ -36,8 +36,8 @@ Include the code in your page via a CDN.
 ```html
 
 <vue-word-cloud
-  :words="[['a', 12], ['b', 5], ['c', 5], ['d', 1]]"
-  :color="([, weight]) => weight > 6 ? 'DeepPink' : weight > 3 ? 'RoyalBlue' : 'Indigo'"
+  :words="[['romance', 19], ['horror', 3], ['fantasy', 7], ['adventure', 3]]"
+  :color="([, weight]) => weight > 10 ? 'DeepPink' : weight > 5 ? 'RoyalBlue' : 'Indigo'"
   font-family="Roboto"
 ></vue-word-cloud>
 

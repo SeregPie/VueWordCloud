@@ -6,14 +6,14 @@
 	}
 }).call(this, function(Vue) {
 
-	let _Worker$fromFunction = function(f) {
+	let Worker_fromFunction = function(f) {
 		let code = `(${f.toString()})()`;
 		let blob = new Blob([code]);
 		let blobURL = URL.createObjectURL(blob);
 		return new Worker(blobURL);
 	};
 
-	let _Worker$getMessage = function(worker) {
+	let Worker_getMessage = function(worker) {
 		return new Promise((resolve, reject) => {
 			worker.addEventListener('message', function(event) {
 				event.preventDefault();
@@ -26,11 +26,11 @@
 		});
 	};
 
-	let _Async$delay = function(ms = 1) {
+	let Async_delay = function(ms = 1) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let _Function$CancelableContext = class {
+	let Function_CancelableContext = class {
 		constructor() {
 			this._canceled = false;
 		}
@@ -51,22 +51,22 @@
 
 		async delay(ms) {
 			this.throwIfCanceled();
-			await _Async$delay(ms);
+			await Async_delay(ms);
 			this.throwIfCanceled();
 		}
 	};
 
-	let _Function$makeLastCancelable = function(fn) {
+	let Function_makeLastCancelable = function(fn) {
 		let context = null;
 		return function(...args) {
 			if (context) {
 				context.cancel();
 			}
-			return fn.call(this, context = new _Function$CancelableContext(), ...args);
+			return fn.call(this, context = new Function_CancelableContext(), ...args);
 		};
 	};
 
-	let _Array$uniqueBy = function(array, iteratee) {
+	let Array_uniqueBy = function(array, iteratee) {
 		let uniqueValues = new Set();
 		return array.filter(value => {
 			value = iteratee(value);
@@ -78,7 +78,7 @@
 		});
 	};
 
-	let _Iterable$minOf = function(values, iteratee) {
+	let Iterable_minOf = function(values, iteratee) {
 		let returns = Infinity;
 		for (let value of values) {
 			returns = Math.min(iteratee(value), returns);
@@ -86,7 +86,7 @@
 		return returns;
 	};
 
-	let _Iterable$maxOf = function(values, iteratee) {
+	let Iterable_maxOf = function(values, iteratee) {
 		let returns = -Infinity;
 		for (let value of values) {
 			returns = Math.max(iteratee(value), returns);
@@ -94,7 +94,7 @@
 		return returns;
 	};
 
-	let _Math$convertTurnToRad = function(v) {
+	let Math_convertTurnToRad = function(v) {
 		return v * 2 * Math.PI;
 	};
 
@@ -175,18 +175,23 @@
 				type: [String, Function],
 				default: 'normal',
 			},
+
+			animationDuration: {
+				type: Number,
+				default: 1000,
+			},
 		},
 
 		data() {
 			return {
-				elProps: {width: 0, height: 0},
+				elementProperties: {width: 0, height: 0},
 				wordNodes: [],
 				animatedWordNodes: [],
 			};
 		},
 
 		mounted() {
-			this.updateElProps();
+			this.updateElementProperties();
 		},
 
 		computed: {
@@ -274,11 +279,11 @@
 			},
 
 			computeWordNodes() {
-				return _Function$makeLastCancelable(this._computeWordNodes);
+				return Function_makeLastCancelable(this._computeWordNodes);
 			},
 
 			animateWordNodes() {
-				return _Function$makeLastCancelable(this._animateWordNodes);
+				return Function_makeLastCancelable(this._animateWordNodes);
 			},
 		},
 
@@ -300,14 +305,14 @@
 		},
 
 		methods: {
-			updateElProps() {
+			updateElementProperties() {
 				if (this.$el) {
 					let {width, height} = this.$el.getBoundingClientRect();
-					this.elProps.width = width;
-					this.elProps.height = height;
+					this.elementProperties.width = width;
+					this.elementProperties.height = height;
 				}
 				setTimeout(() => {
-					this.updateElProps();
+					this.updateElementProperties();
 				}, 1000);
 			},
 
@@ -342,20 +347,20 @@
 				};
 
 				return async function(context) {
-					let containerWidth = this.elProps.width;
-					let containerHeight = this.elProps.height;
+					let containerWidth = this.elementProperties.width;
+					let containerHeight = this.elementProperties.height;
 					let words = this.normalizedWords;
 
 					await context.delay();
 
 					words = words.filter(({weight}) => weight > 0);
-					words = _Array$uniqueBy(words, ({text}) => text);
+					words = Array_uniqueBy(words, ({text}) => text);
 					words.sort((word, otherWord) => otherWord.weight - word.weight);
 
 					await context.delay();
 
 					{
-						let minWeight = _Iterable$minOf(words, ({weight}) => weight);
+						let minWeight = Iterable_minOf(words, ({weight}) => weight);
 						let minFontSize = 2;
 						for (let word of words) {
 							let {weight} = word;
@@ -368,7 +373,7 @@
 
 					{
 						let out = [];
-						let worker = _Worker$fromFunction(function() {
+						let worker = Worker_fromFunction(function() {
 							self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
 								let gridData = Array(gridWidth * gridHeight).fill(0);
 
@@ -468,10 +473,10 @@
 								context.throwIfCanceled();
 								try {
 									let {text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
-									let rotationRad = _Math$convertTurnToRad(rotation);
+									let rotationRad = Math_convertTurnToRad(rotation);
 									let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await _getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotationRad);
 									worker.postMessage({rectWidth, rectHeight, rectData});
-									let {rectLeft, rectTop} = await _Worker$getMessage(worker);
+									let {rectLeft, rectTop} = await Worker_getMessage(worker);
 									Object.assign(word, {rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
 									out.push(word);
 								} catch (error) {}
@@ -485,12 +490,12 @@
 					await context.delay();
 
 					{
-						let minLeft = _Iterable$minOf(words, ({rectLeft}) => rectLeft);
-						let maxLeft = _Iterable$maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+						let minLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
+						let maxLeft = Iterable_maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
 						let cloudWidth = maxLeft - minLeft;
 
-						let minTop = _Iterable$minOf(words, ({rectTop}) => rectTop);
-						let maxTop = _Iterable$maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
+						let minTop = Iterable_minOf(words, ({rectTop}) => rectTop);
+						let maxTop = Iterable_maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
 						let cloudHeight = maxTop - minTop;
 
 						let scale = Math.min(containerWidth / cloudWidth, containerHeight / cloudHeight);

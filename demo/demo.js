@@ -87,12 +87,8 @@
 		console.log(error);
 	}*/
 
-	let _randomInt = function(start, end) {
-		return Math.floor(start + (end - start) * Math.random());
-	};
-
 	let _sample = function(array) {
-		return array[_randomInt(0, array.length)];
+		return array[Math.floor(array.length * Math.random())];
 	};
 
 	let _sampleN = function(array, n) {
@@ -102,9 +98,9 @@
 
 
 	let words = [
-		['astronomy', 14],
+		['astronomy', 15],
 		...['Hydra', 'Virgo', 'Ursa Major', 'Cetus', 'Hercules', 'Eridanus', 'Pegasus', 'Draco', 'Centaurus', 'Aquarius', 'Ophiuchus', 'Leo', 'Great Void', 'Pisces', 'Sagittarius', 'Cygnus', 'Taurus', 'Camelopardalis', 'Andromeda', 'Puppis', 'Auriga', 'Aquila'].map(text => [text, 7]),
-		...['Serpens', 'Perseus', 'Cassiopeia', 'Orion', 'Cepheus', 'Lynx', 'Libra', 'Gemini', 'Cancer', 'Vela', 'Scorpius', 'Carina', 'Monoceros', 'Sculptor', 'Phoenix', 'Canes Venatici', 'Aries', 'Capricornus', 'Fornax', 'Coma Berenices', 'Canis Major', 'Pavo'].map(text => [text, 5]),
+		...['Serpens', 'Perseus', 'Cassiopeia', 'Orion', 'Cepheus', 'Lynx', 'Libra', 'Gemini', 'Cancer', 'Vela', 'Scorpius', 'Carina', 'Monoceros', 'Sculptor', 'Phoenix', 'Canes Venatici', 'Aries', 'Capricornus', 'Fornax', 'Coma Berenices', 'Canis Major', 'Pavo'].map(text => [text, 4]),
 		...['Grus', 'Microscopium', 'Lupus', 'Sextans', 'Tucana', 'Indus', 'Octans', 'Lepus', 'Lyra', 'Crater', 'Columba', 'Vulpecula', 'Ursa Minor', 'Telescopium', 'Horologium', 'Pictor', 'Piscis Austrinus', 'Hydrus', 'Antlia', 'Ara', 'Leo Minor', 'Pyxis'].map(text => [text, 3]),
 		...['Apus', 'Lacerta', 'Delphinus', 'Corvus', 'Canis Minor', 'Dorado', 'Corona Borealis', 'Norma', 'Mensa', 'Volans', 'Musca', 'Triangulum', 'Chamaeleon', 'Corona Australis', 'Caelum', 'Reticulum', 'Triangulum Australe', 'Scutum', 'Circinus', 'Sagitta', 'Equuleus', 'Crux'].map(text => [text, 2]),
 	];
@@ -168,7 +164,7 @@
 					.split(/[\r\n]+/)
 					.map(line => /^(.+)\s+(\d+)$/.exec(line))
 					.filter(matched => matched)
-					.map(([_, text, size]) => [text, parseInt(size)]);
+					.map(([, text, size]) => [text, parseInt(size)]);
 			},
 		},
 	});

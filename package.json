@@ -8,9 +8,13 @@
 		"url": "git+https://github.com/SeregPie/VueWordCloud.git"
 	},
 	"keywords": [
-		"vue",
+		"cloud",
 		"component",
-		"wordcloud"
+		"draw",
+		"key",
+		"tag",
+		"vue",
+		"word"
 	],
 	"author": "Sergej Sintschilin",
 	"license": "MIT",
