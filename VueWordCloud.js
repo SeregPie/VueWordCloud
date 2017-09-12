@@ -110,15 +110,20 @@
 						height: '100%',
 						overflow: 'hidden',
 					},
-				}, this.animatedWordNodes.map(node =>
+				}, this.animatedBoundedWords.map(word =>
 					createElement('div', {
-						key: node.text,
-						style: Object.assign({
+						key: word.text,
+						style: {
 							position: 'absolute',
+							left: `${word.rectLeft + word.rectWidth / 2 - word.textWidth / 2}px`,
+							top: `${word.rectTop + word.rectHeight / 2}px`,
+							color: word.color,
+							font: [word.fontStyle, word.fontVariant, word.fontWeight, `${word.fontSize}px/0`, word.fontFamily].join(' '),
+							transform: `rotate(${word.rotation}turn)`,
 							whiteSpace: 'nowrap',
 							transition: 'all 1s',
-						}, node.style),
-					}, node.text)
+						},
+					}, word.text)
 				))
 			);
 		},
@@ -184,19 +189,21 @@
 
 		data() {
 			return {
-				elementProperties: {width: 0, height: 0},
-				wordNodes: [],
-				animatedWordNodes: [],
+				elProps: {width: 0, height: 0},
+				boundedWords: [],
+				animatedBoundedWords: [],
 			};
 		},
 
 		mounted() {
-			this.updateElementProperties();
+			this.updateElProps();
 		},
 
 		computed: {
 			normalizedWords() {
-				return this.words.map(word => {
+				let words = this.words;
+
+				words = words.map(word => {
 					let text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight;
 					if (word) {
 						switch (typeof word) {
@@ -272,53 +279,66 @@
 					}
 					return {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight};
 				});
+
+				words = words.filter(({weight}) => weight > 0);
+
+				words = Array_uniqueBy(words, ({text}) => text);
+
+				words.sort((word, otherWord) => otherWord.weight - word.weight);
+
+				let minWeight = Iterable_minOf(words, ({weight}) => weight);
+				for (let word of words) {
+					word.weight /= minWeight;
+				}
+
+				return words;
 			},
 
-			promisedWordNodes() {
-				return this.computeWordNodes();
+			promisedBoundedWords() {
+				return this.computeBoundedWords();
 			},
 
-			computeWordNodes() {
-				return Function_makeLastCancelable(this._computeWordNodes);
+			computeBoundedWords() {
+				return Function_makeLastCancelable(this._computeBoundedWords);
 			},
 
-			animateWordNodes() {
-				return Function_makeLastCancelable(this._animateWordNodes);
+			animateBoundedWords() {
+				return Function_makeLastCancelable(this._animateBoundedWords);
 			},
 		},
 
 		watch: {
-			promisedWordNodes: {
+			promisedBoundedWords: {
 				async handler(promise) {
 					try {
-						this.wordNodes = await promise;
+						this.boundedWords = await promise;
 					} catch (error) {}
 				},
 				immediate: true,
 			},
 
-			async wordNodes(value) {
+			async boundedWords(value) {
 				try {
-					await this.animateWordNodes(value);
+					await this.animateBoundedWords(value);
 				} catch (error) {}
 			},
 		},
 
 		methods: {
-			updateElementProperties() {
+			updateElProps() {
 				if (this.$el) {
 					let {width, height} = this.$el.getBoundingClientRect();
-					this.elementProperties.width = width;
-					this.elementProperties.height = height;
+					this.elProps.width = width;
+					this.elProps.height = height;
 				}
 				setTimeout(() => {
-					this.updateElementProperties();
+					this.updateElProps();
 				}, 1000);
 			},
 
-			_computeWordNodes: (function() {
+			_computeBoundedWords: (function() {
 
-				let _getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
+				let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
 					await document.fonts.load(`16px ${fontFamily}`,  'a');
 					let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 					let ctx = document.createElement('canvas').getContext('2d');
@@ -346,26 +366,112 @@
 					return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 				};
 
+				let workerContent = function() {
+					self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
+						let gridData = Array(gridWidth * gridHeight).fill(0);
+
+						self.addEventListener('message', function({data: {rectWidth, rectHeight, rectData}}) {
+							let occupiedPixels = [];
+							for (let x = 0; x < rectWidth; ++x) {
+								for (let y = 0; y < rectHeight; ++y) {
+									if (rectData[rectWidth * y + x]) {
+										occupiedPixels.push([x, y]);
+									}
+								}
+							}
+							self.postMessage((function() {
+								for (let [positionX, positionY] of (function*(rectWidth, rectHeight) {
+									let stepX, stepY;
+									if (rectWidth > rectHeight) {
+										stepX = 1;
+										stepY = rectHeight / rectWidth;
+									} else
+									if (rectHeight > rectWidth) {
+										stepY = 1;
+										stepX = rectWidth / rectHeight;
+									} else {
+										stepX = stepY = 1;
+									}
+									let startX = Math.floor(rectWidth / 2);
+									let startY = Math.floor(rectHeight / 2);
+									let endX = startX - 1;
+									let endY = startY - 1;
+									let b = true;
+									while (b) {
+										b = false;
+										if (endX < rectWidth - 1) {
+											endX++;
+											for (let i = startY; i <= endY; i++) {
+												yield [endX, i];
+											}
+											b = true;
+										}
+										if (endY < rectHeight - 1) {
+											//reverse
+											endY++;
+											for (let i = startX; i <= endX; i++) {
+												yield [i, endY];
+											}
+											b = true;
+										}
+										if (startX > 0) {
+											//reverse
+											startX--;
+											for (let i = startY; i <= endY; i++) {
+												yield [startX, i];
+											}
+											b = true;
+										}
+										if (startY > 0) {
+											startY--;
+											for (let i = startX; i <= endX; i++) {
+												yield [i, startY];
+											}
+											b = true;
+										}
+									}
+								})(gridWidth - rectWidth, gridHeight - rectHeight)) {
+									if ((function() {
+										let occupiedGridPixels = [];
+										for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
+											let occupiedGridPixelX = positionX + occupiedPixelX;
+											let occupiedGridPixelY = positionY + occupiedPixelY;
+											if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridWidth && occupiedGridPixelY < gridHeight) {
+												if (gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX]) {
+													return false;
+												}
+												occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
+											}
+										}
+										for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
+											gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX] = true;
+										}
+										return true;
+									})()) {
+										return {rectLeft: positionX, rectTop: positionY};
+									}
+								}
+								throw new Error();
+							})());
+						});
+
+					}, {once: true});
+				};
+
 				return async function(context) {
-					let containerWidth = this.elementProperties.width;
-					let containerHeight = this.elementProperties.height;
-					let words = this.normalizedWords;
-
-					await context.delay();
-
-					words = words.filter(({weight}) => weight > 0);
-					words = Array_uniqueBy(words, ({text}) => text);
-					words.sort((word, otherWord) => otherWord.weight - word.weight);
+					let containerWidth = this.elProps.width;
+					let containerHeight = this.elProps.height;
+					if (containerWidth < 1 && containerHeight < 1) {
+						return [];
+					}
+					let words = this.normalizedWords.map(word => Object.assign({}, word));
 
 					await context.delay();
 
 					{
-						let minWeight = Iterable_minOf(words, ({weight}) => weight);
 						let minFontSize = 2;
 						for (let word of words) {
-							let {weight} = word;
-							let fontSize = weight / minWeight * minFontSize;
-							Object.assign(word, {fontSize});
+							word.fontSize = word.weight * minFontSize;
 						}
 					}
 
@@ -373,97 +479,7 @@
 
 					{
 						let out = [];
-						let worker = Worker_fromFunction(function() {
-							self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
-								let gridData = Array(gridWidth * gridHeight).fill(0);
-
-								self.addEventListener('message', function({data: {rectWidth, rectHeight, rectData}}) {
-									let occupiedPixels = [];
-									for (let x = 0; x < rectWidth; ++x) {
-										for (let y = 0; y < rectHeight; ++y) {
-											if (rectData[rectWidth * y + x]) {
-												occupiedPixels.push([x, y]);
-											}
-										}
-									}
-									self.postMessage((function() {
-										for (let [positionX, positionY] of (function*(rectWidth, rectHeight) {
-											let stepX, stepY;
-											if (rectWidth > rectHeight) {
-												stepX = 1;
-												stepY = rectHeight / rectWidth;
-											} else
-											if (rectHeight > rectWidth) {
-												stepY = 1;
-												stepX = rectWidth / rectHeight;
-											} else {
-												stepX = stepY = 1;
-											}
-											let startX = Math.floor(rectWidth / 2);
-											let startY = Math.floor(rectHeight / 2);
-											let endX = startX - 1;
-											let endY = startY - 1;
-											let b = true;
-											while (b) {
-												b = false;
-												if (endX < rectWidth - 1) {
-													endX++;
-													for (let i = startY; i <= endY; i++) {
-														yield [endX, i];
-													}
-													b = true;
-												}
-												if (endY < rectHeight - 1) {
-													//reverse
-													endY++;
-													for (let i = startX; i <= endX; i++) {
-														yield [i, endY];
-													}
-													b = true;
-												}
-												if (startX > 0) {
-													//reverse
-													startX--;
-													for (let i = startY; i <= endY; i++) {
-														yield [startX, i];
-													}
-													b = true;
-												}
-												if (startY > 0) {
-													startY--;
-													for (let i = startX; i <= endX; i++) {
-														yield [i, startY];
-													}
-													b = true;
-												}
-											}
-										})(gridWidth - rectWidth, gridHeight - rectHeight)) {
-											if ((function() {
-												let occupiedGridPixels = [];
-												for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
-													let occupiedGridPixelX = positionX + occupiedPixelX;
-													let occupiedGridPixelY = positionY + occupiedPixelY;
-													if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridWidth && occupiedGridPixelY < gridHeight) {
-														if (gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX]) {
-															return false;
-														}
-														occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
-													}
-												}
-												for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
-													gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX] = true;
-												}
-												return true;
-											})()) {
-												return {rectLeft: positionX, rectTop: positionY};
-											}
-										}
-										throw new Error();
-									})());
-								});
-
-							}, {once: true});
-						});
+						let worker = Worker_fromFunction(workerContent);
 						try {
 							let gridResolution = Math.pow(2, 22);
 							let gridWidth = Math.floor(Math.sqrt(containerWidth / containerHeight * gridResolution));
@@ -474,7 +490,7 @@
 								try {
 									let {text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
 									let rotationRad = Math_convertTurnToRad(rotation);
-									let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await _getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotationRad);
+									let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotationRad);
 									worker.postMessage({rectWidth, rectHeight, rectData});
 									let {rectLeft, rectTop} = await Worker_getMessage(worker);
 									Object.assign(word, {rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
@@ -513,37 +529,28 @@
 
 					await context.delay();
 
-					return words.map(({rectLeft, rectTop, rectWidth, rectHeight, text, textWidth, textHeight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation}) => ({
-						text,
-						style: {
-							left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
-							top: `${rectTop + rectHeight / 2}px`,
-							color,
-							font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/0`, fontFamily].join(' '),
-							transform: `rotate(${rotation}turn)`,
-						},
-					}));
+					return words;
 				};
 			})(),
 
-			async _animateWordNodes(context, wordNodes) {
-				let oldWordNodes = this.animatedWordNodes;
-				let newWordNodes = wordNodes.slice();
+			async _animateBoundedWords(context, boundedWords) {
+				let oldBoundedWords = this.animatedBoundedWords;
+				let newBoundedWords = boundedWords.slice();
 				let duration = 1000;
-				let delay = duration / Math.max(oldWordNodes.length, newWordNodes.length);
-				for (let oldIndex = oldWordNodes.length; oldIndex-- > 0;) {
+				let delay = duration / Math.max(oldBoundedWords.length, newBoundedWords.length);
+				for (let oldIndex = oldBoundedWords.length; oldIndex-- > 0;) {
 					await context.delay(delay);
-					let oldWordNode = oldWordNodes[oldIndex];
-					let newIndex = newWordNodes.findIndex(newWordNode => newWordNode.text === oldWordNode.text);
+					let oldBoundedWord = oldBoundedWords[oldIndex];
+					let newIndex = newBoundedWords.findIndex(newBoundedWord => newBoundedWord.text === oldBoundedWord.text);
 					if (newIndex < 0) {
-						oldWordNodes.splice(oldIndex, 1);
+						oldBoundedWords.splice(oldIndex, 1);
 					} else {
-						oldWordNodes.splice(oldIndex, 1, ...newWordNodes.splice(newIndex, 1));
+						oldBoundedWords.splice(oldIndex, 1, ...newBoundedWords.splice(newIndex, 1));
 					}
 				}
-				for (let newWord of newWordNodes) {
+				for (let newWord of newBoundedWords) {
 					await context.delay(delay);
-					oldWordNodes.push(newWord);
+					oldBoundedWords.push(newWord);
 				}
 			},
 		},
