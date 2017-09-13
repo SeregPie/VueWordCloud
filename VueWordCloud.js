@@ -199,11 +199,13 @@
 			this.updateElProps();
 		},
 
+		activated() {
+			this.updateElProps();
+		},
+
 		computed: {
 			normalizedWords() {
-				let words = this.words;
-
-				words = words.map(word => {
+				let words = this.words.map(word => {
 					let text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight;
 					if (word) {
 						switch (typeof word) {
@@ -280,6 +282,7 @@
 					return {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight};
 				});
 
+				words = words.filter(({text}) => text);
 				words = words.filter(({weight}) => weight > 0);
 
 				words = Array_uniqueBy(words, ({text}) => text);
@@ -347,7 +350,7 @@
 					let textHeight = fontSize;
 					let rectWidth = Math.ceil((textWidth * Math.abs(Math.cos(rotation)) + textHeight * Math.abs(Math.sin(rotation))));
 					let rectHeight = Math.ceil((textWidth * Math.abs(Math.sin(rotation)) + textHeight * Math.abs(Math.cos(rotation))));
-					let rectData = new Int8Array(rectWidth * rectHeight);
+					let rectData = new Uint8Array(rectWidth * rectHeight);
 					if (rectData.length > 0) {
 						let ctx = document.createElement('canvas').getContext('2d');
 						ctx.canvas.width = rectWidth;
@@ -368,7 +371,7 @@
 
 				let workerContent = function() {
 					self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
-						let gridData = Array(gridWidth * gridHeight).fill(0);
+						let gridData = new Uint8Array(gridWidth * gridHeight);
 
 						self.addEventListener('message', function({data: {rectWidth, rectHeight, rectData}}) {
 							let occupiedPixels = [];
@@ -536,8 +539,7 @@
 			async _animateBoundedWords(context, boundedWords) {
 				let oldBoundedWords = this.animatedBoundedWords;
 				let newBoundedWords = boundedWords.slice();
-				let duration = 1000;
-				let delay = duration / Math.max(oldBoundedWords.length, newBoundedWords.length);
+				let delay = this.animationDuration / Math.max(oldBoundedWords.length, newBoundedWords.length) / 2;
 				for (let oldIndex = oldBoundedWords.length; oldIndex-- > 0;) {
 					await context.delay(delay);
 					let oldBoundedWord = oldBoundedWords[oldIndex];
