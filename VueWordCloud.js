@@ -30,6 +30,8 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
+	let Function_noop = function() {};
+
 	let Function_CancelableContext = class {
 		constructor() {
 			this._canceled = false;
@@ -185,22 +187,36 @@
 				type: Number,
 				default: 1000,
 			},
+
+			elPropsUpdateInterval: {
+				type: Number,
+				default: 1000,
+			},
 		},
 
 		data() {
 			return {
-				elProps: {width: 0, height: 0},
+				active: false,
 				boundedWords: [],
 				animatedBoundedWords: [],
+				elProps: {width: 0, height: 0},
 			};
 		},
 
 		mounted() {
-			this.updateElProps();
+			this.active = true;
 		},
 
 		activated() {
-			this.updateElProps();
+			this.active = true;
+		},
+
+		destroyed() {
+			this.active = false;
+		},
+
+		deactivated() {
+			this.active = false;
 		},
 
 		computed: {
@@ -308,6 +324,19 @@
 			animateBoundedWords() {
 				return Function_makeLastCancelable(this._animateBoundedWords);
 			},
+
+			elPropsUpdateTimer() {
+				if (this.active) {
+					let id;
+					return function() {
+						clearTimeout(id);
+						id = setTimeout(this.elPropsUpdateTimer, this.elPropsUpdateInterval);
+						this.updateElProps();
+					}.bind(this);
+				} else {
+					return Function_noop;
+				}
+			},
 		},
 
 		watch: {
@@ -325,6 +354,10 @@
 					await this.animateBoundedWords(value);
 				} catch (error) {}
 			},
+
+			elPropsUpdateTimer(timer) {
+				timer();
+			},
 		},
 
 		methods: {
@@ -334,9 +367,6 @@
 					this.elProps.width = width;
 					this.elProps.height = height;
 				}
-				setTimeout(() => {
-					this.updateElProps();
-				}, 1000);
 			},
 
 			_computeBoundedWords: (function() {
