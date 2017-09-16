@@ -6,27 +6,35 @@
 	}
 }).call(this, function(Vue) {
 
-	let Worker_fromFunction = function(f) {
-		let code = `(${f.toString()})()`;
+	let Worker_fromFunction = function(fn) {
+		let code = `(${fn.toString()})()`;
 		let blob = new Blob([code]);
 		let blobURL = URL.createObjectURL(blob);
 		return new Worker(blobURL);
 	};
 
 	let Worker_getMessage = function(worker) {
-		return new Promise((resolve, reject) => {
-			worker.addEventListener('message', function(event) {
-				event.preventDefault();
+		return new Promise(function(resolve, reject) {
+			let cleanUp;
+			let messageHandler = function(event) {
+				cleanUp(event);
 				resolve(event.data);
-			}, {once: true});
-			worker.addEventListener('error', function(event) {
-				event.preventDefault();
+			};
+			let errorHandler = function(event) {
+				cleanUp(event);
 				reject(event);
-			}, {once: true});
+			};
+			cleanUp = function(event) {
+				event.preventDefault();
+				worker.removeEventListener('message', messageHandler);
+				worker.removeEventListener('error', errorHandler);
+			};
+			worker.addEventListener('message', messageHandler);
+			worker.addEventListener('error', errorHandler);
 		});
 	};
 
-	let Async_delay = function(ms = 1) {
+	let Promise_delay = function(ms = 1) {
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
@@ -53,12 +61,12 @@
 
 		async delay(ms) {
 			this.throwIfCanceled();
-			await Async_delay(ms);
+			await Promise_delay(ms);
 			this.throwIfCanceled();
 		}
 	};
 
-	let Function_makeLastCancelable = function(fn) {
+	let Function_withCancelableContext = function(fn) {
 		let context = null;
 		return function(...args) {
 			if (context) {
@@ -67,6 +75,7 @@
 			return fn.call(this, context = new Function_CancelableContext(), ...args);
 		};
 	};
+	//Function_makeLastCancelable
 
 	let Array_uniqueBy = function(array, iteratee) {
 		let uniqueValues = new Set();
@@ -318,11 +327,11 @@
 			},
 
 			computeBoundedWords() {
-				return Function_makeLastCancelable(this._computeBoundedWords);
+				return Function_withCancelableContext(this._computeBoundedWords);
 			},
 
 			animateBoundedWords() {
-				return Function_makeLastCancelable(this._animateBoundedWords);
+				return Function_withCancelableContext(this._animateBoundedWords);
 			},
 
 			elPropsUpdateTimer() {
