@@ -66,7 +66,7 @@
 		}
 	};
 
-	let Function_withCancelableContext = function(fn) {
+	let Function_makeLastCancelable = function(fn) {
 		let context = null;
 		return function(...args) {
 			if (context) {
@@ -75,7 +75,6 @@
 			return fn.call(this, context = new Function_CancelableContext(), ...args);
 		};
 	};
-	//Function_makeLastCancelable
 
 	let Array_uniqueBy = function(array, iteratee) {
 		let uniqueValues = new Set();
@@ -113,30 +112,7 @@
 
 	return {
 		render(createElement) {
-			return(
-				createElement('div', {
-					style: {
-						position: 'relative',
-						width: '100%',
-						height: '100%',
-						overflow: 'hidden',
-					},
-				}, this.animatedBoundedWords.map(word =>
-					createElement('div', {
-						key: word.text,
-						style: {
-							position: 'absolute',
-							left: `${word.rectLeft + word.rectWidth / 2 - word.textWidth / 2}px`,
-							top: `${word.rectTop + word.rectHeight / 2}px`,
-							color: word.color,
-							font: [word.fontStyle, word.fontVariant, word.fontWeight, `${word.fontSize}px/0`, word.fontFamily].join(' '),
-							transform: `rotate(${word.rotation}turn)`,
-							whiteSpace: 'nowrap',
-							transition: 'all 1s',
-						},
-					}, word.text)
-				))
-			);
+			return this.renderer(createElement);
 		},
 
 		props: {
@@ -229,6 +205,10 @@
 		},
 
 		computed: {
+			renderer() {
+				return this.domRenderer;
+			},
+
 			normalizedWords() {
 				let words = this.words.map(word => {
 					let text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight;
@@ -327,11 +307,11 @@
 			},
 
 			computeBoundedWords() {
-				return Function_withCancelableContext(this._computeBoundedWords);
+				return Function_makeLastCancelable(this._computeBoundedWords);
 			},
 
 			animateBoundedWords() {
-				return Function_withCancelableContext(this._animateBoundedWords);
+				return Function_makeLastCancelable(this._animateBoundedWords);
 			},
 
 			elPropsUpdateTimer() {
@@ -370,6 +350,41 @@
 		},
 
 		methods: {
+			domRenderer(createElement) {
+				return(
+					createElement('div', {
+						style: {
+							position: 'relative',
+							width: '100%',
+							height: '100%',
+							overflow: 'hidden',
+						},
+					}, this.animatedBoundedWords.map(word =>
+						createElement('div', {
+							key: word.text,
+							style: {
+								position: 'absolute',
+								left: `${word.rectLeft + word.rectWidth / 2 - word.textWidth / 2}px`,
+								top: `${word.rectTop + word.rectHeight / 2}px`,
+								color: word.color,
+								font: [word.fontStyle, word.fontVariant, word.fontWeight, `${word.fontSize}px/0`, word.fontFamily].join(' '),
+								transform: `rotate(${word.rotation}turn)`,
+								whiteSpace: 'nowrap',
+								transition: 'all 1s',
+							},
+						}, word.text)
+					))
+				);
+			},
+
+			canvasRenderer(createElement) {
+				// todo?
+			},
+
+			svgRenderer(createElement) {
+				// todo?
+			},
+
 			updateElProps() {
 				if (this.$el) {
 					let {width, height} = this.$el.getBoundingClientRect();
@@ -409,6 +424,10 @@
 				};
 
 				let workerContent = function() {
+					let rectangleIterator = function*(startX, startY, endX, endY) {
+
+					};
+
 					self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
 						let gridData = new Uint8Array(gridWidth * gridHeight);
 
