@@ -38,9 +38,7 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let Function_noop = function() {};
-
-	let Function_CancelableContext = class {
+	let Promise_CancelableContext = class {
 		constructor() {
 			this._canceled = false;
 		}
@@ -59,12 +57,14 @@
 			}
 		}
 
-		async delay(ms) {
+		async delayIfNotCanceled(ms) {
 			this.throwIfCanceled();
 			await Promise_delay(ms);
 			this.throwIfCanceled();
 		}
 	};
+
+	let Function_noop = function() {};
 
 	let Function_makeLastCancelable = function(fn) {
 		let context = null;
@@ -72,7 +72,7 @@
 			if (context) {
 				context.cancel();
 			}
-			return fn.call(this, context = new Function_CancelableContext(), ...args);
+			return fn.call(this, context = new Promise_CancelableContext(), ...args);
 		};
 	};
 
@@ -424,92 +424,117 @@
 				};
 
 				let workerContent = function() {
-					let rectangleIterator = function*(startX, startY, endX, endY) {
 
+					let rectCenterOutIterator = function*(rectWidth, rectHeight) {
+						if (rectWidth > 0 && rectHeight > 0) {
+
+							let stepLeft, stepTop;
+							if (rectWidth > rectHeight) {
+								stepLeft = 1;
+								stepTop = rectHeight / rectWidth;
+							} else
+							if (rectHeight > rectWidth) {
+								stepTop = 1;
+								stepLeft = rectWidth / rectHeight;
+							} else {
+								stepLeft = stepTop = 1;
+							}
+
+							let startLeft = Math.floor(rectWidth / 2);
+							let startTop = Math.floor(rectHeight / 2);
+							let endLeft = rectWidth - startLeft;
+							let endTop = rectHeight - startTop;
+
+							if (startLeft < endLeft) {
+								for (let left = startLeft; left <= endLeft; ++left) {
+									yield [left, startTop];
+								}
+							} else
+							if (startTop < endTop) {
+								for (let top = startTop; top <= endTop; ++top) {
+									yield [startLeft, top];
+								}
+							}
+
+							let previousStartLeft = startLeft;
+							let previousStartTop = startTop;
+							let previousEndLeft = endLeft;
+							let previousEndTop = endTop;
+
+							while (endLeft < rectWidth || endTop < rectHeight) {
+
+								startLeft -= stepLeft;
+								startTop -= stepTop;
+								endLeft += stepLeft;
+								endTop += stepTop;
+
+								let currentStartLeft = Math.floor(startLeft);
+								let currentStartTop = Math.floor(startTop);
+								let currentEndLeft = Math.ceil(endLeft);
+								let currentEndTop = Math.ceil(endTop);
+
+								if (currentEndLeft > previousEndLeft) {
+									for (let top = currentStartTop; top < currentEndTop; ++top) {
+										yield [currentEndLeft, top];
+									}
+								}
+
+								if (currentEndTop > previousEndTop) {
+									for (let left = currentEndLeft; left > currentStartLeft; --left) {
+										yield [left, currentEndTop];
+									}
+								}
+
+								if (currentStartLeft < previousStartLeft) {
+									for (let top = currentEndTop; top > currentStartTop; --top) {
+										yield [currentStartLeft, top];
+									}
+								}
+
+								if (currentStartTop < previousStartTop) {
+									for (let left = currentStartLeft; left < currentEndLeft; ++left) {
+										yield [left, currentStartTop];
+									}
+								}
+
+								previousStartLeft = currentStartLeft;
+								previousStartTop = currentStartTop;
+								previousEndLeft = currentEndLeft;
+								previousEndTop = currentEndTop;
+							}
+						}
 					};
 
 					self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
 						let gridData = new Uint8Array(gridWidth * gridHeight);
 
 						self.addEventListener('message', function({data: {rectWidth, rectHeight, rectData}}) {
-							let occupiedPixels = [];
-							for (let x = 0; x < rectWidth; ++x) {
-								for (let y = 0; y < rectHeight; ++y) {
-									if (rectData[rectWidth * y + x]) {
-										occupiedPixels.push([x, y]);
+							let occupiedRectPixels = [];
+							for (let left = 0; left < rectWidth; ++left) {
+								for (let top = 0; top < rectHeight; ++top) {
+									if (rectData[rectWidth * top + left]) {
+										occupiedRectPixels.push([left, top]);
 									}
 								}
 							}
 							self.postMessage((function() {
-								for (let [positionX, positionY] of (function*(rectWidth, rectHeight) {
-									let stepX, stepY;
-									if (rectWidth > rectHeight) {
-										stepX = 1;
-										stepY = rectHeight / rectWidth;
-									} else
-									if (rectHeight > rectWidth) {
-										stepY = 1;
-										stepX = rectWidth / rectHeight;
-									} else {
-										stepX = stepY = 1;
-									}
-									let startX = Math.floor(rectWidth / 2);
-									let startY = Math.floor(rectHeight / 2);
-									let endX = startX - 1;
-									let endY = startY - 1;
-									let b = true;
-									while (b) {
-										b = false;
-										if (endX < rectWidth - 1) {
-											endX++;
-											for (let i = startY; i <= endY; i++) {
-												yield [endX, i];
-											}
-											b = true;
-										}
-										if (endY < rectHeight - 1) {
-											//reverse
-											endY++;
-											for (let i = startX; i <= endX; i++) {
-												yield [i, endY];
-											}
-											b = true;
-										}
-										if (startX > 0) {
-											//reverse
-											startX--;
-											for (let i = startY; i <= endY; i++) {
-												yield [startX, i];
-											}
-											b = true;
-										}
-										if (startY > 0) {
-											startY--;
-											for (let i = startX; i <= endX; i++) {
-												yield [i, startY];
-											}
-											b = true;
-										}
-									}
-								})(gridWidth - rectWidth, gridHeight - rectHeight)) {
+								for (let [rectLeft, rectTop] of rectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {
 									if ((function() {
 										let occupiedGridPixels = [];
-										for (let [occupiedPixelX, occupiedPixelY] of occupiedPixels) {
-											let occupiedGridPixelX = positionX + occupiedPixelX;
-											let occupiedGridPixelY = positionY + occupiedPixelY;
-											if (occupiedGridPixelX >= 0 && occupiedGridPixelY >= 0 && occupiedGridPixelX < gridWidth && occupiedGridPixelY < gridHeight) {
-												if (gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX]) {
-													return false;
-												}
-												occupiedGridPixels.push([occupiedGridPixelX, occupiedGridPixelY]);
+										for (let [left, top] of occupiedRectPixels) {
+											left += rectLeft;
+											top += rectTop;
+											if (gridData[gridWidth * top + left]) {
+												return false;
 											}
+											occupiedGridPixels.push([left, top]);
 										}
-										for (let [occupiedGridPixelX, occupiedGridPixelY] of occupiedGridPixels) {
-											gridData[gridWidth * occupiedGridPixelY + occupiedGridPixelX] = true;
+										for (let [left, top] of occupiedGridPixels) {
+											gridData[gridWidth * top + left] = 1;
 										}
 										return true;
 									})()) {
-										return {rectLeft: positionX, rectTop: positionY};
+										return {rectLeft, rectTop};
 									}
 								}
 								throw new Error();
@@ -522,12 +547,12 @@
 				return async function(context) {
 					let containerWidth = this.elProps.width;
 					let containerHeight = this.elProps.height;
-					if (containerWidth < 1 && containerHeight < 1) {
+					if (containerWidth <= 0 || containerHeight <= 0) {
 						return [];
 					}
 					let words = this.normalizedWords.map(word => Object.assign({}, word));
 
-					await context.delay();
+					await context.delayIfNotCanceled();
 
 					{
 						let minFontSize = 2;
@@ -536,7 +561,7 @@
 						}
 					}
 
-					await context.delay();
+					await context.delayIfNotCanceled();
 
 					{
 						let out = [];
@@ -556,7 +581,9 @@
 									let {rectLeft, rectTop} = await Worker_getMessage(worker);
 									Object.assign(word, {rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
 									out.push(word);
-								} catch (error) {}
+								} catch (error) {
+									console.log(error);
+								}
 							}
 						} finally {
 							worker.terminate();
@@ -564,7 +591,7 @@
 						words = out;
 					}
 
-					await context.delay();
+					await context.delayIfNotCanceled();
 
 					{
 						let minLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
@@ -588,7 +615,7 @@
 						}
 					}
 
-					await context.delay();
+					await context.delayIfNotCanceled();
 
 					return words;
 				};
@@ -599,7 +626,7 @@
 				let newBoundedWords = boundedWords.slice();
 				let delay = this.animationDuration / Math.max(oldBoundedWords.length, newBoundedWords.length) / 2;
 				for (let oldIndex = oldBoundedWords.length; oldIndex-- > 0;) {
-					await context.delay(delay);
+					await context.delayIfNotCanceled(delay);
 					let oldBoundedWord = oldBoundedWords[oldIndex];
 					let newIndex = newBoundedWords.findIndex(newBoundedWord => newBoundedWord.text === oldBoundedWord.text);
 					if (newIndex < 0) {
@@ -609,7 +636,7 @@
 					}
 				}
 				for (let newWord of newBoundedWords) {
-					await context.delay(delay);
+					await context.delayIfNotCanceled(delay);
 					oldBoundedWords.push(newWord);
 				}
 			},
