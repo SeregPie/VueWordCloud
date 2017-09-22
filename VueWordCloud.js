@@ -396,8 +396,10 @@
 			_computeBoundedWords: (function() {
 
 				let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
-					await document.fonts.load(`16px ${fontFamily}`,  'a');
 					let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+					try {
+						await document.fonts.load(font,  text);
+					} catch (error) {}
 					let ctx = document.createElement('canvas').getContext('2d');
 					ctx.font = font;
 					let textWidth = ctx.measureText(text).width;
