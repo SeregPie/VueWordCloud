@@ -6,6 +6,13 @@
 	}
 }).call(this, function(Vue) {
 
+	let CancelError = class extends Error {
+		constructor(...args) {
+			super(...args);
+			this.name = 'CancelError';
+		}
+	};
+
 	let Worker_fromFunction = function(fn) {
 		let code = `(${fn.toString()})()`;
 		let blob = new Blob([code]);
@@ -38,43 +45,7 @@
 		return new Promise(resolve => setTimeout(resolve, ms));
 	};
 
-	let Promise_CancelableContext = class {
-		constructor() {
-			this._canceled = false;
-		}
-
-		get canceled() {
-			return this._canceled;
-		}
-
-		cancel() {
-			this._canceled = true;
-		}
-
-		throwIfCanceled() {
-			if (this.canceled) {
-				throw new Error('canceled');
-			}
-		}
-
-		async delayIfNotCanceled(ms) {
-			this.throwIfCanceled();
-			await Promise_delay(ms);
-			this.throwIfCanceled();
-		}
-	};
-
 	let Function_noop = function() {};
-
-	let Function_makeLastCancelable = function(fn) {
-		let context = null;
-		return function(...args) {
-			if (context) {
-				context.cancel();
-			}
-			return fn.call(this, context = new Promise_CancelableContext(), ...args);
-		};
-	};
 
 	let Array_uniqueBy = function(array, iteratee) {
 		let uniqueValues = new Set();
@@ -111,6 +82,12 @@
 
 
 	return {
+		mixin: [
+			(function() {
+				return {};
+			})(),
+		],
+
 		render(createElement) {
 			return this.renderer(createElement);
 		},
@@ -302,98 +279,36 @@
 				return words;
 			},
 
-			promisedBoundedWords() {
-				return this.computeBoundedWords();
+			gqakbfvi$boundedWords() {
+				return this.syutpsot$boundedWords();
 			},
 
-			computeBoundedWords() {
-				return Function_makeLastCancelable(this._computeBoundedWords);
-			},
+			syutpsot$boundedWords: (function() {
+				let CancelableContext = class {
+					constructor() {
+						this._canceled = false;
+					}
 
-			animateBoundedWords() {
-				return Function_makeLastCancelable(this._animateBoundedWords);
-			},
+					get canceled() {
+						return this._canceled;
+					}
 
-			elPropsUpdateTimer() {
-				if (this.active) {
-					let id;
-					return function() {
-						clearTimeout(id);
-						id = setTimeout(this.elPropsUpdateTimer, this.elPropsUpdateInterval);
-						this.updateElProps();
-					}.bind(this);
-				} else {
-					return Function_noop;
-				}
-			},
-		},
+					cancel() {
+						this._canceled = true;
+					}
 
-		watch: {
-			promisedBoundedWords: {
-				async handler(promise) {
-					try {
-						this.boundedWords = await promise;
-					} catch (error) {}
-				},
-				immediate: true,
-			},
+					throwIfCanceled() {
+						if (this.canceled) {
+							throw new CancelError();
+						}
+					}
 
-			async boundedWords(value) {
-				try {
-					await this.animateBoundedWords(value);
-				} catch (error) {}
-			},
-
-			elPropsUpdateTimer(timer) {
-				timer();
-			},
-		},
-
-		methods: {
-			domRenderer(createElement) {
-				return(
-					createElement('div', {
-						style: {
-							position: 'relative',
-							width: '100%',
-							height: '100%',
-							overflow: 'hidden',
-						},
-					}, this.animatedBoundedWords.map(word =>
-						createElement('div', {
-							key: word.text,
-							style: {
-								position: 'absolute',
-								left: `${word.rectLeft + word.rectWidth / 2 - word.textWidth / 2}px`,
-								top: `${word.rectTop + word.rectHeight / 2}px`,
-								color: word.color,
-								font: [word.fontStyle, word.fontVariant, word.fontWeight, `${word.fontSize}px/0`, word.fontFamily].join(' '),
-								transform: `rotate(${word.rotation}turn)`,
-								whiteSpace: 'nowrap',
-								transition: 'all 1s',
-							},
-						}, word.text)
-					))
-				);
-			},
-
-			canvasRenderer(createElement) {
-				// todo?
-			},
-
-			svgRenderer(createElement) {
-				// todo?
-			},
-
-			updateElProps() {
-				if (this.$el) {
-					let {width, height} = this.$el.getBoundingClientRect();
-					this.elProps.width = width;
-					this.elProps.height = height;
-				}
-			},
-
-			_computeBoundedWords: (function() {
+					async delayIfNotCanceled(ms) {
+						this.throwIfCanceled();
+						await Promise_delay(ms);
+						this.throwIfCanceled();
+					}
+				};
 
 				let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
 					let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
@@ -425,9 +340,9 @@
 					return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 				};
 
-				let workerContent = function() {
+				let boundWordWorkerFunction = function() {
 
-					let rectCenterOutIterator = function*(rectWidth, rectHeight) {
+					let RectCenterOutIterator = function*(rectWidth, rectHeight) {
 						if (rectWidth > 0 && rectHeight > 0) {
 
 							let stepLeft, stepTop;
@@ -520,7 +435,7 @@
 								}
 							}
 							self.postMessage((function() {
-								for (let [rectLeft, rectTop] of rectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {
+								for (let [rectLeft, rectTop] of RectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {
 									if ((function() {
 										let occupiedGridPixels = [];
 										for (let [left, top] of occupiedRectPixels) {
@@ -546,82 +461,157 @@
 					}, {once: true});
 				};
 
-				return async function(context) {
+				let computeBoundedWords = async function(context, containerWidth, containerHeight, words) {
+					let boundedWords = [];
+					let boundWordWorker = Worker_fromFunction(boundWordWorkerFunction);
+					try {
+						let gridResolution = Math.pow(2, 22);
+						let gridWidth = Math.floor(Math.sqrt(containerWidth / containerHeight * gridResolution));
+						let gridHeight = Math.floor(gridResolution / gridWidth);
+						boundWordWorker.postMessage({gridWidth, gridHeight});
+						for (let word of words) {
+							context.throwIfCanceled();
+							try {
+								let {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight} = word;
+								let fontSize = weight * 4;
+								let rotationRad = Math_convertTurnToRad(rotation);
+								let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotationRad);
+								boundWordWorker.postMessage({rectWidth, rectHeight, rectData});
+								let {rectLeft, rectTop} = await Worker_getMessage(boundWordWorker);
+								boundedWords.push({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
+							} catch (error) {
+								console.log(error);
+							}
+						}
+					} finally {
+						boundWordWorker.terminate();
+					}
+					return boundedWords;
+				};
+
+				let scaleBoundedWords = function(boundedWords, containerWidth, containerHeight) {
+					let minLeft = Iterable_minOf(boundedWords, ({rectLeft}) => rectLeft);
+					let maxLeft = Iterable_maxOf(boundedWords, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+					let cloudWidth = maxLeft - minLeft;
+
+					let minTop = Iterable_minOf(boundedWords, ({rectTop}) => rectTop);
+					let maxTop = Iterable_maxOf(boundedWords, ({rectTop, rectHeight}) => rectTop + rectHeight);
+					let cloudHeight = maxTop - minTop;
+
+					let scale = Math.min(containerWidth / cloudWidth, containerHeight / cloudHeight);
+
+					for (let word of boundedWords) {
+						word.rectLeft = (word.rectLeft - (minLeft + maxLeft) / 2) * scale + containerWidth / 2;
+						word.rectTop = (word.rectTop - (minTop + maxTop) / 2) * scale + containerHeight / 2;
+						word.rectWidth *= scale;
+						word.rectHeight *= scale;
+						word.textWidth *= scale;
+						word.textHeight *= scale;
+						word.fontSize *= scale;
+					}
+				};
+
+				let fn = async function(context) {
 					let containerWidth = this.elProps.width;
 					let containerHeight = this.elProps.height;
 					if (containerWidth <= 0 || containerHeight <= 0) {
 						return [];
 					}
-					let words = this.normalizedWords.map(word => Object.assign({}, word));
-
+					let words = this.normalizedWords;
 					await context.delayIfNotCanceled();
+					let boundedWords = await computeBoundedWords(context, containerWidth, containerHeight, words);
+					await context.delayIfNotCanceled();
+					scaleBoundedWords(boundedWords, containerWidth, containerHeight);
+					await context.delayIfNotCanceled();
+					return boundedWords;
+				};
 
-					{
-						let minFontSize = 2;
-						for (let word of words) {
-							word.fontSize = word.weight * minFontSize;
+				return function() {
+					let outerContext;
+					return async function(...args) {
+						if (outerContext) {
+							outerContext.cancel();
 						}
-					}
-
-					await context.delayIfNotCanceled();
-
-					{
-						let out = [];
-						let worker = Worker_fromFunction(workerContent);
-						try {
-							let gridResolution = Math.pow(2, 22);
-							let gridWidth = Math.floor(Math.sqrt(containerWidth / containerHeight * gridResolution));
-							let gridHeight = Math.floor(gridResolution / gridWidth);
-							worker.postMessage({gridWidth, gridHeight});
-							for (let word of words) {
-								context.throwIfCanceled();
-								try {
-									let {text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight} = word;
-									let rotationRad = Math_convertTurnToRad(rotation);
-									let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotationRad);
-									worker.postMessage({rectWidth, rectHeight, rectData});
-									let {rectLeft, rectTop} = await Worker_getMessage(worker);
-									Object.assign(word, {rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
-									out.push(word);
-								} catch (error) {
-									console.log(error);
-								}
-							}
-						} finally {
-							worker.terminate();
-						}
-						words = out;
-					}
-
-					await context.delayIfNotCanceled();
-
-					{
-						let minLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
-						let maxLeft = Iterable_maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
-						let cloudWidth = maxLeft - minLeft;
-
-						let minTop = Iterable_minOf(words, ({rectTop}) => rectTop);
-						let maxTop = Iterable_maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
-						let cloudHeight = maxTop - minTop;
-
-						let scale = Math.min(containerWidth / cloudWidth, containerHeight / cloudHeight);
-
-						for (let word of words) {
-							word.rectLeft = (word.rectLeft - (minLeft + maxLeft) / 2) * scale + containerWidth / 2;
-							word.rectTop = (word.rectTop - (minTop + maxTop) / 2) * scale + containerHeight / 2;
-							word.rectWidth *= scale;
-							word.rectHeight *= scale;
-							word.textWidth *= scale;
-							word.textHeight *= scale;
-							word.fontSize *= scale;
-						}
-					}
-
-					await context.delayIfNotCanceled();
-
-					return words;
+						let innerContext = (outerContext = new CancelableContext());
+						let returns = await fn.call(this, innerContext, ...args);
+						innerContext.throwIfCanceled();
+						return returns;
+					};
 				};
 			})(),
+
+			elPropsUpdateTimer() {
+				if (this.active) {
+					let id;
+					return(() => {
+						clearTimeout(id);
+						id = setTimeout(this.elPropsUpdateTimer, this.elPropsUpdateInterval);
+						this.updateElProps();
+					});
+				} else {
+					return Function_noop;
+				}
+			},
+		},
+
+		watch: {
+			gqakbfvi$boundedWords: {
+				async handler(promise) {
+					try {
+						this.boundedWords = await promise;
+					} catch (error) {}
+				},
+				immediate: true,
+			},
+
+			elPropsUpdateTimer(timer) {
+				timer();
+			},
+		},
+
+		methods: {
+			domRenderer(createElement) {
+				return(
+					createElement('div', {
+						style: {
+							position: 'relative',
+							width: '100%',
+							height: '100%',
+							overflow: 'hidden',
+						},
+					}, this.boundedWords.map(word =>
+						createElement('div', {
+							key: word.text,
+							style: {
+								position: 'absolute',
+								left: `${word.rectLeft + word.rectWidth / 2 - word.textWidth / 2}px`,
+								top: `${word.rectTop + word.rectHeight / 2}px`,
+								color: word.color,
+								font: [word.fontStyle, word.fontVariant, word.fontWeight, `${word.fontSize}px/0`, word.fontFamily].join(' '),
+								transform: `rotate(${word.rotation}turn)`,
+								whiteSpace: 'nowrap',
+								//transition: 'all 1s',
+							},
+						}, word.text)
+					))
+				);
+			},
+
+			canvasRenderer(createElement) {
+				// todo?
+			},
+
+			svgRenderer(createElement) {
+				// todo?
+			},
+
+			updateElProps() {
+				if (this.$el) {
+					let {width, height} = this.$el.getBoundingClientRect();
+					this.elProps.width = width;
+					this.elProps.height = height;
+				}
+			},
 
 			async _animateBoundedWords(context, boundedWords) {
 				let oldBoundedWords = this.animatedBoundedWords;
