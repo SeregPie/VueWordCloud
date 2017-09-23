@@ -384,7 +384,7 @@
 
 		data() {
 			let data = {
-				active: false,
+				destroyed: false,
 				animatedBoundedWords: [],
 				elProps: {width: 0, height: 0},
 			};
@@ -394,20 +394,8 @@
 			return data;
 		},
 
-		mounted() {
-			this.active = true;
-		},
-
-		activated() {
-			this.active = true;
-		},
-
 		destroyed() {
-			this.active = false;
-		},
-
-		deactivated() {
-			this.active = false;
+			this.destroyed = true;
 		},
 
 		computed: {
@@ -501,7 +489,7 @@
 				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
 				let minWeight = Iterable_minOf(words, ({weight}) => weight);
-				let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
+				//let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
 				for (let word of words) {
 					word.weight /= minWeight;
 				}
@@ -510,22 +498,25 @@
 			},
 
 			elPropsUpdateTimer() {
-				if (this.active) {
+				if (this.destroyed) {
+					return Function_noop;
+				} else {
 					let id;
 					return(() => {
 						clearTimeout(id);
 						id = setTimeout(this.elPropsUpdateTimer, this.elPropsUpdateInterval);
 						this.updateElProps();
 					});
-				} else {
-					return Function_noop;
 				}
 			},
 		},
 
 		watch: {
-			elPropsUpdateTimer(timer) {
-				timer();
+			elPropsUpdateTimer: {
+				async handler(timer) {
+					timer();
+				},
+				immediate: true,
 			},
 		},
 
