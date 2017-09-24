@@ -415,9 +415,9 @@
 
 	let watch = {};
 
-	let zkjvlctrpgwg = {
+	let invokePeriodically = {
 		updateContainerSize: {
-			uhiainpxhbxx() {
+			method() {
 				if (this.mounted && this.$el) {
 					let {width, height} = this.$el.getBoundingClientRect();
 					this.containerWidth = width;
@@ -425,7 +425,9 @@
 				}
 			},
 
-			owtjemnvfqqs() {
+			//initialDelay
+
+			interval() {
 				return this.updateContainerSizeInterval;
 			},
 		},
@@ -557,12 +559,12 @@
 		let prefixA = 'wkoojrkxgnng$';
 		let prefixB = 'ozyvltnleyhp$';
 
-		Object.entries(zkjvlctrpgwg).forEach(([key, def]) => {
+		Object.entries(invokePeriodically).forEach(([key, def]) => {
 			let keyA = prefixA + key;
 			let keyB = prefixB + key;
 
 			Object.assign(methods, {
-				[key]: def.uhiainpxhbxx,
+				[key]: def.method,
 			});
 			Object.assign(computed, {
 				[keyA]() {
@@ -575,7 +577,7 @@
 						clearTimeout(id);
 						let tvrsadrhbmtf = function() {
 							if (!this.destroyed) {
-								id = setTimeout(tvrsadrhbmtf, Function_isFunction(def.owtjemnvfqqs) ? def.owtjemnvfqqs.call(this) : def.owtjemnvfqqs);
+								id = setTimeout(tvrsadrhbmtf, Function_isFunction(def.interval) ? def.interval.call(this) : def.interval);
 								this[key]();
 							}
 						}.bind(this);
