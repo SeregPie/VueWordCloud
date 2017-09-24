@@ -114,4 +114,10 @@ A string or a function for the font weight of each word. Possible values are `'n
 `fontVariant`<br/>
 `fontWeight`<br/>
 
-If the property is a function, it will be called with a given word as the first paramater, awaiting a value in return. The value is set for each word, where the value is not already set.
+If the property is a function, it will be called with a given word as the first paramater, awaiting the corresponding attribute in return. The attribute is assigned to each word, where the attribute is not already present.
+
+---
+
+`updateContainerSizeInterval`
+
+A number for the update interval in milliseconds.

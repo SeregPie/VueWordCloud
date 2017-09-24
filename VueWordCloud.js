@@ -187,19 +187,6 @@
 
 			return words;
 		},
-
-		elPropsUpdateTimer() {
-			if (this.destroyed) {
-				return Function_noop;
-			} else {
-				let id;
-				return(() => {
-					clearTimeout(id);
-					id = setTimeout(this.elPropsUpdateTimer, this.elPropsUpdateInterval);
-					this.updateContainerSize();
-				});
-			}
-		},
 	};
 
 	let getBoundedWords = (function() {
@@ -426,12 +413,21 @@
 		},
 	};
 
-	let watch = {
-		elPropsUpdateTimer: {
-			async handler(timer) {
-				timer();
+	let watch = {};
+
+	let zkjvlctrpgwg = {
+		updateContainerSize: {
+			uhiainpxhbxx() {
+				if (this.mounted && this.$el) {
+					let {width, height} = this.$el.getBoundingClientRect();
+					this.containerWidth = width;
+					this.containerHeight = height;
+				}
 			},
-			immediate: true,
+
+			owtjemnvfqqs() {
+				return this.updateContainerSizeInterval;
+			},
 		},
 	};
 
@@ -469,15 +465,6 @@
 
 		svgRenderer(createElement) {
 			// todo?
-		},
-
-		updateContainerSize() {
-			if (this.$el) {
-				//console.log('updateContainerSize');
-				let {width, height} = this.$el.getBoundingClientRect();
-				this.containerWidth = width;
-				this.containerHeight = height;
-			}
 		},
 
 		/*async _animateBoundedWords(context, boundedWords) {
@@ -528,8 +515,8 @@
 			}
 		};
 
-		let prefixA = 'gqakbfvi$';
-		let prefixB = 'syutpsot$';
+		let prefixA = 'duqugwtjleyi$';
+		let prefixB = 'xvvzxtpxrfjr$';
 
 		Object.entries(asyncComputed).forEach(([key, def]) => {
 			let keyA = prefixA + key;
@@ -562,6 +549,42 @@
 					},
 					immediate: true,
 				},
+			});
+		});
+	})();
+
+	(function() {
+		let prefixA = 'wkoojrkxgnng$';
+		let prefixB = 'ozyvltnleyhp$';
+
+		Object.entries(zkjvlctrpgwg).forEach(([key, def]) => {
+			let keyA = prefixA + key;
+			let keyB = prefixB + key;
+
+			Object.assign(methods, {
+				[key]: def.uhiainpxhbxx,
+			});
+			Object.assign(computed, {
+				[keyA]() {
+					return this[keyB]();
+				},
+
+				[keyB]() {
+					let id;
+					return function() {
+						clearTimeout(id);
+						let tvrsadrhbmtf = function() {
+							if (!this.destroyed) {
+								id = setTimeout(tvrsadrhbmtf, Function_isFunction(def.owtjemnvfqqs) ? def.owtjemnvfqqs.call(this) : def.owtjemnvfqqs);
+								this[key]();
+							}
+						}.bind(this);
+						tvrsadrhbmtf();
+					};
+				},
+			});
+			Object.assign(watch, {
+				[keyA]: {handler() {}, immediate: true},
 			});
 		});
 	})();
@@ -629,7 +652,7 @@
 				default: 1000,
 			},
 
-			elPropsUpdateInterval: {
+			updateContainerSizeInterval: {
 				type: Number,
 				default: 1000,
 			},
@@ -637,6 +660,7 @@
 
 		data() {
 			let data = {
+				mounted: false,
 				destroyed: false,
 				animatedBoundedWords: [],
 				containerWidth: 0,
@@ -648,7 +672,11 @@
 			return data;
 		},
 
-		destroyed() {
+		mounted() {
+			this.mounted = true;
+		},
+
+		beforeDestroy() {
 			this.destroyed = true;
 		},
 
