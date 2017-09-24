@@ -428,7 +428,7 @@
 			//initialDelay
 
 			interval() {
-				return this.updateContainerSizeInterval;
+				return this.containerSizeUpdateInterval;
 			},
 		},
 	};
@@ -654,7 +654,7 @@
 				default: 1000,
 			},
 
-			updateContainerSizeInterval: {
+			containerSizeUpdateInterval: {
 				type: Number,
 				default: 1000,
 			},
