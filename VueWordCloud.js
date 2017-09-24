@@ -196,7 +196,7 @@
 				return(() => {
 					clearTimeout(id);
 					id = setTimeout(this.elPropsUpdateTimer, this.elPropsUpdateInterval);
-					this.updateElProps();
+					this.updateContainerSize();
 				});
 			}
 		},
@@ -471,8 +471,9 @@
 			// todo?
 		},
 
-		updateElProps() {
+		updateContainerSize() {
 			if (this.$el) {
+				//console.log('updateContainerSize');
 				let {width, height} = this.$el.getBoundingClientRect();
 				this.containerWidth = width;
 				this.containerHeight = height;
