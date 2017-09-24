@@ -13,6 +13,19 @@
 		}
 	};
 
+	let Number_randomFloat = function(start, end) {
+		return start + (end - start) * Math.random();
+	};
+
+	let Number_randomInt = function(start, end, startInclusive = true, endInclusive = false) {
+		if (start > end) {
+			return Number_randomInt(end, start, endInclusive, startInclusive);
+		}
+		if (!startInclusive) start++;
+		if (endInclusive) end++;
+		return Math.floor(Number_randomFloat(start, end));
+	};
+
 	let Worker_fromFunction = function(fn) {
 		let code = `(${fn.toString()})()`;
 		let blob = new Blob([code]);
@@ -65,6 +78,15 @@
 			uniqueValues.add(value);
 			return true;
 		});
+	};
+
+	let Array_shuffle = function(array) {
+		for (let i = array.length; i > 0;) {
+			let j = Math.floor(Math.random() * i);
+			i--;
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+		return array;
 	};
 
 	let Iterable_minOf = function(values, iteratee) {
@@ -191,6 +213,7 @@
 
 	let getBoundedWords = (function() {
 		let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
+			rotation = Math_convertTurnToRad(rotation);
 			let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 			try {
 				await document.fonts.load(font,  text);
@@ -223,7 +246,6 @@
 		let boundWord = function() {
 			let RectCenterOutIterator = function*(rectWidth, rectHeight) {
 				if (rectWidth > 0 && rectHeight > 0) {
-
 					let stepLeft, stepTop;
 					if (rectWidth > rectHeight) {
 						stepLeft = 1;
@@ -235,12 +257,10 @@
 					} else {
 						stepLeft = stepTop = 1;
 					}
-
 					let startLeft = Math.floor(rectWidth / 2);
 					let startTop = Math.floor(rectHeight / 2);
 					let endLeft = rectWidth - startLeft;
 					let endTop = rectHeight - startTop;
-
 					if (startLeft < endLeft) {
 						for (let left = startLeft; left <= endLeft; ++left) {
 							yield [left, startTop];
@@ -251,48 +271,39 @@
 							yield [startLeft, top];
 						}
 					}
-
 					let previousStartLeft = startLeft;
 					let previousStartTop = startTop;
 					let previousEndLeft = endLeft;
 					let previousEndTop = endTop;
-
 					while (endLeft < rectWidth || endTop < rectHeight) {
-
 						startLeft -= stepLeft;
 						startTop -= stepTop;
 						endLeft += stepLeft;
 						endTop += stepTop;
-
 						let currentStartLeft = Math.floor(startLeft);
 						let currentStartTop = Math.floor(startTop);
 						let currentEndLeft = Math.ceil(endLeft);
 						let currentEndTop = Math.ceil(endTop);
-
 						if (currentEndLeft > previousEndLeft) {
 							for (let top = currentStartTop; top < currentEndTop; ++top) {
 								yield [currentEndLeft, top];
 							}
 						}
-
 						if (currentEndTop > previousEndTop) {
 							for (let left = currentEndLeft; left > currentStartLeft; --left) {
 								yield [left, currentEndTop];
 							}
 						}
-
 						if (currentStartLeft < previousStartLeft) {
 							for (let top = currentEndTop; top > currentStartTop; --top) {
 								yield [currentStartLeft, top];
 							}
 						}
-
 						if (currentStartTop < previousStartTop) {
 							for (let left = currentStartLeft; left < currentEndLeft; ++left) {
 								yield [left, currentStartTop];
 							}
 						}
-
 						previousStartLeft = currentStartLeft;
 						previousStartTop = currentStartTop;
 						previousEndLeft = currentEndLeft;
@@ -353,13 +364,12 @@
 					try {
 						let {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight} = word;
 						let fontSize = weight * 4;
-						let rotationRad = Math_convertTurnToRad(rotation);
-						let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotationRad);
+						let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation);
 						boundWordWorker.postMessage({rectWidth, rectHeight, rectData});
 						let {rectLeft, rectTop} = await Worker_getMessage(boundWordWorker);
 						boundedWords.push({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
 					} catch (error) {
-						console.log(error);
+						//console.log(error);
 					}
 				}
 			} finally {
@@ -371,13 +381,13 @@
 		let scaleBoundedWords = function(boundedWords, containerWidth, containerHeight) {
 			let minLeft = Iterable_minOf(boundedWords, ({rectLeft}) => rectLeft);
 			let maxLeft = Iterable_maxOf(boundedWords, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
-			let cloudWidth = maxLeft - minLeft;
+			let containedWidth = maxLeft - minLeft;
 
 			let minTop = Iterable_minOf(boundedWords, ({rectTop}) => rectTop);
 			let maxTop = Iterable_maxOf(boundedWords, ({rectTop, rectHeight}) => rectTop + rectHeight);
-			let cloudHeight = maxTop - minTop;
+			let containedHeight = maxTop - minTop;
 
-			let scale = Math.min(containerWidth / cloudWidth, containerHeight / cloudHeight);
+			let scale = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
 
 			for (let word of boundedWords) {
 				word.rectLeft = (word.rectLeft - (minLeft + maxLeft) / 2) * scale + containerWidth / 2;
@@ -435,34 +445,48 @@
 
 	let methods = {
 		domRenderer(createElement) {
-			return(
-				createElement('div', {
+			//console.log('domRenderer');
+			return createElement('div', {
+				style: {
+					position: 'relative',
+					width: '100%',
+					height: '100%',
+					overflow: 'hidden',
+				},
+			}, this.boundedWords.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+				let transitionDuration = Number_randomInt(0, this.animationDuration);
+				let transitionDelay = this.animationDuration - transitionDuration;
+				return createElement('div', {
+					key: text,
 					style: {
-						position: 'relative',
-						width: '100%',
-						height: '100%',
-						overflow: 'hidden',
+						position: 'absolute',
+						left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
+						top: `${rectTop + rectHeight / 2}px`,
+						color: color,
+						font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/0`, fontFamily].join(' '),
+						transform: `rotate(${rotation}turn)`,
+						whiteSpace: 'nowrap',
+						transition: ['all', `${transitionDuration}ms`, this.animationEasing, `${transitionDelay}ms`].join(' '),
 					},
-				}, this.boundedWords.map(word =>
-					createElement('div', {
-						key: word.text,
-						style: {
-							position: 'absolute',
-							left: `${word.rectLeft + word.rectWidth / 2 - word.textWidth / 2}px`,
-							top: `${word.rectTop + word.rectHeight / 2}px`,
-							color: word.color,
-							font: [word.fontStyle, word.fontVariant, word.fontWeight, `${word.fontSize}px/0`, word.fontFamily].join(' '),
-							transform: `rotate(${word.rotation}turn)`,
-							whiteSpace: 'nowrap',
-							//transition: 'all 1s',
-						},
-					}, word.text)
-				))
-			);
+				}, text);
+			}));
 		},
 
 		canvasRenderer(createElement) {
-			// todo?
+			let canvas = document.createElement('canvas');
+			let ctx = canvas.getContext('2d');
+			this.boundedWords.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+				ctx.save();
+				ctx.font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+				ctx.fillStyle = color;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(text, 0, 0);
+				ctx.translate(rectLeft + rectWidth / 2, rectTop + rectHeight / 2);
+				ctx.rotate(Math_convertTurnToRad(rotation));
+				ctx.restore();
+			});
+			return canvas;
 		},
 
 		svgRenderer(createElement) {
@@ -493,15 +517,11 @@
 	(function() {
 		let CancelableContext = class {
 			constructor() {
-				this._canceled = false;
-			}
-
-			get canceled() {
-				return this._canceled;
+				this.canceled = false;
 			}
 
 			cancel() {
-				this._canceled = true;
+				this.canceled = true;
 			}
 
 			throwIfCanceled() {
@@ -575,12 +595,12 @@
 					let id;
 					return function() {
 						clearTimeout(id);
-						let tvrsadrhbmtf = function() {
+						let tvrsadrhbmtf = (() => {
 							if (!this.destroyed) {
 								id = setTimeout(tvrsadrhbmtf, Function_isFunction(def.interval) ? def.interval.call(this) : def.interval);
 								this[key]();
 							}
-						}.bind(this);
+						});
 						tvrsadrhbmtf();
 					};
 				},
@@ -616,7 +636,7 @@
 
 			color: {
 				type: [String, Function],
-				default: 'inherit',
+				default: 'Black',
 			},
 
 			rotation: {
@@ -651,7 +671,12 @@
 
 			animationDuration: {
 				type: Number,
-				default: 1000,
+				default: 5000,
+			},
+
+			animationEasing: {
+				type: String,
+				default: 'ease',
 			},
 
 			containerSizeUpdateInterval: {

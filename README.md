@@ -45,7 +45,7 @@ Include the code in your page via a CDN.
 
 ## properties
 
-`words`
+`words = []`
 
 An array of words. A value of the array is either an object, a string or an array.
 
@@ -57,19 +57,19 @@ If the value is a string: `text`;
 
 ---
 
-`text`
+`text = ''`
 
 A string or a function for the text of each word.
 
 ---
 
-`weight`
+`weight = 1`
 
 A number or a function for the weight of each word.
 
 ---
 
-`color`
+`color = 'Black'`
 
 A string or a function for the color of each word.
 
@@ -81,25 +81,25 @@ A number or a function for the rotation of each word. The units for the rotation
 
 ---
 
-`fontFamily`
+`fontFamily = 'serif'`
 
 A string or a function for the font family.
 
 ---
 
-`fontStyle`
+`fontStyle = 'normal'`
 
 A string or a function for the font style of each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.
 
 ---
 
-`fontVariant`
+`fontVariant = 'normal'`
 
 A string or a function for the font variant of each word. Possible values are `'normal'` and `'small-caps'`.
 
 ---
 
-`fontWeight`
+`fontWeight = 'normal'`
 
 A string or a function for the font weight of each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.
 
@@ -118,6 +118,12 @@ If the property is a function, it will be called with a given word as the first 
 
 ---
 
-`containerSizeUpdateInterval`
+`animationDuration = 5000`
+
+
+
+---
+
+`containerSizeUpdateInterval = 1000`
 
 A number for the update interval in milliseconds.

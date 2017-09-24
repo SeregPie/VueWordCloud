@@ -67,6 +67,8 @@
 
 			fontFamily: _sample(supportedFontFamilies),
 			supportedFontFamilies,
+
+			animationDuration: 6000,
 		},
 
 		computed: {
@@ -75,7 +77,7 @@
 					.split(/[\r\n]+/)
 					.map(line => /^(.+)\s+(\d+)$/.exec(line))
 					.filter(matched => matched)
-					.map(([, text, size]) => [text, parseInt(size)]);
+					.map(([, text, size]) => [text, Number.parseInt(size)]);
 			},
 		},
 	});

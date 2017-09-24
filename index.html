@@ -46,7 +46,7 @@
 						</div>
 						<div class="column">
 							<div class="box" style="width: 100%; height: 100%">
-								<vue-word-cloud v-if="active" :words="words" :color="randomColor" :font-family="fontFamily" :rotation="rotation"></vue-word-cloud>
+								<vue-word-cloud v-if="active" :words="words" :color="randomColor" :font-family="fontFamily" :rotation="rotation" :animation-duration="animationDuration"></vue-word-cloud>
 							</div>
 						</div>
 						<div class="column is-2">
@@ -94,6 +94,19 @@
 									<label class="radio">
 										<input type="radio" v-model="rotation" :value="randomRotation"/> fully random
 									</label>
+								</div>
+							</div>
+							<div class="field">
+								<label class="label">animation duration</label>
+								<div class="control">
+									<div class="columns is-mobile">
+										<div class="column">
+											<input style="width: 100%;" type="range" min="0" max="30000" v-model.number="animationDuration"/>
+										</div>
+										<div class="column is-narrow">
+											{{ (animationDuration / 1000).toFixed(1) }} s
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>

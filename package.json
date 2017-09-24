@@ -1,6 +1,6 @@
 {
 	"name": "vuewordcloud",
-	"version": "17.9.17",
+	"version": "17.9.24",
 	"description": "A word cloud generator.",
 	"main": "VueWordCloud.js",
 	"repository": {
@@ -23,6 +23,6 @@
 	},
 	"homepage": "https://github.com/SeregPie/VueWordCloud#readme",
 	"dependencies": {
-		"vue": "^2.4.2"
+		"vue": "^2.4.4"
 	}
 }
