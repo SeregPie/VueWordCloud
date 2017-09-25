@@ -120,8 +120,6 @@ If the property is a function, it will be called with a given word as the first 
 
 `animationDuration = 5000`
 
-
-
 ---
 
 `containerSizeUpdateInterval = 1000`

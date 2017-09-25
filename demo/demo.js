@@ -68,7 +68,7 @@
 			fontFamily: _sample(supportedFontFamilies),
 			supportedFontFamilies,
 
-			animationDuration: 6000,
+			animationDuration: 5000,
 		},
 
 		computed: {

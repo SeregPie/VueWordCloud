@@ -24,5 +24,8 @@
 	"homepage": "https://github.com/SeregPie/VueWordCloud#readme",
 	"dependencies": {
 		"vue": "^2.4.4"
+	},
+	"devDependencies": {
+		"eslint": "^4.7.2"
 	}
 }
