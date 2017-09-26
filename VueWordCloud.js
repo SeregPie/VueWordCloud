@@ -447,7 +447,12 @@
 
 	let methods = {
 		domRenderer(createElement) {
-			//console.log('domRenderer');
+			let words = [...this.boundedWords];
+			//Array_shuffle(words);
+			let wordsCount = words.length;
+			let transitionDuration = this.animationDuration / 2;
+			let transitionDelay = transitionDuration / wordsCount;
+			let transitionEasing = this.animationEasing;
 			return createElement('div', {
 				style: {
 					position: 'relative',
@@ -455,10 +460,8 @@
 					height: '100%',
 					overflow: 'hidden',
 				},
-			}, this.boundedWords.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
-				let transitionDuration = Number_randomInt(0, this.animationDuration);
-				let transitionDelay = this.animationDuration - transitionDuration;
-				return createElement('div', {
+			}, words.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) =>
+				createElement('div', {
 					key: text,
 					style: {
 						position: 'absolute',
@@ -468,10 +471,10 @@
 						font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/0`, fontFamily].join(' '),
 						transform: `rotate(${rotation}turn)`,
 						whiteSpace: 'nowrap',
-						transition: ['all', `${transitionDuration}ms`, this.animationEasing, `${transitionDelay}ms`].join(' '),
+						transition: ['all', `${Math.round(transitionDuration)}ms`, transitionEasing, `${Math.round(transitionDelay * index)}ms`].join(' '),
 					},
-				}, text);
-			}));
+				}, text)
+			));
 		},
 
 		canvasRenderer(createElement) {
@@ -671,6 +674,11 @@
 			fontWeight: {
 				type: [String, Function],
 				default: 'normal',
+			},
+
+			maxFontSize: {
+				type: Number,
+				default: Infinity,
 			},
 
 			animationDuration: {
