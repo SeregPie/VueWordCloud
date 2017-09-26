@@ -380,18 +380,23 @@
 			return boundedWords;
 		};
 
-		let scaleBoundedWords = function(boundedWords, containerWidth, containerHeight) {
-			let minLeft = Iterable_minOf(boundedWords, ({rectLeft}) => rectLeft);
-			let maxLeft = Iterable_maxOf(boundedWords, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+		let scaleBoundedWords = function(words, containerWidth, containerHeight, maxFontSize) {
+			let minLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
+			let maxLeft = Iterable_maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
 			let containedWidth = maxLeft - minLeft;
 
-			let minTop = Iterable_minOf(boundedWords, ({rectTop}) => rectTop);
-			let maxTop = Iterable_maxOf(boundedWords, ({rectTop, rectHeight}) => rectTop + rectHeight);
+			let minTop = Iterable_minOf(words, ({rectTop}) => rectTop);
+			let maxTop = Iterable_maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
 			let containedHeight = maxTop - minTop;
 
 			let scale = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
 
-			for (let word of boundedWords) {
+			let currentMaxFontSize = Iterable_maxOf(words, ({fontSize}) => fontSize) * scale;
+			if (currentMaxFontSize > maxFontSize) {
+				scale *= maxFontSize / currentMaxFontSize;
+			}
+
+			for (let word of words) {
 				word.rectLeft = (word.rectLeft - (minLeft + maxLeft) / 2) * scale + containerWidth / 2;
 				word.rectTop = (word.rectTop - (minTop + maxTop) / 2) * scale + containerHeight / 2;
 				word.rectWidth *= scale;
@@ -408,11 +413,12 @@
 			if (containerWidth <= 0 || containerHeight <= 0) {
 				return [];
 			}
+			let maxFontSize = this.maxFontSize;
 			let words = this.normalizedWords;
 			await context.delayIfNotCanceled();
 			let boundedWords = await boundWords(context, containerWidth, containerHeight, words);
 			await context.delayIfNotCanceled();
-			scaleBoundedWords(boundedWords, containerWidth, containerHeight);
+			scaleBoundedWords(boundedWords, containerWidth, containerHeight, maxFontSize);
 			await context.delayIfNotCanceled();
 			return boundedWords;
 		};
