@@ -217,7 +217,9 @@
 			let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 			try {
 				await document.fonts.load(font,  text);
-			} catch (error) {}
+			} catch (error) {
+				// continue regardless of error
+			}
 			let ctx = document.createElement('canvas').getContext('2d');
 			ctx.font = font;
 			let textWidth = ctx.measureText(text).width;
@@ -567,7 +569,9 @@
 					async handler(promise) {
 						try {
 							this[key] = await promise;
-						} catch (error) {}
+						} catch (error) {
+							// continue regardless of error
+						}
 					},
 					immediate: true,
 				},
