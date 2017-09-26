@@ -202,13 +202,47 @@
 			words.sort((word, otherWord) => otherWord.weight - word.weight);
 
 			let minWeight = Iterable_minOf(words, ({weight}) => weight);
-			//let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
-			for (let word of words) {
-				word.weight /= minWeight;
+			let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
+			if (this.fontSizeRatio) {
+				for (let word of words) {
+					word.weight = interpolateWeight(word.weight, [1, this.fontSizeRatio], maxWeight, minWeight);
+				}
+			} else {
+				for (let word of words) {
+					word.weight /= minWeight;
+				}
 			}
 
 			return words;
 		},
+	};
+
+	let interpolateWeight = function (weight, outputRange, maxWeight, minWeight = 1) {
+		const input = weight;
+		const inputMin = minWeight;
+		const inputMax = maxWeight;
+		const inputRange = [inputMin, inputMax];
+		const [outputMin, outputMax] = outputRange;
+
+		if (outputMin === outputMax) {
+			return outputMin;
+		}
+
+		if (inputMin === inputMax) {
+			if (input <= inputMin) {
+				return outputMin;
+			}
+			return outputMax;
+		}
+
+		let result = input;
+
+		// Input Range
+		result = (result - inputMin) / (inputMax - inputMin);
+
+		// Output Range
+		result = result * (outputMax - outputMin) + outputMin;
+		return result;
 	};
 
 	let getBoundedWords = (function() {
@@ -680,6 +714,10 @@
 			color: {
 				type: [String, Function],
 				default: 'Black',
+			},
+
+			fontSizeRatio: {
+				type: Number
 			},
 
 			maxFontSize: {
