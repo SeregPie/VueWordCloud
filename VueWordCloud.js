@@ -118,7 +118,7 @@
 
 		normalizedWords() {
 			let words = this.words.map(word => {
-				let text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight;
+				let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
 				if (word) {
 					switch (typeof word) {
 						case 'string': {
@@ -127,9 +127,9 @@
 						}
 						case 'object': {
 							if (Array.isArray(word)) {
-								([text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight] = word);
+								([text, weight] = word);
 							} else {
-								({text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight} = word);
+								({text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word);
 							}
 							break;
 						}
@@ -147,13 +147,6 @@
 						weight = this.weight(word);
 					} else {
 						weight = this.weight;
-					}
-				}
-				if (color === undefined) {
-					if (typeof this.color === 'function') {
-						color = this.color(word);
-					} else {
-						color = this.color;
 					}
 				}
 				if (rotation === undefined) {
@@ -191,7 +184,14 @@
 						fontWeight = this.fontWeight;
 					}
 				}
-				return {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight};
+				if (color === undefined) {
+					if (typeof this.color === 'function') {
+						color = this.color(word);
+					} else {
+						color = this.color;
+					}
+				}
+				return {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
 			});
 
 			words = words.filter(({text}) => text);
@@ -647,11 +647,6 @@
 				default: 1,
 			},
 
-			color: {
-				type: [String, Function],
-				default: 'Black',
-			},
-
 			rotation: {
 				type: [String, Function],
 				default() {
@@ -680,6 +675,11 @@
 			fontWeight: {
 				type: [String, Function],
 				default: 'normal',
+			},
+
+			color: {
+				type: [String, Function],
+				default: 'Black',
 			},
 
 			maxFontSize: {

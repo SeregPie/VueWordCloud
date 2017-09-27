@@ -12,7 +12,6 @@ module.exports = {
 	"rules": {
 		"indent": ["warn", "tab", {"SwitchCase": 1}],
 		"linebreak-style": ["warn", "unix"],
-
 		"no-undef": 0,
 		"no-unused-vars": 0,
 		"quotes": ["warn", "single"],

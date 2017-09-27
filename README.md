@@ -49,13 +49,13 @@ Include the code in your page via a CDN.
 
 *type*: `Array`
 
-An array of words. A value of the array is either an object, a string or an array.
+The words to place into the cloud. A value of the array could be either an object, an array or a string.
 
-If the value is an object: `{text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight}`.
+Object: `{text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.
 
-If the value is an array: `[text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight]`.
+Array: `[text, weight]`.
 
-If the value is a string: `text`;
+String: `text`.
 
 ---
 
@@ -63,7 +63,7 @@ If the value is a string: `text`;
 
 *type*: `String` or `Function`
 
-Text of each word.
+The text of each word.
 
 ---
 
@@ -72,14 +72,6 @@ Text of each word.
 *type*: `Number` or `Function`
 
 The weight of each word.
-
----
-
-`color = 'Black'`
-
-*type*: `String` or `Function`
-
-The color of each word.
 
 ---
 
@@ -120,6 +112,14 @@ The font variant of each word. Possible values are `'normal'` and `'small-caps'`
 *type*: `String` or `Function`
 
 The font weight of each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.
+
+---
+
+`color = 'Black'`
+
+*type*: `String` or `Function`
+
+The color of each word.
 
 ---
 
