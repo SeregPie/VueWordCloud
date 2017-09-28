@@ -142,6 +142,17 @@ If the property is a function, it will be called with a given word as the first 
 
 ---
 
+`fontSizeRatio`
+
+*type*: `Number`
+
+By default, if we have a word with a weight of 1 and a word with a weight of 500, we can only read the big word, the one are so small that it won't be readable in most cases.
+
+If `fontSizeRatio` is specified, the words' font size will be scaled to respect the given ratio.
+For example, if the ratio equals `5`, this means that the biggest word will be 5 times bigger than the smallest one, improving readability.
+
+---
+
 `animationDuration = 5000`
 
 *type*: `Number`
