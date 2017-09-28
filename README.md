@@ -136,12 +136,6 @@ If the property is a function, it will be called with a given word as the first 
 
 ---
 
-`maxFontSize = Infinity`
-
-*type*: `Number`
-
----
-
 `fontSizeRatio`
 
 *type*: `Number`
@@ -150,6 +144,12 @@ By default, if we have a word with a weight of 1 and a word with a weight of 500
 
 If `fontSizeRatio` is specified, the words' font size will be scaled to respect the given ratio.
 For example, if the ratio equals `5`, this means that the biggest word will be 5 times bigger than the smallest one, improving readability.
+
+---
+
+`maxFontSize = Infinity`
+
+*type*: `Number`
 
 ---
 

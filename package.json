@@ -1,8 +1,8 @@
 {
 	"name": "vuewordcloud",
-	"version": "17.9.26",
+	"version": "17.9.28",
 	"description": "A word cloud generator.",
-	"main": "VueWordCloud.js",
+	"main": "VueWordCloud.min.js",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/SeregPie/VueWordCloud.git"
@@ -26,6 +26,9 @@
 		"vue": "^2.4.4"
 	},
 	"devDependencies": {
+		"babel-core": "^6.26.0",
+		"babel-minify": "^0.2.0",
+		"babel-preset-es2015": "^6.24.1",
 		"eslint": "^4.7.2"
 	}
 }

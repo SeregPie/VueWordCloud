@@ -26,9 +26,8 @@
 		return Math.floor(Number_randomFloat(start, end));
 	};
 
-	let Worker_fromFunction = function(fn) {
-		let code = `(${fn.toString()})()`;
-		let blob = new Blob([code]);
+	let Worker_fromString = function(string) {
+		let blob = new Blob([string]);
 		let blobURL = URL.createObjectURL(blob);
 		return new Worker(blobURL);
 	};
@@ -110,6 +109,34 @@
 	};
 
 
+
+	let interpolateWeight = function (weight, outputRange, maxWeight, minWeight = 1) {
+		const input = weight;
+		const inputMin = minWeight;
+		const inputMax = maxWeight;
+		const inputRange = [inputMin, inputMax];
+		const [outputMin, outputMax] = outputRange;
+
+		if (outputMin === outputMax) {
+			return outputMin;
+		}
+
+		if (inputMin === inputMax) {
+			if (input <= inputMin) {
+				return outputMin;
+			}
+			return outputMax;
+		}
+
+		let result = input;
+
+		// Input Range
+		result = (result - inputMin) / (inputMax - inputMin);
+
+		// Output Range
+		result = result * (outputMax - outputMin) + outputMin;
+		return result;
+	};
 
 	let computed = {
 		renderer() {
@@ -217,34 +244,6 @@
 		},
 	};
 
-	let interpolateWeight = function (weight, outputRange, maxWeight, minWeight = 1) {
-		const input = weight;
-		const inputMin = minWeight;
-		const inputMax = maxWeight;
-		const inputRange = [inputMin, inputMax];
-		const [outputMin, outputMax] = outputRange;
-
-		if (outputMin === outputMax) {
-			return outputMin;
-		}
-
-		if (inputMin === inputMax) {
-			if (input <= inputMin) {
-				return outputMin;
-			}
-			return outputMax;
-		}
-
-		let result = input;
-
-		// Input Range
-		result = (result - inputMin) / (inputMax - inputMin);
-
-		// Output Range
-		result = result * (outputMax - outputMin) + outputMin;
-		return result;
-	};
-
 	let getBoundedWords = (function() {
 		let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
 			rotation = Math_convertTurnToRad(rotation);
@@ -279,117 +278,9 @@
 			return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 		};
 
-		let boundWord = function() {
-			let RectCenterOutIterator = function*(rectWidth, rectHeight) {
-				if (rectWidth > 0 && rectHeight > 0) {
-					let stepLeft, stepTop;
-					if (rectWidth > rectHeight) {
-						stepLeft = 1;
-						stepTop = rectHeight / rectWidth;
-					} else
-					if (rectHeight > rectWidth) {
-						stepTop = 1;
-						stepLeft = rectWidth / rectHeight;
-					} else {
-						stepLeft = stepTop = 1;
-					}
-					let startLeft = Math.floor(rectWidth / 2);
-					let startTop = Math.floor(rectHeight / 2);
-					let endLeft = rectWidth - startLeft;
-					let endTop = rectHeight - startTop;
-					if (startLeft < endLeft) {
-						for (let left = startLeft; left <= endLeft; ++left) {
-							yield [left, startTop];
-						}
-					} else
-					if (startTop < endTop) {
-						for (let top = startTop; top <= endTop; ++top) {
-							yield [startLeft, top];
-						}
-					}
-					let previousStartLeft = startLeft;
-					let previousStartTop = startTop;
-					let previousEndLeft = endLeft;
-					let previousEndTop = endTop;
-					while (endLeft < rectWidth || endTop < rectHeight) {
-						startLeft -= stepLeft;
-						startTop -= stepTop;
-						endLeft += stepLeft;
-						endTop += stepTop;
-						let currentStartLeft = Math.floor(startLeft);
-						let currentStartTop = Math.floor(startTop);
-						let currentEndLeft = Math.ceil(endLeft);
-						let currentEndTop = Math.ceil(endTop);
-						if (currentEndLeft > previousEndLeft) {
-							for (let top = currentStartTop; top < currentEndTop; ++top) {
-								yield [currentEndLeft, top];
-							}
-						}
-						if (currentEndTop > previousEndTop) {
-							for (let left = currentEndLeft; left > currentStartLeft; --left) {
-								yield [left, currentEndTop];
-							}
-						}
-						if (currentStartLeft < previousStartLeft) {
-							for (let top = currentEndTop; top > currentStartTop; --top) {
-								yield [currentStartLeft, top];
-							}
-						}
-						if (currentStartTop < previousStartTop) {
-							for (let left = currentStartLeft; left < currentEndLeft; ++left) {
-								yield [left, currentStartTop];
-							}
-						}
-						previousStartLeft = currentStartLeft;
-						previousStartTop = currentStartTop;
-						previousEndLeft = currentEndLeft;
-						previousEndTop = currentEndTop;
-					}
-				}
-			};
-
-			self.addEventListener('message', function({data: {gridWidth, gridHeight}}) {
-				let gridData = new Uint8Array(gridWidth * gridHeight);
-
-				self.addEventListener('message', function({data: {rectWidth, rectHeight, rectData}}) {
-					let occupiedRectPixels = [];
-					for (let left = 0; left < rectWidth; ++left) {
-						for (let top = 0; top < rectHeight; ++top) {
-							if (rectData[rectWidth * top + left]) {
-								occupiedRectPixels.push([left, top]);
-							}
-						}
-					}
-					self.postMessage((function() {
-						for (let [rectLeft, rectTop] of RectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {
-							if ((function() {
-								let occupiedGridPixels = [];
-								for (let [left, top] of occupiedRectPixels) {
-									left += rectLeft;
-									top += rectTop;
-									if (gridData[gridWidth * top + left]) {
-										return false;
-									}
-									occupiedGridPixels.push([left, top]);
-								}
-								for (let [left, top] of occupiedGridPixels) {
-									gridData[gridWidth * top + left] = 1;
-								}
-								return true;
-							})()) {
-								return {rectLeft, rectTop};
-							}
-						}
-						throw new Error();
-					})());
-				});
-
-			}, {once: true});
-		};
-
 		let boundWords = async function(context, containerWidth, containerHeight, words) {
 			let boundedWords = [];
-			let boundWordWorker = Worker_fromFunction(boundWord);
+			let boundWordWorker = Worker_fromString('./workers/boundWord.js');
 			try {
 				let gridResolution = Math.pow(2, 22);
 				let gridWidth = Math.floor(Math.sqrt(containerWidth / containerHeight * gridResolution));
@@ -398,14 +289,14 @@
 				for (let word of words) {
 					context.throwIfCanceled();
 					try {
-						let {text, weight, color, rotation, fontFamily, fontStyle, fontVariant, fontWeight} = word;
+						let {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word;
 						let fontSize = weight * 4;
 						let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation);
 						boundWordWorker.postMessage({rectWidth, rectHeight, rectData});
 						let {rectLeft, rectTop} = await Worker_getMessage(boundWordWorker);
-						boundedWords.push({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight});
+						boundedWords.push({text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight, color});
 					} catch (error) {
-						//console.log(error);
+						// continue regardless of error
 					}
 				}
 			} finally {
@@ -537,26 +428,6 @@
 		svgRenderer(createElement) {
 			// todo?
 		},
-
-		/*async _animateBoundedWords(context, boundedWords) {
-			let oldBoundedWords = this.animatedBoundedWords;
-			let newBoundedWords = boundedWords.slice();
-			let delay = this.animationDuration / Math.max(oldBoundedWords.length, newBoundedWords.length) / 2;
-			for (let oldIndex = oldBoundedWords.length; oldIndex-- > 0;) {
-				await context.delayIfNotCanceled(delay);
-				let oldBoundedWord = oldBoundedWords[oldIndex];
-				let newIndex = newBoundedWords.findIndex(newBoundedWord => newBoundedWord.text === oldBoundedWord.text);
-				if (newIndex < 0) {
-					oldBoundedWords.splice(oldIndex, 1);
-				} else {
-					oldBoundedWords.splice(oldIndex, 1, ...newBoundedWords.splice(newIndex, 1));
-				}
-			}
-			for (let newWord of newBoundedWords) {
-				await context.delayIfNotCanceled(delay);
-				oldBoundedWords.push(newWord);
-			}
-		},*/
 	};
 
 	(function() {
@@ -717,7 +588,8 @@
 			},
 
 			fontSizeRatio: {
-				type: Number
+				type: Number,
+				default: 1,
 			},
 
 			maxFontSize: {
