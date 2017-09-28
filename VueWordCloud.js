@@ -589,7 +589,6 @@
 
 			fontSizeRatio: {
 				type: Number,
-				default: 1,
 			},
 
 			maxFontSize: {
