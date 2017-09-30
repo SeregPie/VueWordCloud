@@ -1,45 +1,37 @@
+/* eslint no-console: 0 */
+
 const fs = require('fs');
 const path = require('path');
 const babel = require('babel-core');
 
-let compile = function() {
-	console.log('compile');
-	{
-		let {code} = babel.transformFileSync(path.join(__dirname, 'VueWordCloud.js'), {
-			'presets': ['minify'],
-		});
+let transformFile;
 
-		code = code.replace("'./workers/boundWord.js'", () => {
-			let {code} = babel.transformFileSync(path.join(__dirname, './workers/boundWord.js'), {
-				'presets': ['minify'],
-			});
+let build = function() {
+	for (let [output, presets] of Object.entries({
+		'VueWordCloud.min.js': ['minify'],
+		'VueWordCloud.es2015.min.js': [
+			['es2015', {'modules': false}],
+			'minify',
+		],
+	})) {
+		let code = transformFile(path.join(__dirname, 'VueWordCloud.js'), {presets});
+		code = code.replace('\'./workers/boundWord.js\'', () => {
+			let code = transformFile(path.join(__dirname, './workers/boundWord.js'), {presets});
 			return JSON.stringify(code);
 		});
-
-		fs.writeFileSync(path.join(__dirname, 'VueWordCloud.min.js'), code);
+		fs.writeFileSync(path.join(__dirname, output), code);
 	}
-	{
-		let {code} = babel.transformFileSync(path.join(__dirname, 'VueWordCloud.js'), {
-			'presets': [
-				['es2015', {'modules': false}],
-				//'minify',
-			],
-		});
-
-		code = code.replace("'./workers/boundWord.js'", () => {
-			let {code} = babel.transformFileSync(path.join(__dirname, './workers/boundWord.js'), {
-				'presets': [
-					['es2015', {'modules': false}],
-					'minify',
-				],
-			});
-			return JSON.stringify(code);
-		});
-
-		fs.writeFileSync(path.join(__dirname, 'VueWordCloud.es2015.min.js'), code);
-	}
+	console.log('build complete');
 };
 
-compile();
+let watchedFiles = new Set();
+transformFile = function(file, options) {
+	if (!watchedFiles.has(file)) {
+		watchedFiles.add(file);
+		fs.watchFile(file, build);
+	}
+	let {code} = babel.transformFileSync(file, options);
+	return code;
+};
 
-fs.watchFile(path.join(__dirname, 'VueWordCloud.js'), compile);
+build();

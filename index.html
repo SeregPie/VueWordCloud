@@ -45,8 +45,17 @@
 							</div>
 						</div>
 						<div class="column">
-							<div class="box" style="width: 100%; height: 100%">
-								<vue-word-cloud v-if="active" :words="words" :color="randomColor" :font-family="fontFamily" :rotation="rotation" :animation-duration="animationDuration"></vue-word-cloud>
+							<div class="box" style="width: 100%; height: 100%; min-width: 256px; min-height: 256px;">
+								<vue-word-cloud
+									v-if="active"
+									:words="words"
+									:color="randomColor"
+									:font-family="fontFamily"
+									:rotation="rotation"
+									:font-size-ratio="fontSizeRatio"
+									:max-font-size="maxFontSize"
+									:animation-duration="animationDuration"
+								></vue-word-cloud>
 							</div>
 						</div>
 						<div class="column is-2">
@@ -105,6 +114,32 @@
 										</div>
 										<div class="column is-narrow">
 											{{ (animationDuration / 1000).toFixed(1) }} s
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="field">
+								<label class="label">font size ratio</label>
+								<div class="control">
+									<div class="columns is-mobile">
+										<div class="column">
+											<input style="width: 100%;" type="range" min="1" max="20" step="0.1" v-model.number="fontSizeRatio"/>
+										</div>
+										<div class="column is-narrow">
+											{{ fontSizeRatio.toFixed(1) }}
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="field">
+								<label class="label">max font size</label>
+								<div class="control">
+									<div class="columns is-mobile">
+										<div class="column">
+											<input style="width: 100%;" type="range" min="1" max="200" step="1" v-model.number="maxFontSize"/>
+										</div>
+										<div class="column is-narrow">
+											{{ maxFontSize }} px
 										</div>
 									</div>
 								</div>

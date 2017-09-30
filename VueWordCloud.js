@@ -13,6 +13,10 @@
 		}
 	};
 
+	let Reflect_isNil = function(value) {
+		return value === null || value === undefined;
+	};
+
 	let Number_randomFloat = function(start, end) {
 		return start + (end - start) * Math.random();
 	};
@@ -108,14 +112,17 @@
 		return v * 2 * Math.PI;
 	};
 
+	let Math_interpolateLinear = function(x, x0, x1, y0, y1) {
+		return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+	};
 
 
-	let interpolateWeight = function (weight, outputRange, maxWeight, minWeight = 1) {
+
+	let interpolateWeight = function (weight, maxWeight, minWeight = 1, outputMin, outputMax) {
 		const input = weight;
 		const inputMin = minWeight;
 		const inputMax = maxWeight;
 		const inputRange = [inputMin, inputMax];
-		const [outputMin, outputMax] = outputRange;
 
 		if (outputMin === outputMax) {
 			return outputMin;
@@ -232,7 +239,7 @@
 			let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
 			if (this.fontSizeRatio) {
 				for (let word of words) {
-					word.weight = interpolateWeight(word.weight, [1, this.fontSizeRatio], maxWeight, minWeight);
+					word.weight = interpolateWeight(word.weight, maxWeight, minWeight, 1, this.fontSizeRatio);
 				}
 			} else {
 				for (let word of words) {
@@ -430,6 +437,7 @@
 		},
 	};
 
+	// asyncComputed
 	(function() {
 		let CancelableContext = class {
 			constructor() {
@@ -493,6 +501,7 @@
 		});
 	})();
 
+	// invokePeriodically
 	(function() {
 		let prefixA = 'wkoojrkxgnng$';
 		let prefixB = 'ozyvltnleyhp$';
