@@ -7,21 +7,25 @@ const babel = require('babel-core');
 let transformFile;
 
 let build = function() {
-	for (let [output, presets] of Object.entries({
-		'VueWordCloud.min.js': ['minify'],
-		'VueWordCloud.es2015.min.js': [
-			['es2015', {'modules': false}],
-			'minify',
-		],
-	})) {
-		let code = transformFile(path.join(__dirname, 'VueWordCloud.js'), {presets});
-		code = code.replace('\'./workers/boundWord.js\'', () => {
-			let code = transformFile(path.join(__dirname, './workers/boundWord.js'), {presets});
-			return JSON.stringify(code);
-		});
-		fs.writeFileSync(path.join(__dirname, output), code);
+	try {
+		for (let [output, presets] of Object.entries({
+			'VueWordCloud.min.js': ['minify'],
+			'VueWordCloud.es2015.min.js': [
+				['es2015', {'modules': false}],
+				'minify',
+			],
+		})) {
+			let code = transformFile(path.join(__dirname, 'VueWordCloud.js'), {presets});
+			code = code.replace('\'./workers/boundWord.js\'', () => {
+				let code = transformFile(path.join(__dirname, './workers/boundWord.js'), {presets});
+				return JSON.stringify(code);
+			});
+			fs.writeFileSync(path.join(__dirname, output), code);
+		}
+		console.log('build complete');
+	} catch (error) {
+		console.log('build failed');
 	}
-	console.log('build complete');
 };
 
 let watchedFiles = new Set();

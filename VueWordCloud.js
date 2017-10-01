@@ -6,15 +6,19 @@
 	}
 }).call(this, function(Vue) {
 
-	let CancelError = class extends Error {
+	let InterruptError = class extends Error {
 		constructor(...args) {
 			super(...args);
-			this.name = 'CancelError';
+			this.name = 'InterruptError';
 		}
 	};
 
 	let Reflect_isNil = function(value) {
 		return value === null || value === undefined;
+	};
+
+	let Object_isObject = function(value) {
+		return value && typeof value === 'object';
 	};
 
 	let Number_randomFloat = function(start, end) {
@@ -285,16 +289,16 @@
 			return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 		};
 
-		let boundWords = async function(context, containerWidth, containerHeight, words) {
+		let boundWords = async function(context, containerAspect, words) {
 			let boundedWords = [];
 			let boundWordWorker = Worker_fromString('./workers/boundWord.js');
 			try {
 				let gridResolution = Math.pow(2, 22);
-				let gridWidth = Math.floor(Math.sqrt(containerWidth / containerHeight * gridResolution));
+				let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
 				let gridHeight = Math.floor(gridResolution / gridWidth);
 				boundWordWorker.postMessage({gridWidth, gridHeight});
 				for (let word of words) {
-					context.throwIfCanceled();
+					context.throwIfInterrupted();
 					try {
 						let {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word;
 						let fontSize = weight * 4;
@@ -347,11 +351,11 @@
 			}
 			let maxFontSize = this.maxFontSize;
 			let words = this.normalizedWords;
-			await context.delayIfNotCanceled();
-			let boundedWords = await boundWords(context, containerWidth, containerHeight, words);
-			await context.delayIfNotCanceled();
+			await context.delayIfNotInterrupted();
+			let boundedWords = await boundWords(context, containerWidth / containerHeight, words);
+			await context.delayIfNotInterrupted();
 			scaleBoundedWords(boundedWords, containerWidth, containerHeight, maxFontSize);
-			await context.delayIfNotCanceled();
+			await context.delayIfNotInterrupted();
 			return boundedWords;
 		};
 	})();
@@ -361,10 +365,24 @@
 			get: getBoundedWords,
 			default: Function_stubArray,
 		},
+
+		updateContainerSizePeriodically(context) {
+			let id = setInterval(() => {
+				if (context.interrupted) {
+					clearInterval(id);
+				} else {
+					this.updateContainerSize();
+				}
+			}, this.containerSizeUpdateInterval);
+			this.updateContainerSize();
+		},
 	};
 
-	let watch = {};
+	let watch = {
+		updateContainerSizePeriodically: {handler() {}, immediate: true},
+	};
 
+	/*
 	let invokePeriodically = {
 		updateContainerSize: {
 			method() {
@@ -375,6 +393,10 @@
 				}
 			},
 
+			active() {
+				return this.mounted && this.$el;
+			},
+
 			//initialDelay
 
 			interval() {
@@ -382,6 +404,7 @@
 			},
 		},
 	};
+	*/
 
 	let methods = {
 		domRenderer(createElement) {
@@ -416,6 +439,8 @@
 		},
 
 		canvasRenderer(createElement) {
+			// todo?
+			/*
 			let canvas = document.createElement('canvas');
 			let ctx = canvas.getContext('2d');
 			this.boundedWords.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
@@ -430,78 +455,24 @@
 				ctx.restore();
 			});
 			return canvas;
+			*/
 		},
 
 		svgRenderer(createElement) {
 			// todo?
 		},
+
+		updateContainerSize() {
+			if (this.mounted && this.$el) {
+				let {width, height} = this.$el.getBoundingClientRect();
+				this.containerWidth = width;
+				this.containerHeight = height;
+			}
+		},
 	};
 
-	// asyncComputed
-	(function() {
-		let CancelableContext = class {
-			constructor() {
-				this.canceled = false;
-			}
-
-			cancel() {
-				this.canceled = true;
-			}
-
-			throwIfCanceled() {
-				if (this.canceled) {
-					throw new CancelError();
-				}
-			}
-
-			async delayIfNotCanceled(ms) {
-				this.throwIfCanceled();
-				await Promise_delay(ms);
-				this.throwIfCanceled();
-			}
-		};
-
-		let prefixA = 'duqugwtjleyi$';
-		let prefixB = 'xvvzxtpxrfjr$';
-
-		Object.entries(asyncComputed).forEach(([key, def]) => {
-			let keyA = prefixA + key;
-			let keyB = prefixB + key;
-
-			Object.assign(computed, {
-				[keyA]() {
-					return this[keyB]();
-				},
-
-				[keyB]() {
-					let outerContext;
-					return async function(...args) {
-						if (outerContext) {
-							outerContext.cancel();
-						}
-						let innerContext = (outerContext = new CancelableContext());
-						let returns = await def.get.call(this, innerContext, ...args);
-						innerContext.throwIfCanceled();
-						return returns;
-					};
-				},
-			});
-			Object.assign(watch, {
-				[keyA]: {
-					async handler(promise) {
-						try {
-							this[key] = await promise;
-						} catch (error) {
-							// continue regardless of error
-						}
-					},
-					immediate: true,
-				},
-			});
-		});
-	})();
-
 	// invokePeriodically
+	/*
 	(function() {
 		let prefixA = 'wkoojrkxgnng$';
 		let prefixB = 'ozyvltnleyhp$';
@@ -534,6 +505,55 @@
 			});
 			Object.assign(watch, {
 				[keyA]: {handler() {}, immediate: true},
+			});
+		});
+	})();
+	*/
+
+	// asyncComputed
+	(function() {
+		let AsyncComputedContext = {
+			throwIfInterrupted() {
+				if (this.interrupted) {
+					throw new InterruptError();
+				}
+			},
+
+			async delayIfNotInterrupted(ms) {
+				this.throwIfInterrupted();
+				await Promise_delay(ms);
+				this.throwIfInterrupted();
+			},
+		};
+
+		Object.entries(asyncComputed).forEach(([key, def]) => {
+			let getter = (Function_isFunction(def) ? def : def.get);
+			Object.assign(computed, {
+				[key]() {
+					this['xvvzxtpxrfjr$'+key]();
+					return this['duqugwtjleyi$'+key];
+				},
+
+				['xvvzxtpxrfjr$'+key]() {
+					let outerToken;
+					return async function(...args) {
+						let self = this;
+						try {
+							let innerToken = (outerToken = {});
+							let oldValue = this['duqugwtjleyi$'+key];
+							let newValue = await getter.call(this, Object.assign({
+								get interrupted() {
+									return innerToken !== outerToken || self._isDestroyed;
+								},
+							}, AsyncComputedContext), ...args);
+							if (this['duqugwtjleyi$'+key] === oldValue) {
+								this['duqugwtjleyi$'+key] = newValue;
+							}
+						} catch (error) {
+							// continue regardless of error
+						}
+					};
+				},
 			});
 		});
 	})();
@@ -624,23 +644,22 @@
 		data() {
 			let data = {
 				mounted: false,
-				destroyed: false,
-				animatedBoundedWords: [],
+				domWords: {},
 				containerWidth: 0,
 				containerHeight: 0,
 			};
 			Object.entries(asyncComputed).forEach(([key, def]) => {
-				data[key] = Function_isFunction(def.default) ? def.default.call(this) : def.default;
+				data['duqugwtjleyi$'+key] = Function_isFunction(def)
+					? undefined
+					: Function_isFunction(def.default)
+						? def.default.call(this)
+						: def.default;
 			});
 			return data;
 		},
 
 		mounted() {
 			this.mounted = true;
-		},
-
-		beforeDestroy() {
-			this.destroyed = true;
 		},
 
 		computed,
