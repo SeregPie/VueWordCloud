@@ -469,29 +469,29 @@
 				let containerHeight = this.containerHeight;
 				let maxFontSize = this.maxFontSize;
 
-				let minLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
-				let maxLeft = Iterable_maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
-				let containedWidth = maxLeft - minLeft;
+				let containedLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
+				let containedRight = Iterable_maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+				let containedWidth = containedRight - containedLeft;
 
-				let minTop = Iterable_minOf(words, ({rectTop}) => rectTop);
-				let maxTop = Iterable_maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
-				let containedHeight = maxTop - minTop;
+				let containedTop = Iterable_minOf(words, ({rectTop}) => rectTop);
+				let containedBottom = Iterable_maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
+				let containedHeight = containedBottom - containedTop;
 
-				let scale = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
+				let scaleFactor = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
 
-				let currentMaxFontSize = Iterable_maxOf(words, ({fontSize}) => fontSize) * scale;
+				let currentMaxFontSize = Iterable_maxOf(words, ({fontSize}) => fontSize) * scaleFactor;
 				if (currentMaxFontSize > maxFontSize) {
-					scale *= maxFontSize / currentMaxFontSize;
+					scaleFactor *= maxFontSize / currentMaxFontSize;
 				}
 
 				return words.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
-					rectLeft = (rectLeft - (minLeft + maxLeft) / 2) * scale + containerWidth / 2;
-					rectTop = (rectTop - (minTop + maxTop) / 2) * scale + containerHeight / 2;
-					rectWidth *= scale;
-					rectHeight *= scale;
-					textWidth *= scale;
-					textHeight *= scale;
-					fontSize *= scale;
+					rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
+					rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
+					rectWidth *= scaleFactor;
+					rectHeight *= scaleFactor;
+					textWidth *= scaleFactor;
+					textHeight *= scaleFactor;
+					fontSize *= scaleFactor;
 					return {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
 				});
 			},
