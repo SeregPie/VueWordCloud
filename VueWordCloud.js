@@ -253,6 +253,17 @@
 
 			return words;
 		},
+
+		startContainerSizeUpdate() {
+			return function() {
+				if (!this._isDestroyed) {
+					setTimeout(() => {
+						this.startContainerSizeUpdate();
+					}, this.containerSizeUpdateInterval);
+					this.updateContainerSize();
+				}
+			};
+		},
 	};
 
 	let getBoundedWords = (function() {
@@ -365,46 +376,9 @@
 			get: getBoundedWords,
 			default: Function_stubArray,
 		},
-
-		updateContainerSizePeriodically(context) {
-			let id = setInterval(() => {
-				if (context.interrupted) {
-					clearInterval(id);
-				} else {
-					this.updateContainerSize();
-				}
-			}, this.containerSizeUpdateInterval);
-			this.updateContainerSize();
-		},
 	};
 
-	let watch = {
-		updateContainerSizePeriodically: {handler() {}, immediate: true},
-	};
-
-	/*
-	let invokePeriodically = {
-		updateContainerSize: {
-			method() {
-				if (this.mounted && this.$el) {
-					let {width, height} = this.$el.getBoundingClientRect();
-					this.containerWidth = width;
-					this.containerHeight = height;
-				}
-			},
-
-			active() {
-				return this.mounted && this.$el;
-			},
-
-			//initialDelay
-
-			interval() {
-				return this.containerSizeUpdateInterval;
-			},
-		},
-	};
-	*/
+	let watch = {};
 
 	let methods = {
 		domRenderer(createElement) {
@@ -463,52 +437,11 @@
 		},
 
 		updateContainerSize() {
-			if (this.mounted && this.$el) {
-				let {width, height} = this.$el.getBoundingClientRect();
-				this.containerWidth = width;
-				this.containerHeight = height;
-			}
+			let {width, height} = this.$el.getBoundingClientRect();
+			this.containerWidth = width;
+			this.containerHeight = height;
 		},
 	};
-
-	// invokePeriodically
-	/*
-	(function() {
-		let prefixA = 'wkoojrkxgnng$';
-		let prefixB = 'ozyvltnleyhp$';
-
-		Object.entries(invokePeriodically).forEach(([key, def]) => {
-			let keyA = prefixA + key;
-			let keyB = prefixB + key;
-
-			Object.assign(methods, {
-				[key]: def.method,
-			});
-			Object.assign(computed, {
-				[keyA]() {
-					return this[keyB]();
-				},
-
-				[keyB]() {
-					let id;
-					return function() {
-						clearTimeout(id);
-						let tvrsadrhbmtf = (() => {
-							if (!this.destroyed) {
-								id = setTimeout(tvrsadrhbmtf, Function_isFunction(def.interval) ? def.interval.call(this) : def.interval);
-								this[key]();
-							}
-						});
-						tvrsadrhbmtf();
-					};
-				},
-			});
-			Object.assign(watch, {
-				[keyA]: {handler() {}, immediate: true},
-			});
-		});
-	})();
-	*/
 
 	// asyncComputed
 	(function() {
@@ -643,7 +576,6 @@
 
 		data() {
 			let data = {
-				mounted: false,
 				domWords: {},
 				containerWidth: 0,
 				containerHeight: 0,
@@ -659,7 +591,7 @@
 		},
 
 		mounted() {
-			this.mounted = true;
+			this.startContainerSizeUpdate();
 		},
 
 		computed,
