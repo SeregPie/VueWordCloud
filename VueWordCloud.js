@@ -150,120 +150,7 @@
 	};
 
 	let computed = {
-		renderer() {
-			return this.domRenderer;
-		},
 
-		normalizedWords() {
-			let words = this.words.map(word => {
-				let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
-				if (word) {
-					switch (typeof word) {
-						case 'string': {
-							text = word;
-							break;
-						}
-						case 'object': {
-							if (Array.isArray(word)) {
-								([text, weight] = word);
-							} else {
-								({text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word);
-							}
-							break;
-						}
-					}
-				}
-				if (text === undefined) {
-					if (typeof this.text === 'function') {
-						text = this.text(word);
-					} else {
-						text = this.text;
-					}
-				}
-				if (weight === undefined) {
-					if (typeof this.weight === 'function') {
-						weight = this.weight(word);
-					} else {
-						weight = this.weight;
-					}
-				}
-				if (rotation === undefined) {
-					if (typeof this.rotation === 'function') {
-						rotation = this.rotation(word);
-					} else {
-						rotation = this.rotation;
-					}
-				}
-				if (fontFamily === undefined) {
-					if (typeof this.fontFamily === 'function') {
-						fontFamily = this.fontFamily(word);
-					} else {
-						fontFamily = this.fontFamily;
-					}
-				}
-				if (fontStyle === undefined) {
-					if (typeof this.fontStyle === 'function') {
-						fontStyle = this.fontStyle(word);
-					} else {
-						fontStyle = this.fontStyle;
-					}
-				}
-				if (fontVariant === undefined) {
-					if (typeof this.fontVariant === 'function') {
-						fontVariant = this.fontVariant(word);
-					} else {
-						fontVariant = this.fontVariant;
-					}
-				}
-				if (fontWeight === undefined) {
-					if (typeof this.fontWeight === 'function') {
-						fontWeight = this.fontWeight(word);
-					} else {
-						fontWeight = this.fontWeight;
-					}
-				}
-				if (color === undefined) {
-					if (typeof this.color === 'function') {
-						color = this.color(word);
-					} else {
-						color = this.color;
-					}
-				}
-				return {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
-			});
-
-			words = words.filter(({text}) => text);
-			words = words.filter(({weight}) => weight > 0);
-
-			words = Array_uniqueBy(words, ({text}) => text);
-
-			words.sort((word, otherWord) => otherWord.weight - word.weight);
-
-			let minWeight = Iterable_minOf(words, ({weight}) => weight);
-			let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
-			if (this.fontSizeRatio) {
-				for (let word of words) {
-					word.weight = interpolateWeight(word.weight, maxWeight, minWeight, 1, this.fontSizeRatio);
-				}
-			} else {
-				for (let word of words) {
-					word.weight /= minWeight;
-				}
-			}
-
-			return words;
-		},
-
-		startContainerSizeUpdate() {
-			return function() {
-				if (!this._isDestroyed) {
-					setTimeout(() => {
-						this.startContainerSizeUpdate();
-					}, this.containerSizeUpdateInterval);
-					this.updateContainerSize();
-				}
-			};
-		},
 	};
 
 	let getBoundedWords = (function() {
@@ -371,125 +258,7 @@
 		};
 	})();
 
-	let asyncComputed = {
-		boundedWords: {
-			get: getBoundedWords,
-			default: Function_stubArray,
-		},
-	};
 
-	let watch = {};
-
-	let methods = {
-		domRenderer(createElement) {
-			let words = [...this.boundedWords];
-			//Array_shuffle(words);
-			let wordsCount = words.length;
-			let transitionDuration = this.animationDuration / 2;
-			let transitionDelay = transitionDuration / wordsCount;
-			let transitionEasing = this.animationEasing;
-			return createElement('div', {
-				style: {
-					position: 'relative',
-					width: '100%',
-					height: '100%',
-					overflow: 'hidden',
-				},
-			}, words.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) =>
-				createElement('div', {
-					key: text,
-					style: {
-						position: 'absolute',
-						left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
-						top: `${rectTop + rectHeight / 2}px`,
-						color: color,
-						font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/0`, fontFamily].join(' '),
-						transform: `rotate(${rotation}turn)`,
-						whiteSpace: 'nowrap',
-						transition: ['all', `${Math.round(transitionDuration)}ms`, transitionEasing, `${Math.round(transitionDelay * index)}ms`].join(' '),
-					},
-				}, text)
-			));
-		},
-
-		canvasRenderer(createElement) {
-			// todo?
-			/*
-			let canvas = document.createElement('canvas');
-			let ctx = canvas.getContext('2d');
-			this.boundedWords.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
-				ctx.save();
-				ctx.font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
-				ctx.fillStyle = color;
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText(text, 0, 0);
-				ctx.translate(rectLeft + rectWidth / 2, rectTop + rectHeight / 2);
-				ctx.rotate(Math_convertTurnToRad(rotation));
-				ctx.restore();
-			});
-			return canvas;
-			*/
-		},
-
-		svgRenderer(createElement) {
-			// todo?
-		},
-
-		updateContainerSize() {
-			let {width, height} = this.$el.getBoundingClientRect();
-			this.containerWidth = width;
-			this.containerHeight = height;
-		},
-	};
-
-	// asyncComputed
-	(function() {
-		let AsyncComputedContext = {
-			throwIfInterrupted() {
-				if (this.interrupted) {
-					throw new InterruptError();
-				}
-			},
-
-			async delayIfNotInterrupted(ms) {
-				this.throwIfInterrupted();
-				await Promise_delay(ms);
-				this.throwIfInterrupted();
-			},
-		};
-
-		Object.entries(asyncComputed).forEach(([key, def]) => {
-			let getter = (Function_isFunction(def) ? def : def.get);
-			Object.assign(computed, {
-				[key]() {
-					this['xvvzxtpxrfjr$'+key]();
-					return this['duqugwtjleyi$'+key];
-				},
-
-				['xvvzxtpxrfjr$'+key]() {
-					let outerToken;
-					return async function(...args) {
-						let self = this;
-						try {
-							let innerToken = (outerToken = {});
-							let oldValue = this['duqugwtjleyi$'+key];
-							let newValue = await getter.call(this, Object.assign({
-								get interrupted() {
-									return innerToken !== outerToken || self._isDestroyed;
-								},
-							}, AsyncComputedContext), ...args);
-							if (this['duqugwtjleyi$'+key] === oldValue) {
-								this['duqugwtjleyi$'+key] = newValue;
-							}
-						} catch (error) {
-							// continue regardless of error
-						}
-					};
-				},
-			});
-		});
-	})();
 
 	return {
 		render(createElement) {
@@ -575,28 +344,241 @@
 		},
 
 		data() {
-			let data = {
-				domWords: {},
+			return {
 				containerWidth: 0,
 				containerHeight: 0,
+				computedBoundedWords: [],
+				domWords: {},
 			};
-			Object.entries(asyncComputed).forEach(([key, def]) => {
-				data['duqugwtjleyi$'+key] = Function_isFunction(def)
-					? undefined
-					: Function_isFunction(def.default)
-						? def.default.call(this)
-						: def.default;
-			});
-			return data;
 		},
 
 		mounted() {
 			this.startContainerSizeUpdate();
 		},
 
-		computed,
-		watch,
-		methods,
+		computed: {
+			renderer() {
+				return this.domRenderer;
+			},
+
+			normalizedWords() {
+				let words = this.words.map(word => {
+					let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
+					if (word) {
+						switch (typeof word) {
+							case 'string': {
+								text = word;
+								break;
+							}
+							case 'object': {
+								if (Array.isArray(word)) {
+									([text, weight] = word);
+								} else {
+									({text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word);
+								}
+								break;
+							}
+						}
+					}
+					if (text === undefined) {
+						if (typeof this.text === 'function') {
+							text = this.text(word);
+						} else {
+							text = this.text;
+						}
+					}
+					if (weight === undefined) {
+						if (typeof this.weight === 'function') {
+							weight = this.weight(word);
+						} else {
+							weight = this.weight;
+						}
+					}
+					if (rotation === undefined) {
+						if (typeof this.rotation === 'function') {
+							rotation = this.rotation(word);
+						} else {
+							rotation = this.rotation;
+						}
+					}
+					if (fontFamily === undefined) {
+						if (typeof this.fontFamily === 'function') {
+							fontFamily = this.fontFamily(word);
+						} else {
+							fontFamily = this.fontFamily;
+						}
+					}
+					if (fontStyle === undefined) {
+						if (typeof this.fontStyle === 'function') {
+							fontStyle = this.fontStyle(word);
+						} else {
+							fontStyle = this.fontStyle;
+						}
+					}
+					if (fontVariant === undefined) {
+						if (typeof this.fontVariant === 'function') {
+							fontVariant = this.fontVariant(word);
+						} else {
+							fontVariant = this.fontVariant;
+						}
+					}
+					if (fontWeight === undefined) {
+						if (typeof this.fontWeight === 'function') {
+							fontWeight = this.fontWeight(word);
+						} else {
+							fontWeight = this.fontWeight;
+						}
+					}
+					if (color === undefined) {
+						if (typeof this.color === 'function') {
+							color = this.color(word);
+						} else {
+							color = this.color;
+						}
+					}
+					return {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
+				});
+
+				words = words.filter(({text}) => text);
+				words = words.filter(({weight}) => weight > 0);
+
+				words = Array_uniqueBy(words, ({text}) => text);
+
+				words.sort((word, otherWord) => otherWord.weight - word.weight);
+
+				let minWeight = Iterable_minOf(words, ({weight}) => weight);
+				let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
+				if (this.fontSizeRatio) {
+					for (let word of words) {
+						word.weight = interpolateWeight(word.weight, maxWeight, minWeight, 1, this.fontSizeRatio);
+					}
+				} else {
+					for (let word of words) {
+						word.weight /= minWeight;
+					}
+				}
+
+				return words;
+			},
+
+			boundedWords() {
+				(async () => {
+					try {
+						this.computedBoundedWords = await this.promisedBoundedWords;
+					} catch (error) {
+						// continue regardless of error
+					}
+				})();
+				return this.computedBoundedWords;
+			},
+
+			promisedBoundedWords() {
+				return this.computeBoundedWords();
+			},
+
+			computeBoundedWords() {
+				let outerToken;
+				return async function() {
+					let self = this;
+					let innerToken = (outerToken = {});
+					return await getBoundedWords.call(this, {
+						get interrupted() {
+							return innerToken !== outerToken || self._isDestroyed;
+						},
+
+						throwIfInterrupted() {
+							if (this.interrupted) {
+								throw new InterruptError();
+							}
+						},
+
+						async delayIfNotInterrupted(ms) {
+							this.throwIfInterrupted();
+							await Promise_delay(ms);
+							this.throwIfInterrupted();
+						},
+					});
+				};
+			},
+
+			startContainerSizeUpdate() {
+				return function() {
+					if (!this._isDestroyed) {
+						setTimeout(() => {
+							this.startContainerSizeUpdate();
+						}, this.containerSizeUpdateInterval);
+						this.updateContainerSize();
+					}
+				};
+			},
+		},
+
+		watch: {
+
+		},
+
+		methods: {
+			domRenderer(createElement) {
+				let words = [...this.boundedWords];
+				//Array_shuffle(words);
+				let wordsCount = words.length;
+				let transitionDuration = this.animationDuration / 2;
+				let transitionDelay = transitionDuration / wordsCount;
+				let transitionEasing = this.animationEasing;
+				return createElement('div', {
+					style: {
+						position: 'relative',
+						width: '100%',
+						height: '100%',
+						overflow: 'hidden',
+					},
+				}, words.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) =>
+					createElement('div', {
+						key: text,
+						style: {
+							position: 'absolute',
+							left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
+							top: `${rectTop + rectHeight / 2}px`,
+							color: color,
+							font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/0`, fontFamily].join(' '),
+							transform: `rotate(${rotation}turn)`,
+							whiteSpace: 'nowrap',
+							transition: ['all', `${Math.round(transitionDuration)}ms`, transitionEasing, `${Math.round(transitionDelay * index)}ms`].join(' '),
+						},
+					}, text)
+				));
+			},
+
+			canvasRenderer(createElement) {
+				// todo?
+				/*
+				let canvas = document.createElement('canvas');
+				let ctx = canvas.getContext('2d');
+				this.boundedWords.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+					ctx.save();
+					ctx.font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+					ctx.fillStyle = color;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(text, 0, 0);
+					ctx.translate(rectLeft + rectWidth / 2, rectTop + rectHeight / 2);
+					ctx.rotate(Math_convertTurnToRad(rotation));
+					ctx.restore();
+				});
+				return canvas;
+				*/
+			},
+
+			svgRenderer(createElement) {
+				// todo?
+			},
+
+			updateContainerSize() {
+				let {width, height} = this.$el.getBoundingClientRect();
+				this.containerWidth = width;
+				this.containerHeight = height;
+			},
+		},
 	};
 
 });
