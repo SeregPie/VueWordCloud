@@ -355,15 +355,16 @@
 			boundedWords() {
 				(async () => {
 					try {
-						this.computedBoundedWords = await this.promisedComputedBoundedWords;
+						this.computedBoundedWords = await this.promisedBoundedWords;
 					} catch (error) {
+						// console.log(error);
 						// continue regardless of error
 					}
 				})();
 				return this.computedBoundedWords;
 			},
 
-			promisedComputedBoundedWords() {
+			promisedBoundedWords() {
 				return this.computeBoundedWords();
 			},
 
@@ -427,6 +428,7 @@
 								let {rectLeft, rectTop} = await Worker_getMessage(boundWordWorker);
 								boundedWords.push({text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight, color});
 							} catch (error) {
+								// console.log(error);
 								// continue regardless of error
 							}
 						}
