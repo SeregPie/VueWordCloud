@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
 	<head>
 		<title>VueWordCloud</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
@@ -15,25 +15,19 @@
 		<link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Roboto|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco" rel="stylesheet"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.1/theme-chalk/index.css"/>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.1/index.js"></script>
-		<style>
-			html, body {
-				height: 100%;
-			}
-			body {
-				font-family: 'Helvetica Neue',Helvetica,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','微软雅黑',Arial,sans-serif;
-			}
-		</style>
 	</head>
-	<body>
+	<body style="height: 100%; font-family: Roboto;">
 		<el-container style="height: 100%;" v-cloak id="demo">
 			<el-aside width="400px">
-				<a href="https://github.com/SeregPie/VueWordCloud" target="_blank">
-					<el-button type="text" style="font-size: 22px;">
-						<i class="fa fa-github"></i> VueWordCloud
-					</el-button>
-				</a>
+				<div style="text-align: center;">
+					<a href="https://github.com/SeregPie/VueWordCloud" target="_blank">
+						<el-button type="text" style="font-size: 28px;">
+							<i class="fa fa-github"></i> VueWordCloud
+						</el-button>
+					</a>
+				</div>
 				<el-form label-position="right" label-width="100px">
-					<el-form-item label="active">
+					<el-form-item label="active" hidden>
 						<el-switch
 							v-model="active"
 						></el-switch>
@@ -57,58 +51,73 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="rotation">
-						<el-select v-model="rotation" style="width: 100%;">
-							<el-option
-								label="horizontal"
-								:value="horizontalRotation"
-							></el-option>
-							<el-option
-								label="diagonal"
-								:value="diagonalRotation"
-							></el-option>
-							<el-option
-								label="horizontal and vertical"
-								:value="randomHorizontalVerticalRotation"
-							></el-option>
-							<el-option
-								label="horizontal, vertical and diagonals"
-								:value="randomHorizontalVerticalDiagonalsRotation"
-							></el-option>
-							<el-option
-								label="fully random"
-								:value="randomRotation"
-							></el-option>
-						</el-select>
+						<el-radio-group v-model="rotation">
+							<el-radio
+								:label="horizontalRotation"
+							>horizontal</el-radio>
+							<el-radio
+								:label="diagonalRotation"
+							>diagonal</el-radio>
+							<el-radio
+								:label="randomHorizontalVerticalRotation"
+							>horizontal and vertical</el-radio>
+							<el-radio
+								:label="randomHorizontalVerticalDiagonalsRotation"
+							>horizontal, vertical and diagonals</el-radio>
+							<el-radio
+								:label="randomRotation"
+							>fully random</el-radio>
+						</el-radio-group>
 					</el-form-item>
 					<el-form-item label="animation duration">
-						<el-slider
-							:min="0"
-							:max="15000"
-							:step="500"
-							show-input
-							:format-tooltip="v => `${((v || 0) / 1000).toFixed(1)} s`"
-							v-model="animationDuration"
-						></el-slider>
+						<div style="display: flex;">
+							<div style="flex: 1; padding: 0 10px;">
+								<el-slider
+									:min="0"
+									:max="15000"
+									:step="500"
+									:show-tooltip="false"
+									v-model="animationDuration"
+								></el-slider>
+							</div>
+							<div style="width: 75px; text-align: right;">
+								{{ (animationDuration / 1000).toFixed(1) }} s
+							</div>
+						</div>
 					</el-form-item>
 					<el-form-item label="font size ratio">
-						<el-slider
-							:min="1"
-							:max="20"
-							:step="0.1"
-							show-input
-							:format-tooltip="v => (v || 0).toFixed(1)"
-							v-model="fontSizeRatio"
-						></el-slider>
+						<div style="display: flex;">
+							<div style="flex: 1; padding: 0 10px;">
+								<el-slider
+									:min="1"
+									:max="20"
+									:step="0.1"
+									:show-tooltip="false"
+									:format-tooltip="v => (v || 0).toFixed(1)"
+									v-model="fontSizeRatio"
+								></el-slider>
+							</div>
+							<div style="width: 75px; text-align: right;">
+								{{ fontSizeRatio.toFixed(1) }}
+							</div>
+						</div>
 					</el-form-item>
 					<el-form-item label="max font size">
-						<el-slider
-							:min="1"
-							:max="200"
-							:step="1"
-							show-input
-							:format-tooltip="v => `${v || 0} px`"
-							v-model="maxFontSize"
-						></el-slider>
+						<div style="display: flex;">
+							<div style="flex: 1; padding: 0 10px;">
+								<el-slider
+									:min="1"
+									:max="200"
+									:step="1"
+									:show-tooltip="false"
+									:format-tooltip="v => `${v || 0} px`"
+									v-model="maxFontSize"
+								></el-slider>
+							</div>
+							<div style="width: 75px; text-align: right;">
+								{{ maxFontSize }} px
+							</div>
+						</div>
 					</el-form-item>
 				</el-form>
 			</el-aside>
