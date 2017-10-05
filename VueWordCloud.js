@@ -96,7 +96,7 @@
 		return array;
 	};
 
-	let Iterable_minOf = function(values, iteratee) {
+	let Iterable_min = function(values, iteratee) {
 		let returns = Infinity;
 		for (let value of values) {
 			returns = Math.min(iteratee(value), returns);
@@ -104,7 +104,7 @@
 		return returns;
 	};
 
-	let Iterable_maxOf = function(values, iteratee) {
+	let Iterable_max = function(values, iteratee) {
 		let returns = -Infinity;
 		for (let value of values) {
 			returns = Math.max(iteratee(value), returns);
@@ -238,8 +238,10 @@
 			return {
 				containerWidth: 0,
 				containerHeight: 0,
-				computedBoundedWords: [],
+
 				//domWords: {},
+
+				fulfilledBoundedWords: [],
 			};
 		},
 
@@ -337,8 +339,8 @@
 
 				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
-				let minWeight = Iterable_minOf(words, ({weight}) => weight);
-				let maxWeight = Iterable_maxOf(words, ({weight}) => weight);
+				let minWeight = Iterable_min(words, ({weight}) => weight);
+				let maxWeight = Iterable_max(words, ({weight}) => weight);
 				if (this.fontSizeRatio) {
 					for (let word of words) {
 						word.weight = interpolateWeight(word.weight, maxWeight, minWeight, 1, this.fontSizeRatio);
@@ -355,13 +357,13 @@
 			boundedWords() {
 				(async () => {
 					try {
-						this.computedBoundedWords = await this.promisedBoundedWords;
+						this.fulfilledBoundedWords = await this.promisedBoundedWords;
 					} catch (error) {
 						// console.log(error);
 						// continue regardless of error
 					}
 				})();
-				return this.computedBoundedWords;
+				return this.fulfilledBoundedWords;
 			},
 
 			promisedBoundedWords() {
@@ -402,7 +404,7 @@
 					return {textWidth, textHeight, rectWidth, rectHeight, rectData};
 				};
 
-				let computer = async function(context) {
+				let compute = async function(context) {
 					let containerWidth = this.containerWidth;
 					let containerHeight = this.containerHeight;
 					if (containerWidth <= 0 || containerHeight <= 0) {
@@ -444,7 +446,7 @@
 					return async function() {
 						let self = this;
 						let innerToken = (outerToken = {});
-						return await computer.call(this, {
+						return await compute.call(this, {
 							get interrupted() {
 								return innerToken !== outerToken || self._isDestroyed;
 							},
@@ -471,17 +473,17 @@
 				let containerHeight = this.containerHeight;
 				let maxFontSize = this.maxFontSize;
 
-				let containedLeft = Iterable_minOf(words, ({rectLeft}) => rectLeft);
-				let containedRight = Iterable_maxOf(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+				let containedLeft = Iterable_min(words, ({rectLeft}) => rectLeft);
+				let containedRight = Iterable_max(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
 				let containedWidth = containedRight - containedLeft;
 
-				let containedTop = Iterable_minOf(words, ({rectTop}) => rectTop);
-				let containedBottom = Iterable_maxOf(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
+				let containedTop = Iterable_min(words, ({rectTop}) => rectTop);
+				let containedBottom = Iterable_max(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
 				let containedHeight = containedBottom - containedTop;
 
 				let scaleFactor = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
 
-				let currentMaxFontSize = Iterable_maxOf(words, ({fontSize}) => fontSize) * scaleFactor;
+				let currentMaxFontSize = Iterable_max(words, ({fontSize}) => fontSize) * scaleFactor;
 				if (currentMaxFontSize > maxFontSize) {
 					scaleFactor *= maxFontSize / currentMaxFontSize;
 				}
