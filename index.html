@@ -1,155 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%;">
 	<head>
 		<title>VueWordCloud</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.js"></script>
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
+		<script src="VueWordCloud.min.js"></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 		<link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Roboto|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco" rel="stylesheet"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.4/vue.min.js"></script>
-		<script src="VueWordCloud.min.js"></script>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.5.3/css/bulma.min.css"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.2/theme-chalk/index.css"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.2/index.js"></script>
 	</head>
-	<body>
-		<div class="hero is-fullheight" id="demo">
-			<div class="hero-head">
-				<nav class="navbar is-transparent">
-					<div class="navbar-brand">
-						<a class="navbar-item" href="https://github.com/SeregPie/VueWordCloud" target="_blank">
-							<span class="title" style="color: inherit;">
-								<span class="icon">
-									<i class="fa fa-github"></i>
-								</span>
-								<span>VueWordCloud</span>
-							</span>
-						</a>
-					</div>
-				</nav>
-			</div>
-			<div class="hero-body">
-				<div class="container is-fluid" style="align-self: stretch;">
-					<div class="columns" style="width: 100%; height: 100%">
-						<div class="column is-2">
-							<div class="field">
-								<div class="control">
-									<label class="checkbox">
-										<input type="checkbox" v-model="active"/> active
-									</label>
-								</div>
-							</div>
-							<div class="field">
-								<label class="label">words &amp; weights</label>
-								<div class="control">
-									<textarea class="textarea" v-model="wordsInput" rows="14"></textarea>
-								</div>
-							</div>
-						</div>
-						<div class="column">
-							<div class="box" style="width: 100%; height: 100%;">
-								<vue-word-cloud
-									v-if="active"
-									:words="words"
-									:color="randomColor"
-									:font-family="fontFamily"
-									:rotation="rotation"
-									:font-size-ratio="fontSizeRatio"
-									:max-font-size="maxFontSize"
-									:animation-duration="animationDuration"
-									style="min-width: 256px; min-height: 256px;"
-								></vue-word-cloud>
-							</div>
-						</div>
-						<div class="column is-2">
-							<div class="field">
-								<label class="label">font family</label>
-								<div class="control">
-									<div class="select is-fullwidth">
-										<select v-model="fontFamily">
-											<option v-for="fontFamily in supportedFontFamilies" :value="fontFamily" :style="{fontFamily}">{{ fontFamily }}</option>
-										</select>
-									</div>
-								</div>
-							</div>
-							<div class="field">
-								<label class="label">rotation</label>
-								<div class="control">
-									<label class="radio">
-										<input type="radio" v-model="rotation" :value="horizontalRotation"/> horizontal
-									</label>
-								</div>
-							</div>
-							<div class="field">
-								<div class="control">
-									<label class="radio">
-										<input type="radio" v-model="rotation" :value="diagonalRotation"/> diagonal
-									</label>
-								</div>
-							</div>
-							<div class="field">
-								<div class="control">
-									<label class="radio">
-										<input type="radio" v-model="rotation" :value="randomHorizontalVerticalRotation"/> horizontal and vertical
-									</label>
-								</div>
-							</div>
-							<div class="field">
-								<div class="control">
-									<label class="radio">
-										<input type="radio" v-model="rotation" :value="randomHorizontalVerticalDiagonalsRotation"/> horizontal, vertical and diagonals
-									</label>
-								</div>
-							</div>
-							<div class="field">
-								<div class="control">
-									<label class="radio">
-										<input type="radio" v-model="rotation" :value="randomRotation"/> fully random
-									</label>
-								</div>
-							</div>
-							<div class="field">
-								<label class="label">animation duration</label>
-								<div class="control">
-									<div class="columns is-mobile">
-										<div class="column">
-											<input style="width: 100%;" type="range" min="0" max="15000" v-model.number="animationDuration"/>
-										</div>
-										<div class="column is-narrow">
-											{{ (animationDuration / 1000).toFixed(1) }} s
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="field">
-								<label class="label">font size ratio</label>
-								<div class="control">
-									<div class="columns is-mobile">
-										<div class="column">
-											<input style="width: 100%;" type="range" min="1" max="20" step="0.1" v-model.number="fontSizeRatio"/>
-										</div>
-										<div class="column is-narrow">
-											{{ fontSizeRatio.toFixed(1) }}
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="field">
-								<label class="label">max font size</label>
-								<div class="control">
-									<div class="columns is-mobile">
-										<div class="column">
-											<input style="width: 100%;" type="range" min="1" max="200" step="1" v-model.number="maxFontSize"/>
-										</div>
-										<div class="column is-narrow">
-											{{ maxFontSize }} px
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+	<body style="height: 100%; font-family: Roboto;">
+		<el-container style="height: 100%;" v-cloak id="demo">
+			<el-aside width="400px">
+				<div style="text-align: center;">
+					<a href="https://github.com/SeregPie/VueWordCloud" target="_blank">
+						<el-button type="text" style="font-size: 28px;">
+							<i class="fa fa-github"></i> VueWordCloud
+						</el-button>
+					</a>
 				</div>
-			</div>
-		</div>
+				<el-form label-position="right" label-width="125px">
+					<el-form-item label="active" >
+						<el-switch
+							v-model="active"
+						></el-switch>
+					</el-form-item>
+					<el-form-item label="words &amp; weights">
+						<el-input
+							type="textarea"
+							v-model="wordsInput"
+							:rows="9"
+						></el-input>
+					</el-form-item>
+					<el-form-item label="font family">
+						<el-select v-model="fontFamily" style="width: 100%;">
+							<el-option
+								v-for="fontFamily in supportedFontFamilies"
+								:key="fontFamily"
+								:label="fontFamily"
+								:value="fontFamily"
+								:style="{fontFamily}"
+							></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item label="rotation">
+						<el-radio-group v-model="rotation" style="line-height: 1; padding-top: 11px;">
+							<div>
+								<el-radio :label="horizontalRotation">
+									horizontal
+								</el-radio>
+							</div>
+							<div>
+								<el-radio :label="diagonalRotation">
+									diagonal
+								</el-radio>
+							</div>
+							<div>
+								<el-radio :label="randomHorizontalVerticalRotation">
+									horizontal and vertical
+								</el-radio>
+							</div>
+							<div>
+								<el-radio :label="randomHorizontalVerticalDiagonalsRotation">
+									horizontal, vertical and diagonals
+								</el-radio>
+							</div>
+							<div>
+								<el-radio :label="randomRotation">
+									fully random
+								</el-radio>
+							</div>
+						</el-radio-group>
+					</el-form-item>
+					<el-form-item label="animation duration">
+						<div style="display: flex;">
+							<div style="flex: 1; padding: 0 10px;">
+								<el-slider
+									:min="0"
+									:max="15000"
+									:step="500"
+									:show-tooltip="false"
+									v-model="animationDuration"
+								></el-slider>
+							</div>
+							<div style="width: 75px; text-align: right;">
+								{{ (animationDuration / 1000).toFixed(1) }} s
+							</div>
+						</div>
+					</el-form-item>
+					<el-form-item label="font size ratio">
+						<div style="display: flex;">
+							<div style="flex: 1; padding: 0 10px;">
+								<el-slider
+									:min="1"
+									:max="20"
+									:step="0.1"
+									:show-tooltip="false"
+									:format-tooltip="v => (v || 0).toFixed(1)"
+									v-model="fontSizeRatio"
+								></el-slider>
+							</div>
+							<div style="width: 75px; text-align: right;">
+								{{ fontSizeRatio.toFixed(1) }}
+							</div>
+						</div>
+					</el-form-item>
+					<el-form-item label="max font size">
+						<div style="display: flex;">
+							<div style="flex: 1; padding: 0 10px;">
+								<el-slider
+									:min="1"
+									:max="200"
+									:step="1"
+									:show-tooltip="false"
+									:format-tooltip="v => `${v || 0} px`"
+									v-model="maxFontSize"
+								></el-slider>
+							</div>
+							<div style="width: 75px; text-align: right;">
+								{{ maxFontSize }} px
+							</div>
+						</div>
+					</el-form-item>
+				</el-form>
+			</el-aside>
+			<el-container>
+				<el-main>
+					<vue-word-cloud
+						v-if="active"
+						:words="words"
+						:color="randomColor"
+						:font-family="fontFamily"
+						:rotation="rotation"
+						:font-size-ratio="fontSizeRatio"
+						:max-font-size="maxFontSize"
+						:animation-duration="animationDuration"
+						style="min-width: 256px; min-height: 256px;"
+					></vue-word-cloud>
+				</el-main>
+			</el-container>
+		</el-container>
 		<script src="demo/demo.js"></script>
 	</body>
 </html>
