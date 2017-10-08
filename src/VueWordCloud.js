@@ -10,7 +10,6 @@ import Math_convertTurnToRad from './helpers/Math/convertTurnToRad';
 import Math_interpolateLinear from './helpers/Math/interpolateLinear';
 
 
-
 import boundWordWorkerContent from 'objectURL!./workers/boundWord.js';
 
 
