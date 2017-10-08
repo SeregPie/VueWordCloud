@@ -6,8 +6,8 @@ import Promise_delay from './helpers/Promise/delay';
 import Array_uniqueBy from './helpers/Array/uniqueBy';
 import Iterable_min from './helpers/Iterable/min';
 import Iterable_max from './helpers/Iterable/max';
-import Math_convertTurnToRad from './helpers/Math/convertTurnToRad';
-import Math_interpolateLinear from './helpers/Math/interpolateLinear';
+import Math_turnToRad from './helpers/Math/turnToRad';
+
 
 
 import boundWordWorkerContent from 'objectURL!./workers/boundWord.js';
@@ -263,7 +263,7 @@ let VueWordCloud = {
 
 		computeBoundedWords: (function() {
 			let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
-				rotation = Math_convertTurnToRad(rotation);
+				rotation = Math_turnToRad(rotation);
 				let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 				try {
 					await document.fonts.load(font,  text);
@@ -455,7 +455,7 @@ let VueWordCloud = {
 				ctx.textBaseline = 'middle';
 				ctx.fillText(text, 0, 0);
 				ctx.translate(rectLeft + rectWidth / 2, rectTop + rectHeight / 2);
-				ctx.rotate(Math_convertTurnToRad(rotation));
+				ctx.rotate(Math_turnToRad(rotation));
 				ctx.restore();
 			});
 			return canvas;

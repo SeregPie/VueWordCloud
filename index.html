@@ -27,7 +27,7 @@
 					</a>
 				</div>
 				<el-form label-position="right" label-width="125px">
-					<el-form-item label="active" >
+					<el-form-item label="active" hidden>
 						<el-switch
 							v-model="active"
 						></el-switch>
@@ -85,13 +85,18 @@
 								<el-slider
 									:min="0"
 									:max="15000"
-									:step="500"
+									:step="100"
 									:show-tooltip="false"
 									v-model="animationDuration"
 								></el-slider>
 							</div>
 							<div style="width: 75px; text-align: right;">
-								{{ (animationDuration / 1000).toFixed(1) }} s
+								<template v-if="animationDuration > 0">
+									{{ (animationDuration / 1000).toFixed(1) }} s
+								</template>
+								<template v-else>
+									n/a
+								</template>
 							</div>
 						</div>
 					</el-form-item>
@@ -103,12 +108,16 @@
 									:max="20"
 									:step="0.1"
 									:show-tooltip="false"
-									:format-tooltip="v => (v || 0).toFixed(1)"
 									v-model="fontSizeRatio"
 								></el-slider>
 							</div>
 							<div style="width: 75px; text-align: right;">
-								{{ fontSizeRatio.toFixed(1) }}
+								<template v-if="fontSizeRatio > 0">
+									{{ fontSizeRatio.toFixed(1) }}
+								</template>
+								<template v-else>
+									n/a
+								</template>
 							</div>
 						</div>
 					</el-form-item>
@@ -120,7 +129,6 @@
 									:max="200"
 									:step="1"
 									:show-tooltip="false"
-									:format-tooltip="v => `${v || 0} px`"
 									v-model="maxFontSize"
 								></el-slider>
 							</div>

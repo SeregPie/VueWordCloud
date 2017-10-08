@@ -12,7 +12,7 @@
 		"build.min": "rollup -c rollup.min.config.js",
 		"build.es5.min": "rollup -c rollup.es5.min.config.js",
 		"build.all": "npm run build && npm run build.min && npm run build.es5.min",
-		"dev": "rollup -c -w rollup.min.config.js",
+		"dev": "rollup -c rollup.min.config.js -w",
 		"prepublish": "npm run build.all"
 	},
 	"keywords": [
