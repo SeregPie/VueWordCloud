@@ -13,6 +13,19 @@ import AsyncQueue from '../helpers/AsyncQueue';
 
 	for (;;) {
 		let {rectWidth, rectHeight, rectData} = await messages.dequeue();
+
+		/*
+			let rectWidthPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectWidth);
+			let rectHeightPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectHeight);
+			const pixelSize = Math.min(rectWidthPowerOfTwo, rectHeightPowerOfTwo) / 16 (8, 4, 2);
+			let rectDataLevels = ?
+			if (gridDataLevels === undefined) {
+				gridDataLevels = ?
+			}
+			let occupiedRectPixelsLevels = ?
+
+		*/
+
 		let occupiedRectPixels = [];
 		for (let left = 0; left < rectWidth; ++left) {
 			for (let top = 0; top < rectHeight; ++top) {
@@ -21,19 +34,44 @@ import AsyncQueue from '../helpers/AsyncQueue';
 				}
 			}
 		}
+		/*
+			let level = occupiedRectPixelsLevels.length - 1;
+			let occupiedRectPixels = occupiedRectPixelsLevels[level]
+			let gridData = gridDataLevels[level];
+		*/
+
 		this.postMessage((() => {
 			for (let [rectLeft, rectTop] of RectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {
 				if ((() => {
-					let occupiedGridPixels = [];
+					/*
+					for (let [left, top] of occupiedRectPixels) {
+						left += rectLeft / Math.pow(2, level);
+						top += rectTop / Math.pow(2, level);
+						if (gridData[gridWidth * top + left]) {
+							return false;
+						}
+					}
+					*/
 					for (let [left, top] of occupiedRectPixels) {
 						left += rectLeft;
 						top += rectTop;
 						if (gridData[gridWidth * top + left]) {
 							return false;
 						}
-						occupiedGridPixels.push([left, top]);
 					}
-					for (let [left, top] of occupiedGridPixels) {
+					/*
+					occupiedRectPixelsLevels.forEach((occupiedRectPixels, level) => {
+						let gridData = gridDataLevels[level];
+						for (let [left, top] of occupiedRectPixels) {
+							left += rectLeft / Math.pow(2, level);
+							top += rectTop / Math.pow(2, level);
+							gridData[gridWidth * top + left] = 1;
+						}
+					});
+					*/
+					for (let [left, top] of occupiedRectPixels) {
+						left += rectLeft;
+						top += rectTop;
 						gridData[gridWidth * top + left] = 1;
 					}
 					return true;
