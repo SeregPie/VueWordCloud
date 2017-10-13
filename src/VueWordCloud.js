@@ -43,6 +43,8 @@ let interpolateWeight = function (weight, maxWeight, minWeight = 1, outputMin, o
 
 
 let VueWordCloud = {
+	name: 'VueWordCloud',
+
 	render(createElement) {
 		return this.renderer(createElement);
 	},
@@ -474,6 +476,6 @@ let VueWordCloud = {
 	},
 };
 
-Vue.component('VueWordCloud', VueWordCloud);
+Vue.component(VueWordCloud.name, VueWordCloud);
 
 export default VueWordCloud;

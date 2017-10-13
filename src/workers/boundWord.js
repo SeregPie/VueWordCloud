@@ -10,19 +10,33 @@ import AsyncQueue from '../helpers/AsyncQueue';
 
 	let {gridWidth, gridHeight} = await messages.dequeue();
 	let gridData = new Uint8Array(gridWidth * gridHeight);
+	/*
+	let gridWidth2 = Math_ceilToNearestPowerOfTwo(gridWidth);
+	let gridHeight2 = Math_ceilToNearestPowerOfTwo(gridHeight);
+	let gridData2 = new Uint8Array(gridWidth2 * gridHeight2);
+	let gridDataLeft2 = Math.ceil(gridWidth2 / 2);
+	let gridDataTop2 = Math.ceil(gridHeight2 / 2);
+	let gridDataLevels = [];
+	*/
 
 	for (;;) {
 		let {rectWidth, rectHeight, rectData} = await messages.dequeue();
 
+
 		/*
-			let rectWidthPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectWidth);
-			let rectHeightPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectHeight);
-			const pixelSize = Math.min(rectWidthPowerOfTwo, rectHeightPowerOfTwo) / 16 (8, 4, 2);
-			let rectDataLevels = ?
-			if (gridDataLevels === undefined) {
-				gridDataLevels = ?
-			}
-			let occupiedRectPixelsLevels = ?
+		let rectWidth2 = Math_ceilToNearestPowerOfTwo(rectWidth);
+		let rectHeight2 = Math_ceilToNearestPowerOfTwo(rectHeight);
+		let rectData2 = convert(rectData);
+		let occupiedRectPixelsLevels = [];
+		let maxLevel = calculate(rectWidth2, rectHeight2);
+		let rectWidthPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectWidth);
+		let rectHeightPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectHeight);
+		const pixelSize = Math.min(rectWidthPowerOfTwo, rectHeightPowerOfTwo) / 16 (8, 4, 2);
+		let rectDataLevels = ?
+		if (gridDataLevels === undefined) {
+			gridDataLevels = ?
+		}
+		let occupiedRectPixelsLevels = ?
 
 		*/
 
@@ -35,9 +49,9 @@ import AsyncQueue from '../helpers/AsyncQueue';
 			}
 		}
 		/*
-			let level = occupiedRectPixelsLevels.length - 1;
-			let occupiedRectPixels = occupiedRectPixelsLevels[level]
-			let gridData = gridDataLevels[level];
+		let level = occupiedRectPixelsLevels.length - 1;
+		let occupiedRectPixels = occupiedRectPixelsLevels[level]
+		let gridData = gridDataLevels[level];
 		*/
 
 		this.postMessage((() => {
