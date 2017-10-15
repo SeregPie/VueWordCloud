@@ -1,10 +1,6 @@
-import Array_first from '../helpers/Array/first';
-import Array_last from '../helpers/Array/last';
-import Math_mapLinear from '../helpers/Math/mapLinear';
-
 export default function() {
-	let keys = {};
-	let words = this.words.map(word => {
+	let keyCounters = {};
+	return this.words.map(word => {
 		let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
 		if (word) {
 			switch (typeof word) {
@@ -79,37 +75,11 @@ export default function() {
 			}
 		}
 		let key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight]);
-		let keyCount = keys[key] || 0;
-		keys[key] = keyCount + 1;
-		if (keyCount > 0) {
-			key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight, keyCount]);
+		let keyCounter = keyCounters[key] || 0;
+		keyCounters[key] = keyCounter + 1;
+		if (keyCounter > 0) {
+			key += `-${keyCounter}`;
 		}
 		return {key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
 	});
-
-	words = words.filter(({text}) => text);
-	words = words.filter(({weight}) => weight > 0);
-
-	if (words.length > 0) {
-		words.sort((word, otherWord) => otherWord.weight - word.weight);
-
-		let minWeight = Array_last(words).weight;
-		let maxWeight = Array_first(words).weight;
-
-		let fontSizeRatio = this.fontSizeRatio;
-		if (fontSizeRatio > 0 && fontSizeRatio < Infinity) {
-			if (fontSizeRatio < 1) {
-				fontSizeRatio = 1/fontSizeRatio;
-			}
-			for (let word of words) {
-				word.weight = Math_mapLinear(word.weight, minWeight, maxWeight, 1, fontSizeRatio);
-			}
-		} else {
-			for (let word of words) {
-				word.weight /= minWeight;
-			}
-		}
-	}
-
-	return words;
 }
