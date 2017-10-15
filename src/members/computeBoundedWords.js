@@ -26,6 +26,7 @@ export default async function(context) {
 			context.throwIfInterrupted();
 			try {
 				let {
+					key,
 					text,
 					weight,
 					rotation,
@@ -86,6 +87,7 @@ export default async function(context) {
 				let innerRectTop = outerRectTop + (outerRectHeight - innerRectHeight) / 2;
 
 				boundedWords.push({
+					key,
 					text,
 					rotation,
 					fontFamily,

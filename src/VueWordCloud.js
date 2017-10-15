@@ -4,7 +4,6 @@ import InterruptError from './helpers/InterruptError';
 import Promise_delay from './helpers/Promise/delay';
 import Array_first from './helpers/Array/first';
 import Array_last from './helpers/Array/last';
-import Array_uniqueBy from './helpers/Array/uniqueBy';
 import Iterable_min from './helpers/Iterable/min';
 import Iterable_max from './helpers/Iterable/max';
 import Math_mapLinear from './helpers/Math/mapLinear';
@@ -118,6 +117,7 @@ let VueWordCloud = {
 		},
 
 		normalizedWords() {
+			let keys = {};
 			let words = this.words.map(word => {
 				let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
 				if (word) {
@@ -192,15 +192,19 @@ let VueWordCloud = {
 						color = this.color;
 					}
 				}
-				return {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
+				let key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight]);
+				let keyCount = keys[key] || 0;
+				keys[key] = keyCount + 1;
+				if (keyCount > 0) {
+					key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight, keyCount]);
+				}
+				return {key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
 			});
 
 			words = words.filter(({text}) => text);
 			words = words.filter(({weight}) => weight > 0);
 
 			if (words.length > 0) {
-				words = Array_uniqueBy(words, ({text}) => text);
-
 				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
 				let minWeight = Array_last(words).weight;
@@ -286,7 +290,7 @@ let VueWordCloud = {
 				scaleFactor *= maxFontSize / currentMaxFontSize;
 			}
 
-			return words.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+			return words.map(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
 				rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
 				rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
 				rectWidth *= scaleFactor;
@@ -294,7 +298,7 @@ let VueWordCloud = {
 				textWidth *= scaleFactor;
 				textHeight *= scaleFactor;
 				fontSize *= scaleFactor;
-				return {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
+				return {key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
 			});
 		},
 
@@ -305,8 +309,8 @@ let VueWordCloud = {
 			let transitionDelay = (this.animationDuration - transitionDuration) / wordsCount;
 			let transitionEasing = this.animationEasing;
 			let domWords = {};
-			words.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) => {
-				domWords[text] = {
+			words.forEach(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) => {
+				domWords[key] = {
 					style: {
 						position: 'absolute',
 						left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
