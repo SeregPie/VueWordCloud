@@ -1,5 +1,6 @@
 import Worker_getMessage from '../helpers/Worker/getMessage';
 import Math_turnToRad from '../helpers/Math/turnToRad';
+import D2_rectAfterRotation from '../helpers/D2/rectAfterRotation';
 
 import boundWordWorkerContent from 'objectURL!../workers/boundWord.js';
 
@@ -15,8 +16,7 @@ let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVari
 	ctx.font = font;
 	let textWidth = ctx.measureText(text).width;
 	let textHeight = fontSize;
-	let rectWidth = Math.ceil((textWidth * Math.abs(Math.cos(rotation)) + textHeight * Math.abs(Math.sin(rotation))));
-	let rectHeight = Math.ceil((textWidth * Math.abs(Math.sin(rotation)) + textHeight * Math.abs(Math.cos(rotation))));
+	let [rectWidth, rectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotation);
 	let rectData = new Uint8Array(rectWidth * rectHeight);
 	if (rectData.length > 0) {
 		let ctx = document.createElement('canvas').getContext('2d');
