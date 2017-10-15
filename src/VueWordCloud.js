@@ -1,41 +1,15 @@
 import Vue from 'vue';
 
 import InterruptError from './helpers/InterruptError';
-
 import Promise_delay from './helpers/Promise/delay';
+import Array_first from './helpers/Array/first';
+import Array_last from './helpers/Array/last';
 import Array_uniqueBy from './helpers/Array/uniqueBy';
 import Iterable_min from './helpers/Iterable/min';
 import Iterable_max from './helpers/Iterable/max';
-import Math_turnToRad from './helpers/Math/turnToRad';
+import Math_mapLinear from './helpers/Math/mapLinear';
 
 import computeBoundedWords from './members/computeBoundedWords.js';
-
-let interpolateWeight = function (weight, maxWeight, minWeight = 1, outputMin, outputMax) {
-	const input = weight;
-	const inputMin = minWeight;
-	const inputMax = maxWeight;
-	const inputRange = [inputMin, inputMax];
-
-	if (outputMin === outputMax) {
-		return outputMin;
-	}
-
-	if (inputMin === inputMax) {
-		if (input <= inputMin) {
-			return outputMin;
-		}
-		return outputMax;
-	}
-
-	let result = input;
-
-	// Input Range
-	result = (result - inputMin) / (inputMax - inputMin);
-
-	// Output Range
-	result = result * (outputMax - outputMin) + outputMin;
-	return result;
-};
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
@@ -99,6 +73,7 @@ let VueWordCloud = {
 
 		fontSizeRatio: {
 			type: Number,
+			default: 0,
 		},
 
 		maxFontSize: {
@@ -223,19 +198,26 @@ let VueWordCloud = {
 			words = words.filter(({text}) => text);
 			words = words.filter(({weight}) => weight > 0);
 
-			words = Array_uniqueBy(words, ({text}) => text);
+			if (words.length > 0) {
+				words = Array_uniqueBy(words, ({text}) => text);
 
-			words.sort((word, otherWord) => otherWord.weight - word.weight);
+				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
-			let minWeight = Iterable_min(words, ({weight}) => weight);
-			let maxWeight = Iterable_max(words, ({weight}) => weight);
-			if (this.fontSizeRatio) {
-				for (let word of words) {
-					word.weight = interpolateWeight(word.weight, maxWeight, minWeight, 1, this.fontSizeRatio);
-				}
-			} else {
-				for (let word of words) {
-					word.weight /= minWeight;
+				let minWeight = Array_last(words).weight;
+				let maxWeight = Array_first(words).weight;
+
+				let fontSizeRatio = this.fontSizeRatio;
+				if (fontSizeRatio > 0 && fontSizeRatio < Infinity) {
+					if (fontSizeRatio < 1) {
+						fontSizeRatio = 1/fontSizeRatio;
+					}
+					for (let word of words) {
+						word.weight = Math_mapLinear(word.weight, minWeight, maxWeight, 1, fontSizeRatio);
+					}
+				} else {
+					for (let word of words) {
+						word.weight /= minWeight;
+					}
 				}
 			}
 

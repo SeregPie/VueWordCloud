@@ -145,6 +145,8 @@ By default, if we have a word with a weight of 1 and a word with a weight of 500
 If `fontSizeRatio` is specified, the words' font size will be scaled to respect the given ratio.
 For example, if the ratio equals `5`, this means that the biggest word will be 5 times bigger than the smallest one, improving readability.
 
+The value of `4` is the same as the value of `1/4`. The value of `3/2` is the same as the value of `2/3`.
+
 ---
 
 `maxFontSize = Infinity`

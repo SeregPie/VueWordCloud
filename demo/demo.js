@@ -68,7 +68,7 @@
 			fontFamily: _sample(supportedFontFamilies),
 			supportedFontFamilies,
 
-			fontSizeRatio: 5,
+			fontSizeRatio: 0,
 			maxFontSize: 200,
 			animationDuration: 5000,
 		},

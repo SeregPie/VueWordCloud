@@ -95,7 +95,7 @@
 									{{ (animationDuration / 1000).toFixed(1) }} s
 								</template>
 								<template v-else>
-									n/a
+									none
 								</template>
 							</div>
 						</div>
@@ -104,19 +104,19 @@
 						<div style="display: flex;">
 							<div style="flex: 1; padding: 0 10px;">
 								<el-slider
-									:min="1"
+									:min="0"
 									:max="20"
-									:step="0.1"
+									:step="1"
 									:show-tooltip="false"
 									v-model="fontSizeRatio"
 								></el-slider>
 							</div>
 							<div style="width: 75px; text-align: right;">
 								<template v-if="fontSizeRatio > 0">
-									{{ fontSizeRatio.toFixed(1) }}
+									{{ fontSizeRatio }} x
 								</template>
 								<template v-else>
-									n/a
+									none
 								</template>
 							</div>
 						</div>
