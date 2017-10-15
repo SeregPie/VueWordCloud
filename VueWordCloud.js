@@ -13,29 +13,16 @@ var InterruptError = class extends Error {
 	}
 };
 
-var Worker_getMessage = function(worker) {
-	return new Promise(function(resolve, reject) {
-		let cleanUp;
-		let messageHandler = function(event) {
-			cleanUp(event);
-			resolve(event.data);
-		};
-		let errorHandler = function(event) {
-			cleanUp(event);
-			reject(event);
-		};
-		cleanUp = function(event) {
-			event.preventDefault();
-			worker.removeEventListener('message', messageHandler);
-			worker.removeEventListener('error', errorHandler);
-		};
-		worker.addEventListener('message', messageHandler);
-		worker.addEventListener('error', errorHandler);
-	});
-};
-
 var Promise_delay = function(ms = 1) {
 	return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+var Array_first = function(array) {
+	return array[0];
+};
+
+var Array_last = function(array) {
+	return array[array.length - 1];
 };
 
 var Array_uniqueBy = function(array, iteratee) {
@@ -66,40 +53,156 @@ var Iterable_max = function(values, iteratee) {
 	return returns;
 };
 
+var Math_mapLinear = function(x, x0, x1, y0, y1) {
+	return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+};
+
+var Worker_getMessage = function(worker) {
+	return new Promise(function(resolve, reject) {
+		let cleanUp;
+		let messageHandler = function(event) {
+			cleanUp(event);
+			resolve(event.data);
+		};
+		let errorHandler = function(event) {
+			cleanUp(event);
+			reject(event);
+		};
+		cleanUp = function(event) {
+			event.preventDefault();
+			worker.removeEventListener('message', messageHandler);
+			worker.removeEventListener('error', errorHandler);
+		};
+		worker.addEventListener('message', messageHandler);
+		worker.addEventListener('error', errorHandler);
+	});
+};
+
 var Math_turnToRad = function(v) {
 	return v * 2 * Math.PI;
 };
 
-var boundWordWorkerContent = URL.createObjectURL(new Blob(["(function () {\n'use strict';\n\nvar RectCenterOutIterator = function*(rectWidth, rectHeight) {\n\n\tif (rectWidth > 0 && rectHeight > 0) {\n\n\t\tlet stepLeft, stepTop;\n\t\tif (rectWidth > rectHeight) {\n\t\t\tstepLeft = 1;\n\t\t\tstepTop = rectHeight / rectWidth;\n\t\t} else\n\t\tif (rectHeight > rectWidth) {\n\t\t\tstepTop = 1;\n\t\t\tstepLeft = rectWidth / rectHeight;\n\t\t} else {\n\t\t\tstepLeft = stepTop = 1;\n\t\t}\n\n\t\tlet startLeft = Math.floor(rectWidth / 2);\n\t\tlet startTop = Math.floor(rectHeight / 2);\n\t\tlet endLeft = rectWidth - startLeft;\n\t\tlet endTop = rectHeight - startTop;\n\n\t\tif (startLeft < endLeft) {\n\t\t\tfor (let left = startLeft; left <= endLeft; ++left) {\n\t\t\t\tyield [left, startTop];\n\t\t\t}\n\t\t} else\n\t\tif (startTop < endTop) {\n\t\t\tfor (let top = startTop; top <= endTop; ++top) {\n\t\t\t\tyield [startLeft, top];\n\t\t\t}\n\t\t}\n\n\t\tlet previousStartLeft = startLeft;\n\t\tlet previousStartTop = startTop;\n\t\tlet previousEndLeft = endLeft;\n\t\tlet previousEndTop = endTop;\n\n\t\twhile (endLeft < rectWidth || endTop < rectHeight) {\n\n\t\t\tstartLeft -= stepLeft;\n\t\t\tstartTop -= stepTop;\n\t\t\tendLeft += stepLeft;\n\t\t\tendTop += stepTop;\n\n\t\t\tlet currentStartLeft = Math.floor(startLeft);\n\t\t\tlet currentStartTop = Math.floor(startTop);\n\t\t\tlet currentEndLeft = Math.ceil(endLeft);\n\t\t\tlet currentEndTop = Math.ceil(endTop);\n\n\t\t\tif (currentEndLeft > previousEndLeft) {\n\t\t\t\tfor (let top = currentStartTop; top < currentEndTop; ++top) {\n\t\t\t\t\tyield [currentEndLeft, top];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (currentEndTop > previousEndTop) {\n\t\t\t\tfor (let left = currentEndLeft; left > currentStartLeft; --left) {\n\t\t\t\t\tyield [left, currentEndTop];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (currentStartLeft < previousStartLeft) {\n\t\t\t\tfor (let top = currentEndTop; top > currentStartTop; --top) {\n\t\t\t\t\tyield [currentStartLeft, top];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (currentStartTop < previousStartTop) {\n\t\t\t\tfor (let left = currentStartLeft; left < currentEndLeft; ++left) {\n\t\t\t\t\tyield [left, currentStartTop];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tpreviousStartLeft = currentStartLeft;\n\t\t\tpreviousStartTop = currentStartTop;\n\t\t\tpreviousEndLeft = currentEndLeft;\n\t\t\tpreviousEndTop = currentEndTop;\n\t\t}\n\t}\n};\n\nvar AsyncQueue = class {\n\tconstructor() {\n\t\tthis._values = [];\n\t\t/*\n\t\tthis._promise = undefined;\n\t\tthis._resolvePromise = undefined;\n\t\t*/\n\t}\n\n\tenqueue(value) {\n\t\tthis._values.push(value);\n\t\tif (this._promise) {\n\t\t\tthis._resolvePromise();\n\t\t}\n\t}\n\n\tasync dequeue() {\n\t\tfor (;;) {\n\t\t\tif (this._values.length) {\n\t\t\t\treturn this._values.shift();\n\t\t\t}\n\t\t\tif (!this._promise) {\n\t\t\t\tthis._promise = new Promise(resolve => {\n\t\t\t\t\tthis._resolvePromise = resolve;\n\t\t\t\t});\n\t\t\t}\n\t\t\tawait this._promise;\n\t\t\tthis._promise = undefined;\n\t\t}\n\t}\n};\n\n//import Math_ceilToNearestPowerOfTwo from '../helpers/Math/ceilToNearestPowerOfTwo';\n(async function() {\n\tlet messages = new AsyncQueue();\n\tthis.addEventListener('message', function({data}) {\n\t\tmessages.enqueue(data);\n\t});\n\n\tlet {gridWidth, gridHeight} = await messages.dequeue();\n\tlet gridData = new Uint8Array(gridWidth * gridHeight);\n\n\tfor (;;) {\n\t\tlet {rectWidth, rectHeight, rectData} = await messages.dequeue();\n\t\tlet occupiedRectPixels = [];\n\t\tfor (let left = 0; left < rectWidth; ++left) {\n\t\t\tfor (let top = 0; top < rectHeight; ++top) {\n\t\t\t\tif (rectData[rectWidth * top + left]) {\n\t\t\t\t\toccupiedRectPixels.push([left, top]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tthis.postMessage((() => {\n\t\t\tfor (let [rectLeft, rectTop] of RectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {\n\t\t\t\tif ((() => {\n\t\t\t\t\tlet occupiedGridPixels = [];\n\t\t\t\t\tfor (let [left, top] of occupiedRectPixels) {\n\t\t\t\t\t\tleft += rectLeft;\n\t\t\t\t\t\ttop += rectTop;\n\t\t\t\t\t\tif (gridData[gridWidth * top + left]) {\n\t\t\t\t\t\t\treturn false;\n\t\t\t\t\t\t}\n\t\t\t\t\t\toccupiedGridPixels.push([left, top]);\n\t\t\t\t\t}\n\t\t\t\t\tfor (let [left, top] of occupiedGridPixels) {\n\t\t\t\t\t\tgridData[gridWidth * top + left] = 1;\n\t\t\t\t\t}\n\t\t\t\t\treturn true;\n\t\t\t\t})()) {\n\t\t\t\t\treturn {rectLeft, rectTop};\n\t\t\t\t}\n\t\t\t}\n\t\t\tthrow new Error();\n\t\t})());\n\t}\n}).call(self);\n\n}());\n"]));
-
-let interpolateWeight = function (weight, maxWeight, minWeight = 1, outputMin, outputMax) {
-	const input = weight;
-	const inputMin = minWeight;
-	const inputMax = maxWeight;
-	if (outputMin === outputMax) {
-		return outputMin;
-	}
-
-	if (inputMin === inputMax) {
-		if (input <= inputMin) {
-			return outputMin;
-		}
-		return outputMax;
-	}
-
-	let result = input;
-
-	// Input Range
-	result = (result - inputMin) / (inputMax - inputMin);
-
-	// Output Range
-	result = result * (outputMax - outputMin) + outputMin;
-	return result;
+var D2_rectAfterRotation = function(width, height, rotation) {
+	return [
+		Math.ceil((width * Math.abs(Math.cos(rotation)) + height * Math.abs(Math.sin(rotation)))),
+		Math.ceil((width * Math.abs(Math.sin(rotation)) + height * Math.abs(Math.cos(rotation)))),
+	];
 };
 
+var boundWordWorkerContent = URL.createObjectURL(new Blob(["(function () {\n'use strict';\n\nvar RectCenterOutIterator = function*(rectWidth, rectHeight) {\n\n\tif (rectWidth > 0 && rectHeight > 0) {\n\n\t\tlet stepLeft, stepTop;\n\t\tif (rectWidth > rectHeight) {\n\t\t\tstepLeft = 1;\n\t\t\tstepTop = rectHeight / rectWidth;\n\t\t} else\n\t\tif (rectHeight > rectWidth) {\n\t\t\tstepTop = 1;\n\t\t\tstepLeft = rectWidth / rectHeight;\n\t\t} else {\n\t\t\tstepLeft = stepTop = 1;\n\t\t}\n\n\t\tlet startLeft = Math.floor(rectWidth / 2);\n\t\tlet startTop = Math.floor(rectHeight / 2);\n\t\tlet endLeft = rectWidth - startLeft;\n\t\tlet endTop = rectHeight - startTop;\n\n\t\tif (startLeft < endLeft) {\n\t\t\tfor (let left = startLeft; left <= endLeft; ++left) {\n\t\t\t\tyield [left, startTop];\n\t\t\t}\n\t\t} else\n\t\tif (startTop < endTop) {\n\t\t\tfor (let top = startTop; top <= endTop; ++top) {\n\t\t\t\tyield [startLeft, top];\n\t\t\t}\n\t\t}\n\n\t\tlet previousStartLeft = startLeft;\n\t\tlet previousStartTop = startTop;\n\t\tlet previousEndLeft = endLeft;\n\t\tlet previousEndTop = endTop;\n\n\t\twhile (endLeft < rectWidth || endTop < rectHeight) {\n\n\t\t\tstartLeft -= stepLeft;\n\t\t\tstartTop -= stepTop;\n\t\t\tendLeft += stepLeft;\n\t\t\tendTop += stepTop;\n\n\t\t\tlet currentStartLeft = Math.floor(startLeft);\n\t\t\tlet currentStartTop = Math.floor(startTop);\n\t\t\tlet currentEndLeft = Math.ceil(endLeft);\n\t\t\tlet currentEndTop = Math.ceil(endTop);\n\n\t\t\tif (currentEndLeft > previousEndLeft) {\n\t\t\t\tfor (let top = currentStartTop; top < currentEndTop; ++top) {\n\t\t\t\t\tyield [currentEndLeft, top];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (currentEndTop > previousEndTop) {\n\t\t\t\tfor (let left = currentEndLeft; left > currentStartLeft; --left) {\n\t\t\t\t\tyield [left, currentEndTop];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (currentStartLeft < previousStartLeft) {\n\t\t\t\tfor (let top = currentEndTop; top > currentStartTop; --top) {\n\t\t\t\t\tyield [currentStartLeft, top];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (currentStartTop < previousStartTop) {\n\t\t\t\tfor (let left = currentStartLeft; left < currentEndLeft; ++left) {\n\t\t\t\t\tyield [left, currentStartTop];\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tpreviousStartLeft = currentStartLeft;\n\t\t\tpreviousStartTop = currentStartTop;\n\t\t\tpreviousEndLeft = currentEndLeft;\n\t\t\tpreviousEndTop = currentEndTop;\n\t\t}\n\t}\n};\n\nvar AsyncQueue = class {\n\tconstructor() {\n\t\tthis._values = [];\n\t\t/*\n\t\tthis._promise = undefined;\n\t\tthis._resolvePromise = undefined;\n\t\t*/\n\t}\n\n\tenqueue(value) {\n\t\tthis._values.push(value);\n\t\tif (this._promise) {\n\t\t\tthis._resolvePromise();\n\t\t}\n\t}\n\n\tasync dequeue() {\n\t\tfor (;;) {\n\t\t\tif (this._values.length) {\n\t\t\t\treturn this._values.shift();\n\t\t\t}\n\t\t\tif (!this._promise) {\n\t\t\t\tthis._promise = new Promise(resolve => {\n\t\t\t\t\tthis._resolvePromise = resolve;\n\t\t\t\t});\n\t\t\t}\n\t\t\tawait this._promise;\n\t\t\tthis._promise = undefined;\n\t\t}\n\t}\n};\n\n//import Math_ceilToNearestPowerOfTwo from '../helpers/Math/ceilToNearestPowerOfTwo';\n(async function() {\n\tlet messages = new AsyncQueue();\n\tthis.addEventListener('message', function({data}) {\n\t\tmessages.enqueue(data);\n\t});\n\n\tlet {gridWidth, gridHeight} = await messages.dequeue();\n\tlet gridData = new Uint8Array(gridWidth * gridHeight);\n\t/*\n\tlet gridWidth2 = Math_ceilToNearestPowerOfTwo(gridWidth);\n\tlet gridHeight2 = Math_ceilToNearestPowerOfTwo(gridHeight);\n\tlet gridData2 = new Uint8Array(gridWidth2 * gridHeight2);\n\tlet gridDataLeft2 = Math.ceil(gridWidth2 / 2);\n\tlet gridDataTop2 = Math.ceil(gridHeight2 / 2);\n\tlet gridDataLevels = [];\n\t*/\n\n\tfor (;;) {\n\t\tlet {rectWidth, rectHeight, rectData} = await messages.dequeue();\n\n\n\t\t/*\n\t\tlet rectWidth2 = Math_ceilToNearestPowerOfTwo(rectWidth);\n\t\tlet rectHeight2 = Math_ceilToNearestPowerOfTwo(rectHeight);\n\t\tlet rectData2 = convert(rectData);\n\t\tlet occupiedRectPixelsLevels = [];\n\t\tlet maxLevel = calculate(rectWidth2, rectHeight2);\n\t\tlet rectWidthPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectWidth);\n\t\tlet rectHeightPowerOfTwo = Math_ceilToNearestPowerOfTwo(rectHeight);\n\t\tconst pixelSize = Math.min(rectWidthPowerOfTwo, rectHeightPowerOfTwo) / 16 (8, 4, 2);\n\t\tlet rectDataLevels = ?\n\t\tif (gridDataLevels === undefined) {\n\t\t\tgridDataLevels = ?\n\t\t}\n\t\tlet occupiedRectPixelsLevels = ?\n\n\t\t*/\n\n\t\tlet occupiedRectPixels = [];\n\t\tfor (let left = 0; left < rectWidth; ++left) {\n\t\t\tfor (let top = 0; top < rectHeight; ++top) {\n\t\t\t\tif (rectData[rectWidth * top + left]) {\n\t\t\t\t\toccupiedRectPixels.push([left, top]);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\t/*\n\t\tlet level = occupiedRectPixelsLevels.length - 1;\n\t\tlet occupiedRectPixels = occupiedRectPixelsLevels[level]\n\t\tlet gridData = gridDataLevels[level];\n\t\t*/\n\n\t\tthis.postMessage((() => {\n\t\t\tfor (let [rectLeft, rectTop] of RectCenterOutIterator(gridWidth - rectWidth, gridHeight - rectHeight)) {\n\t\t\t\tif ((() => {\n\t\t\t\t\t/*\n\t\t\t\t\tfor (let [left, top] of occupiedRectPixels) {\n\t\t\t\t\t\tleft += rectLeft / Math.pow(2, level);\n\t\t\t\t\t\ttop += rectTop / Math.pow(2, level);\n\t\t\t\t\t\tif (gridData[gridWidth * top + left]) {\n\t\t\t\t\t\t\treturn false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t*/\n\t\t\t\t\tfor (let [left, top] of occupiedRectPixels) {\n\t\t\t\t\t\tleft += rectLeft;\n\t\t\t\t\t\ttop += rectTop;\n\t\t\t\t\t\tif (gridData[gridWidth * top + left]) {\n\t\t\t\t\t\t\treturn false;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t\t/*\n\t\t\t\t\toccupiedRectPixelsLevels.forEach((occupiedRectPixels, level) => {\n\t\t\t\t\t\tlet gridData = gridDataLevels[level];\n\t\t\t\t\t\tfor (let [left, top] of occupiedRectPixels) {\n\t\t\t\t\t\t\tleft += rectLeft / Math.pow(2, level);\n\t\t\t\t\t\t\ttop += rectTop / Math.pow(2, level);\n\t\t\t\t\t\t\tgridData[gridWidth * top + left] = 1;\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t\t*/\n\t\t\t\t\tfor (let [left, top] of occupiedRectPixels) {\n\t\t\t\t\t\tleft += rectLeft;\n\t\t\t\t\t\ttop += rectTop;\n\t\t\t\t\t\tgridData[gridWidth * top + left] = 1;\n\t\t\t\t\t}\n\t\t\t\t\treturn true;\n\t\t\t\t})()) {\n\t\t\t\t\treturn {rectLeft, rectTop};\n\t\t\t\t}\n\t\t\t}\n\t\t\tthrow new Error();\n\t\t})());\n\t}\n}).call(self);\n\n}());\n"]));
 
+var computeBoundedWords = async function(context) {
+	let containerWidth = this.containerWidth;
+	let containerHeight = this.containerHeight;
+	if (containerWidth <= 0 || containerHeight <= 0) {
+		return [];
+	}
+	let containerAspect = containerWidth / containerHeight;
+	let words = this.normalizedWords;
+
+	await context.delayIfNotInterrupted();
+
+	let boundedWords = [];
+	let boundWordWorker = new Worker(boundWordWorkerContent);
+	try {
+		let gridResolution = Math.pow(2, 22);
+		let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
+		let gridHeight = Math.floor(gridResolution / gridWidth);
+		boundWordWorker.postMessage({gridWidth, gridHeight});
+		for (let word of words) {
+			context.throwIfInterrupted();
+			try {
+				let {
+					text,
+					weight,
+					rotation,
+					fontFamily,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+					color,
+				} = word;
+
+				let fontSize = weight * 4;
+				let rotationRad = Math_turnToRad(rotation);
+
+				let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+				try {
+					await document.fonts.load(font,  text);
+				} catch (error) {
+					// continue regardless of error
+				}
+
+				let ctx = document.createElement('canvas').getContext('2d');
+				ctx.font = font;
+				let innerTextWidth = ctx.measureText(text).width;
+				let innerTextHeight = fontSize;
+				let outerTextPadding = Math.max(ctx.measureText('m').width, fontSize);
+				let outerTextWidth = innerTextWidth + 2 * outerTextPadding;
+				let outerTextHeight = innerTextHeight + 2 * outerTextPadding;
+				let [innerRectWidth, innerRectHeight] = D2_rectAfterRotation(innerTextWidth, innerTextHeight, rotationRad);
+				let [outerRectWidth, outerRectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
+				let outerRectData = new Uint8Array(outerRectWidth * outerRectHeight);
+				if (outerRectData.length > 0) {
+					let ctx = document.createElement('canvas').getContext('2d');
+					ctx.canvas.width = outerRectWidth;
+					ctx.canvas.height = outerRectHeight;
+					ctx.translate(outerRectWidth / 2, outerRectHeight / 2);
+					ctx.rotate(rotationRad);
+					ctx.font = font;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(text, 0, 0);
+					let imageData = ctx.getImageData(0, 0, outerRectWidth, outerRectHeight).data;
+					for (let i = 0, ii = outerRectData.length; i < ii; ++i) {
+						outerRectData[i] = imageData[i * 4 + 3];
+					}
+				}
+
+				boundWordWorker.postMessage({
+					rectWidth: outerRectWidth,
+					rectHeight: outerRectHeight,
+					rectData: outerRectData,
+				});
+				let {
+					rectLeft: outerRectLeft,
+					rectTop: outerRectTop,
+				} = await Worker_getMessage(boundWordWorker);
+
+				let innerRectLeft = outerRectLeft + (outerRectWidth - innerRectWidth) / 2;
+				let innerRectTop = outerRectTop + (outerRectHeight - innerRectHeight) / 2;
+
+				boundedWords.push({
+					text,
+					rotation,
+					fontFamily,
+					fontSize,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+					rectLeft: innerRectLeft,
+					rectTop: innerRectTop,
+					rectWidth: innerRectWidth,
+					rectHeight: innerRectHeight,
+					textWidth: innerTextWidth,
+					textHeight: innerTextHeight,
+					color,
+				});
+			} catch (error) {
+				// console.log(error);
+				// continue regardless of error
+			}
+		}
+	} finally {
+		boundWordWorker.terminate();
+	}
+	await context.delayIfNotInterrupted();
+	return boundedWords;
+};
 
 let VueWordCloud = {
+	name: 'VueWordCloud',
+
 	render(createElement) {
 		return this.renderer(createElement);
 	},
@@ -159,6 +262,7 @@ let VueWordCloud = {
 
 		fontSizeRatio: {
 			type: Number,
+			default: 0,
 		},
 
 		maxFontSize: {
@@ -283,19 +387,26 @@ let VueWordCloud = {
 			words = words.filter(({text}) => text);
 			words = words.filter(({weight}) => weight > 0);
 
-			words = Array_uniqueBy(words, ({text}) => text);
+			if (words.length > 0) {
+				words = Array_uniqueBy(words, ({text}) => text);
 
-			words.sort((word, otherWord) => otherWord.weight - word.weight);
+				words.sort((word, otherWord) => otherWord.weight - word.weight);
 
-			let minWeight = Iterable_min(words, ({weight}) => weight);
-			let maxWeight = Iterable_max(words, ({weight}) => weight);
-			if (this.fontSizeRatio) {
-				for (let word of words) {
-					word.weight = interpolateWeight(word.weight, maxWeight, minWeight, 1, this.fontSizeRatio);
-				}
-			} else {
-				for (let word of words) {
-					word.weight /= minWeight;
+				let minWeight = Array_last(words).weight;
+				let maxWeight = Array_first(words).weight;
+
+				let fontSizeRatio = this.fontSizeRatio;
+				if (fontSizeRatio > 0 && fontSizeRatio < Infinity) {
+					if (fontSizeRatio < 1) {
+						fontSizeRatio = 1/fontSizeRatio;
+					}
+					for (let word of words) {
+						word.weight = Math_mapLinear(word.weight, minWeight, maxWeight, 1, fontSizeRatio);
+					}
+				} else {
+					for (let word of words) {
+						word.weight /= minWeight;
+					}
 				}
 			}
 
@@ -318,102 +429,30 @@ let VueWordCloud = {
 			return this.computeBoundedWords();
 		},
 
-		computeBoundedWords: (function() {
-			let getTextRect = async function(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation) {
-				rotation = Math_turnToRad(rotation);
-				let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
-				try {
-					await document.fonts.load(font,  text);
-				} catch (error) {
-					// continue regardless of error
-				}
-				let ctx = document.createElement('canvas').getContext('2d');
-				ctx.font = font;
-				let textWidth = ctx.measureText(text).width;
-				let textHeight = fontSize;
-				let rectWidth = Math.ceil((textWidth * Math.abs(Math.cos(rotation)) + textHeight * Math.abs(Math.sin(rotation))));
-				let rectHeight = Math.ceil((textWidth * Math.abs(Math.sin(rotation)) + textHeight * Math.abs(Math.cos(rotation))));
-				let rectData = new Uint8Array(rectWidth * rectHeight);
-				if (rectData.length > 0) {
-					let ctx = document.createElement('canvas').getContext('2d');
-					ctx.canvas.width = rectWidth;
-					ctx.canvas.height = rectHeight;
-					ctx.translate(rectWidth / 2, rectHeight / 2);
-					ctx.rotate(rotation);
-					ctx.font = font;
-					ctx.textAlign = 'center';
-					ctx.textBaseline = 'middle';
-					ctx.fillText(text, 0, 0);
-					let imageData = ctx.getImageData(0, 0, rectWidth, rectHeight).data;
-					for (let i = 0, ii = rectData.length; i < ii; ++i) {
-						rectData[i] = imageData[i * 4 + 3];
-					}
-				}
-				return {textWidth, textHeight, rectWidth, rectHeight, rectData};
-			};
+		computeBoundedWords() {
+			let outerToken;
+			return async function() {
+				let self = this;
+				let innerToken = (outerToken = {});
+				return await computeBoundedWords.call(this, {
+					get interrupted() {
+						return innerToken !== outerToken || self._isDestroyed;
+					},
 
-			let compute = async function(context) {
-				let containerWidth = this.containerWidth;
-				let containerHeight = this.containerHeight;
-				if (containerWidth <= 0 || containerHeight <= 0) {
-					return [];
-				}
-				let words = this.normalizedWords;
-				await context.delayIfNotInterrupted();
-				let containerAspect = containerWidth / containerHeight;
-				let boundedWords = [];
-				let boundWordWorker = new Worker(boundWordWorkerContent);
-				try {
-					let gridResolution = Math.pow(2, 22);
-					let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
-					let gridHeight = Math.floor(gridResolution / gridWidth);
-					boundWordWorker.postMessage({gridWidth, gridHeight});
-					for (let word of words) {
-						context.throwIfInterrupted();
-						try {
-							let {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word;
-							let fontSize = weight * 4;
-							let {textWidth, textHeight, rectWidth, rectHeight, rectData} = await getTextRect(text, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation);
-							boundWordWorker.postMessage({rectWidth, rectHeight, rectData});
-							let {rectLeft, rectTop} = await Worker_getMessage(boundWordWorker);
-							boundedWords.push({text, rotation, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight, color});
-						} catch (error) {
-							// console.log(error);
-							// continue regardless of error
+					throwIfInterrupted() {
+						if (this.interrupted) {
+							throw new InterruptError();
 						}
-					}
-				} finally {
-					boundWordWorker.terminate();
-				}
-				await context.delayIfNotInterrupted();
-				return boundedWords;
+					},
+
+					async delayIfNotInterrupted(ms) {
+						this.throwIfInterrupted();
+						await Promise_delay(ms);
+						this.throwIfInterrupted();
+					},
+				});
 			};
-
-			return function() {
-				let outerToken;
-				return async function() {
-					let self = this;
-					let innerToken = (outerToken = {});
-					return await compute.call(this, {
-						get interrupted() {
-							return innerToken !== outerToken || self._isDestroyed;
-						},
-
-						throwIfInterrupted() {
-							if (this.interrupted) {
-								throw new InterruptError();
-							}
-						},
-
-						async delayIfNotInterrupted(ms) {
-							this.throwIfInterrupted();
-							await Promise_delay(ms);
-							this.throwIfInterrupted();
-						},
-					});
-				};
-			};
-		})(),
+		},
 
 		scaledBoundedWords() {
 			let words = this.boundedWords;
@@ -531,7 +570,7 @@ let VueWordCloud = {
 	},
 };
 
-Vue.component('VueWordCloud', VueWordCloud);
+Vue.component(VueWordCloud.name, VueWordCloud);
 
 return VueWordCloud;
 
