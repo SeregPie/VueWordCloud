@@ -25,36 +25,120 @@ var Array_last = function(array) {
 	return array[array.length - 1];
 };
 
-var Array_uniqueBy = function(array, iteratee) {
-	let uniqueValues = new Set();
-	return array.filter(value => {
-		value = iteratee(value);
-		if (uniqueValues.has(value)) {
-			return false;
-		}
-		uniqueValues.add(value);
-		return true;
-	});
-};
-
-var Iterable_min = function(values, iteratee) {
-	let returns = Infinity;
-	for (let value of values) {
-		returns = Math.min(iteratee(value), returns);
-	}
-	return returns;
-};
-
-var Iterable_max = function(values, iteratee) {
-	let returns = -Infinity;
-	for (let value of values) {
-		returns = Math.max(iteratee(value), returns);
-	}
-	return returns;
-};
-
 var Math_mapLinear = function(x, x0, x1, y0, y1) {
 	return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
+};
+
+var computeNormalizedWords = function() {
+	let keys = {};
+	let words = this.words.map(word => {
+		let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
+		if (word) {
+			switch (typeof word) {
+				case 'string': {
+					text = word;
+					break;
+				}
+				case 'object': {
+					if (Array.isArray(word)) {
+						([text, weight] = word);
+					} else {
+						({text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word);
+					}
+					break;
+				}
+			}
+		}
+		if (text === undefined) {
+			if (typeof this.text === 'function') {
+				text = this.text(word);
+			} else {
+				text = this.text;
+			}
+		}
+		if (weight === undefined) {
+			if (typeof this.weight === 'function') {
+				weight = this.weight(word);
+			} else {
+				weight = this.weight;
+			}
+		}
+		if (rotation === undefined) {
+			if (typeof this.rotation === 'function') {
+				rotation = this.rotation(word);
+			} else {
+				rotation = this.rotation;
+			}
+		}
+		if (fontFamily === undefined) {
+			if (typeof this.fontFamily === 'function') {
+				fontFamily = this.fontFamily(word);
+			} else {
+				fontFamily = this.fontFamily;
+			}
+		}
+		if (fontStyle === undefined) {
+			if (typeof this.fontStyle === 'function') {
+				fontStyle = this.fontStyle(word);
+			} else {
+				fontStyle = this.fontStyle;
+			}
+		}
+		if (fontVariant === undefined) {
+			if (typeof this.fontVariant === 'function') {
+				fontVariant = this.fontVariant(word);
+			} else {
+				fontVariant = this.fontVariant;
+			}
+		}
+		if (fontWeight === undefined) {
+			if (typeof this.fontWeight === 'function') {
+				fontWeight = this.fontWeight(word);
+			} else {
+				fontWeight = this.fontWeight;
+			}
+		}
+		if (color === undefined) {
+			if (typeof this.color === 'function') {
+				color = this.color(word);
+			} else {
+				color = this.color;
+			}
+		}
+		let key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight]);
+		let keyCount = keys[key] || 0;
+		keys[key] = keyCount + 1;
+		if (keyCount > 0) {
+			key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight, keyCount]);
+		}
+		return {key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
+	});
+
+	words = words.filter(({text}) => text);
+	words = words.filter(({weight}) => weight > 0);
+
+	if (words.length > 0) {
+		words.sort((word, otherWord) => otherWord.weight - word.weight);
+
+		let minWeight = Array_last(words).weight;
+		let maxWeight = Array_first(words).weight;
+
+		let fontSizeRatio = this.fontSizeRatio;
+		if (fontSizeRatio > 0 && fontSizeRatio < Infinity) {
+			if (fontSizeRatio < 1) {
+				fontSizeRatio = 1/fontSizeRatio;
+			}
+			for (let word of words) {
+				word.weight = Math_mapLinear(word.weight, minWeight, maxWeight, 1, fontSizeRatio);
+			}
+		} else {
+			for (let word of words) {
+				word.weight /= minWeight;
+			}
+		}
+	}
+
+	return words;
 };
 
 var Worker_getMessage = function(worker) {
@@ -113,6 +197,7 @@ var computeBoundedWords = async function(context) {
 			context.throwIfInterrupted();
 			try {
 				let {
+					key,
 					text,
 					weight,
 					rotation,
@@ -173,6 +258,7 @@ var computeBoundedWords = async function(context) {
 				let innerRectTop = outerRectTop + (outerRectHeight - innerRectHeight) / 2;
 
 				boundedWords.push({
+					key,
 					text,
 					rotation,
 					fontFamily,
@@ -198,6 +284,55 @@ var computeBoundedWords = async function(context) {
 	}
 	await context.delayIfNotInterrupted();
 	return boundedWords;
+};
+
+var Iterable_min = function(values, iteratee) {
+	let returns = Infinity;
+	for (let value of values) {
+		returns = Math.min(iteratee(value), returns);
+	}
+	return returns;
+};
+
+var Iterable_max = function(values, iteratee) {
+	let returns = -Infinity;
+	for (let value of values) {
+		returns = Math.max(iteratee(value), returns);
+	}
+	return returns;
+};
+
+var computeScaledBoundedWords = function() {
+	let words = this.boundedWords;
+	let containerWidth = this.containerWidth;
+	let containerHeight = this.containerHeight;
+	let maxFontSize = this.maxFontSize;
+
+	let containedLeft = Iterable_min(words, ({rectLeft}) => rectLeft);
+	let containedRight = Iterable_max(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+	let containedWidth = containedRight - containedLeft;
+
+	let containedTop = Iterable_min(words, ({rectTop}) => rectTop);
+	let containedBottom = Iterable_max(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
+	let containedHeight = containedBottom - containedTop;
+
+	let scaleFactor = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
+
+	let currentMaxFontSize = Iterable_max(words, ({fontSize}) => fontSize) * scaleFactor;
+	if (currentMaxFontSize > maxFontSize) {
+		scaleFactor *= maxFontSize / currentMaxFontSize;
+	}
+
+	return words.map(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
+		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
+		rectWidth *= scaleFactor;
+		rectHeight *= scaleFactor;
+		textWidth *= scaleFactor;
+		textHeight *= scaleFactor;
+		fontSize *= scaleFactor;
+		return {key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
+	});
 };
 
 let VueWordCloud = {
@@ -306,112 +441,7 @@ let VueWordCloud = {
 			return this.domRenderer;
 		},
 
-		normalizedWords() {
-			let words = this.words.map(word => {
-				let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
-				if (word) {
-					switch (typeof word) {
-						case 'string': {
-							text = word;
-							break;
-						}
-						case 'object': {
-							if (Array.isArray(word)) {
-								([text, weight] = word);
-							} else {
-								({text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color} = word);
-							}
-							break;
-						}
-					}
-				}
-				if (text === undefined) {
-					if (typeof this.text === 'function') {
-						text = this.text(word);
-					} else {
-						text = this.text;
-					}
-				}
-				if (weight === undefined) {
-					if (typeof this.weight === 'function') {
-						weight = this.weight(word);
-					} else {
-						weight = this.weight;
-					}
-				}
-				if (rotation === undefined) {
-					if (typeof this.rotation === 'function') {
-						rotation = this.rotation(word);
-					} else {
-						rotation = this.rotation;
-					}
-				}
-				if (fontFamily === undefined) {
-					if (typeof this.fontFamily === 'function') {
-						fontFamily = this.fontFamily(word);
-					} else {
-						fontFamily = this.fontFamily;
-					}
-				}
-				if (fontStyle === undefined) {
-					if (typeof this.fontStyle === 'function') {
-						fontStyle = this.fontStyle(word);
-					} else {
-						fontStyle = this.fontStyle;
-					}
-				}
-				if (fontVariant === undefined) {
-					if (typeof this.fontVariant === 'function') {
-						fontVariant = this.fontVariant(word);
-					} else {
-						fontVariant = this.fontVariant;
-					}
-				}
-				if (fontWeight === undefined) {
-					if (typeof this.fontWeight === 'function') {
-						fontWeight = this.fontWeight(word);
-					} else {
-						fontWeight = this.fontWeight;
-					}
-				}
-				if (color === undefined) {
-					if (typeof this.color === 'function') {
-						color = this.color(word);
-					} else {
-						color = this.color;
-					}
-				}
-				return {text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
-			});
-
-			words = words.filter(({text}) => text);
-			words = words.filter(({weight}) => weight > 0);
-
-			if (words.length > 0) {
-				words = Array_uniqueBy(words, ({text}) => text);
-
-				words.sort((word, otherWord) => otherWord.weight - word.weight);
-
-				let minWeight = Array_last(words).weight;
-				let maxWeight = Array_first(words).weight;
-
-				let fontSizeRatio = this.fontSizeRatio;
-				if (fontSizeRatio > 0 && fontSizeRatio < Infinity) {
-					if (fontSizeRatio < 1) {
-						fontSizeRatio = 1/fontSizeRatio;
-					}
-					for (let word of words) {
-						word.weight = Math_mapLinear(word.weight, minWeight, maxWeight, 1, fontSizeRatio);
-					}
-				} else {
-					for (let word of words) {
-						word.weight /= minWeight;
-					}
-				}
-			}
-
-			return words;
-		},
+		normalizedWords: computeNormalizedWords,
 
 		boundedWords() {
 			(async () => {
@@ -454,38 +484,7 @@ let VueWordCloud = {
 			};
 		},
 
-		scaledBoundedWords() {
-			let words = this.boundedWords;
-			let containerWidth = this.containerWidth;
-			let containerHeight = this.containerHeight;
-			let maxFontSize = this.maxFontSize;
-
-			let containedLeft = Iterable_min(words, ({rectLeft}) => rectLeft);
-			let containedRight = Iterable_max(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
-			let containedWidth = containedRight - containedLeft;
-
-			let containedTop = Iterable_min(words, ({rectTop}) => rectTop);
-			let containedBottom = Iterable_max(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
-			let containedHeight = containedBottom - containedTop;
-
-			let scaleFactor = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
-
-			let currentMaxFontSize = Iterable_max(words, ({fontSize}) => fontSize) * scaleFactor;
-			if (currentMaxFontSize > maxFontSize) {
-				scaleFactor *= maxFontSize / currentMaxFontSize;
-			}
-
-			return words.map(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
-				rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
-				rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
-				rectWidth *= scaleFactor;
-				rectHeight *= scaleFactor;
-				textWidth *= scaleFactor;
-				textHeight *= scaleFactor;
-				fontSize *= scaleFactor;
-				return {text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
-			});
-		},
+		scaledBoundedWords: computeScaledBoundedWords,
 
 		domWords() {
 			let words = [...this.scaledBoundedWords];
@@ -494,8 +493,8 @@ let VueWordCloud = {
 			let transitionDelay = (this.animationDuration - transitionDuration) / wordsCount;
 			let transitionEasing = this.animationEasing;
 			let domWords = {};
-			words.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) => {
-				domWords[text] = {
+			words.forEach(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) => {
+				domWords[key] = {
 					style: {
 						position: 'absolute',
 						left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,

@@ -8,12 +8,12 @@
 		"url": "git+https://github.com/SeregPie/VueWordCloud.git"
 	},
 	"scripts": {
-		"build": "rollup -c",
-		"build.min": "rollup -c rollup.min.config.js",
-		"build.es5.min": "rollup -c rollup.es5.min.config.js",
-		"build.all": "npm run build && npm run build.min && npm run build.es5.min",
-		"dev": "rollup -c rollup.min.config.js -w",
-		"prepublish": "npm run build.all"
+		"build": "rollup -c build/rollup.config.js",
+		"build:min": "rollup -c build/rollup.min.config.js",
+		"build:es5": "rollup -c build/rollup.es5.config.js",
+		"build:all": "npm run build && npm run build:min && npm run build:es5",
+		"dev": "rollup -c build/rollup.min.config.js -w",
+		"prepublish": "npm run build:all"
 	},
 	"keywords": [
 		"cloud",

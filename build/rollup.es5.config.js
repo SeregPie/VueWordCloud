@@ -4,7 +4,7 @@ import commonjs from 'rollup-plugin-commonjs';
 import minify from 'rollup-plugin-babel-minify';
 
 import config from './rollup.config.js';
-config.output.file = 'VueWordCloud.es5.min.js';
+config.output.file = 'VueWordCloud.es5.js';
 config.plugins.push(
 	babel({
 		exclude: 'node_modules/**',
