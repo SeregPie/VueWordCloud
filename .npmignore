@@ -1,6 +1,8 @@
-/node_modules/
+.eslintrc.js
+
 /src/
 /build/
+
 /demo/
 /index.html
 /index.bulma.html
