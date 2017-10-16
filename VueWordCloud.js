@@ -138,6 +138,20 @@ var Array_last = function(array) {
 	return array[array.length - 1];
 };
 
+var Array_sortBy = function(array, iteratee) {
+	return array.slice().sort((value, otherValue) => {
+		value = iteratee(value);
+		otherValue = iteratee(otherValue);
+		if (value < otherValue) {
+			return -1;
+		}
+		if (value > otherValue) {
+			return 1;
+		}
+		return 0;
+	});
+};
+
 var Array_dropRightUntil = function(array, iteratee) {
 	let i = array.length;
 	while (i-- > 0) {
@@ -179,29 +193,28 @@ var computeBoundedWords = async function(context) {
 		await context.delayIfNotInterrupted();
 
 		let containerAspect = containerWidth / containerHeight;
-		words = words.slice();
 
-		words.sort((word, otherWord) => otherWord.weight - word.weight);
+		words = Array_sortBy(words, ({weight}) => -weight);
+
 		let minWeight = Array_last(words).weight;
 		let maxWeight = Array_first(words).weight;
 
+		let weightToFontSize;
 		if (minWeight < maxWeight && fontSizeRatio > 0 && fontSizeRatio < Infinity) {
 			if (fontSizeRatio < 1) {
 				fontSizeRatio = 1 / fontSizeRatio;
 			}
-			for (let word of words) {
-				word.weight = Math_mapLinear(word.weight, minWeight, maxWeight, 1, fontSizeRatio);
-			}
-			minWeight = 1;
-			maxWeight = fontSizeRatio;
+			weightToFontSize = function(weight) {
+				return Math_mapLinear(weight, minWeight, maxWeight, 1, fontSizeRatio);
+			};
 		} else {
 			words = Array_dropRightUntil(words, ({weight}) => weight > 0);
 			if (words.length > 0) {
 				minWeight = Array_last(words).weight;
-				for (let word of words) {
-					word.weight /= minWeight;
-				}
 			}
+			weightToFontSize = function(weight) {
+				return weight / minWeight;
+			};
 		}
 
 		let boundWordWorker = new Worker(boundWordWorkerContent);
@@ -231,7 +244,7 @@ var computeBoundedWords = async function(context) {
 						color,
 					} = word;
 
-					let fontSize = weight * 4;
+					let fontSize = 4 * weightToFontSize(weight);
 					let rotationRad = Math_turnToRad(rotation);
 
 					let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
@@ -299,7 +312,7 @@ var computeBoundedWords = async function(context) {
 						});
 					}
 				} catch (error) {
-					console.log(error);
+					// console.log(error);
 					// continue regardless of error
 				}
 			}
@@ -475,7 +488,7 @@ let VueWordCloud = {
 				try {
 					this.fulfilledBoundedWords = await this.promisedBoundedWords;
 				} catch (error) {
-					console.log(error);
+					// console.log(error);
 					// continue regardless of error
 				}
 			})();
