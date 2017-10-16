@@ -1,5 +1,16 @@
 export default function() {
-	let keyCounters = {};
+	let generateKey = (function() {
+		let keyCounters = {};
+		return function(value) {
+			let key = JSON.stringify(value);
+			let keyCounter = keyCounters[key] || 0;
+			keyCounters[key] = keyCounter + 1;
+			if (keyCounter > 0) {
+				key += `-${keyCounter}`;
+			}
+			return key;
+		};
+	})();
 	return this.words.map(word => {
 		let text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color;
 		if (word) {
@@ -74,12 +85,7 @@ export default function() {
 				color = this.color;
 			}
 		}
-		let key = JSON.stringify([text, fontFamily, fontStyle, fontVariant, fontWeight]);
-		let keyCounter = keyCounters[key] || 0;
-		keyCounters[key] = keyCounter + 1;
-		if (keyCounter > 0) {
-			key += `-${keyCounter}`;
-		}
+		let key = generateKey([text, fontFamily, fontStyle, fontVariant, fontWeight]);
 		return {key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color};
 	});
 }
