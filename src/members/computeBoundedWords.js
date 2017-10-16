@@ -29,12 +29,12 @@ export default async function(context) {
 		let minWeight = Array_last(words).weight;
 		let maxWeight = Array_first(words).weight;
 
-		let weightToFontSize;
+		let convertWeightToFontSize;
 		if (minWeight < maxWeight && fontSizeRatio > 0 && fontSizeRatio < Infinity) {
 			if (fontSizeRatio < 1) {
 				fontSizeRatio = 1 / fontSizeRatio;
 			}
-			weightToFontSize = function(weight) {
+			convertWeightToFontSize = function(weight) {
 				return Math_mapLinear(weight, minWeight, maxWeight, 1, fontSizeRatio);
 			};
 		} else {
@@ -42,7 +42,7 @@ export default async function(context) {
 			if (words.length > 0) {
 				minWeight = Array_last(words).weight;
 			}
-			weightToFontSize = function(weight) {
+			convertWeightToFontSize = function(weight) {
 				return weight / minWeight;
 			};
 		}
@@ -74,7 +74,7 @@ export default async function(context) {
 						color,
 					} = word;
 
-					let fontSize = 4 * weightToFontSize(weight);
+					let fontSize = 4 * convertWeightToFontSize(weight);
 					let rotationRad = Math_turnToRad(rotation);
 
 					let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
@@ -86,14 +86,14 @@ export default async function(context) {
 
 					let ctx = document.createElement('canvas').getContext('2d');
 					ctx.font = font;
-					let innerTextWidth = ctx.measureText(text).width;
-					if (innerTextWidth > 0) {
+					let textWidth = ctx.measureText(text).width;
+					if (textWidth > 0) {
 
-						let innerTextHeight = fontSize;
+						let textHeight = fontSize;
 						let outerTextPadding = Math.max(ctx.measureText('m').width, fontSize);
-						let outerTextWidth = innerTextWidth + 2 * outerTextPadding;
-						let outerTextHeight = innerTextHeight + 2 * outerTextPadding;
-						let [innerRectWidth, innerRectHeight] = D2_rectAfterRotation(innerTextWidth, innerTextHeight, rotationRad);
+						let outerTextWidth = textWidth + 2 * outerTextPadding;
+						let outerTextHeight = textHeight + 2 * outerTextPadding;
+						let [rectWidth, rectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotationRad);
 						let [outerRectWidth, outerRectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
 						let outerRectData = new Uint8Array(outerRectWidth * outerRectHeight);
 
@@ -120,8 +120,8 @@ export default async function(context) {
 							rectTop: outerRectTop,
 						} = await Worker_getMessage(boundWordWorker);
 
-						let innerRectLeft = outerRectLeft + (outerRectWidth - innerRectWidth) / 2;
-						let innerRectTop = outerRectTop + (outerRectHeight - innerRectHeight) / 2;
+						let rectLeft = outerRectLeft + (outerRectWidth - rectWidth) / 2;
+						let rectTop = outerRectTop + (outerRectHeight - rectHeight) / 2;
 
 						boundedWords.push({
 							key,
@@ -132,12 +132,12 @@ export default async function(context) {
 							fontStyle,
 							fontVariant,
 							fontWeight,
-							rectLeft: innerRectLeft,
-							rectTop: innerRectTop,
-							rectWidth: innerRectWidth,
-							rectHeight: innerRectHeight,
-							textWidth: innerTextWidth,
-							textHeight: innerTextHeight,
+							rectLeft,
+							rectTop,
+							rectWidth,
+							rectHeight,
+							textWidth,
+							textHeight,
 							color,
 						});
 					}
