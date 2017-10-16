@@ -1,6 +1,7 @@
 import Worker_getMessage from '../helpers/Worker/getMessage';
 import Array_first from '../helpers/Array/first';
 import Array_last from '../helpers/Array/last';
+import Array_sortBy from '../helpers/Array/sortBy';
 import Array_dropRightUntil from '../helpers/Array/dropRightUntil';
 import Math_mapLinear from '../helpers/Math/mapLinear';
 import Math_turnToRad from '../helpers/Math/turnToRad';
@@ -12,7 +13,7 @@ export default async function(context) {
 
 	let containerWidth = this.containerWidth;
 	let containerHeight = this.containerHeight;
-	let words = JSON.parse(JSON.stringify(this.normalizedWords));
+	let words = this.normalizedWords;
 	let fontSizeRatio = this.fontSizeRatio;
 
 	let boundedWords = [];
@@ -23,7 +24,8 @@ export default async function(context) {
 
 		let containerAspect = containerWidth / containerHeight;
 
-		words.sort((word, otherWord) => otherWord.weight - word.weight);
+		words = Array_sortBy(words, ({weight}) => -weight);
+
 		let minWeight = Array_last(words).weight;
 		let maxWeight = Array_first(words).weight;
 
