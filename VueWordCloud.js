@@ -170,6 +170,10 @@ var Math_turnToRad = function(v) {
 	return v * 2 * Math.PI;
 };
 
+var Math_ceilToNearestPowerOfTwo = function(v) {
+	return Math.pow(2, Math.ceil(Math.log(v) / Math.LN2));
+};
+
 var D2_rectAfterRotation = function(width, height, rotation) {
 	return [
 		Math.ceil((width * Math.abs(Math.cos(rotation)) + height * Math.abs(Math.sin(rotation)))),
@@ -199,12 +203,12 @@ var computeBoundedWords = async function(context) {
 		let minWeight = Array_last(words).weight;
 		let maxWeight = Array_first(words).weight;
 
-		let weightToFontSize;
+		let convertWeightToFontSize;
 		if (minWeight < maxWeight && fontSizeRatio > 0 && fontSizeRatio < Infinity) {
 			if (fontSizeRatio < 1) {
 				fontSizeRatio = 1 / fontSizeRatio;
 			}
-			weightToFontSize = function(weight) {
+			convertWeightToFontSize = function(weight) {
 				return Math_mapLinear(weight, minWeight, maxWeight, 1, fontSizeRatio);
 			};
 		} else {
@@ -212,7 +216,7 @@ var computeBoundedWords = async function(context) {
 			if (words.length > 0) {
 				minWeight = Array_last(words).weight;
 			}
-			weightToFontSize = function(weight) {
+			convertWeightToFontSize = function(weight) {
 				return weight / minWeight;
 			};
 		}
@@ -223,6 +227,8 @@ var computeBoundedWords = async function(context) {
 			let gridResolution = Math.pow(2, 22);
 			let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
 			let gridHeight = Math.floor(gridResolution / gridWidth);
+			gridWidth = Math_ceilToNearestPowerOfTwo(gridWidth);
+			gridHeight = Math_ceilToNearestPowerOfTwo(gridHeight);
 
 			boundWordWorker.postMessage({gridWidth, gridHeight});
 
@@ -244,7 +250,7 @@ var computeBoundedWords = async function(context) {
 						color,
 					} = word;
 
-					let fontSize = 4 * weightToFontSize(weight);
+					let fontSize = 4 * convertWeightToFontSize(weight);
 					let rotationRad = Math_turnToRad(rotation);
 
 					let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
@@ -256,15 +262,17 @@ var computeBoundedWords = async function(context) {
 
 					let ctx = document.createElement('canvas').getContext('2d');
 					ctx.font = font;
-					let innerTextWidth = ctx.measureText(text).width;
-					if (innerTextWidth > 0) {
+					let textWidth = ctx.measureText(text).width;
+					if (textWidth > 0) {
 
-						let innerTextHeight = fontSize;
+						let textHeight = fontSize;
 						let outerTextPadding = Math.max(ctx.measureText('m').width, fontSize);
-						let outerTextWidth = innerTextWidth + 2 * outerTextPadding;
-						let outerTextHeight = innerTextHeight + 2 * outerTextPadding;
-						let [innerRectWidth, innerRectHeight] = D2_rectAfterRotation(innerTextWidth, innerTextHeight, rotationRad);
+						let outerTextWidth = textWidth + 2 * outerTextPadding;
+						let outerTextHeight = textHeight + 2 * outerTextPadding;
+						let [rectWidth, rectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotationRad);
 						let [outerRectWidth, outerRectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
+						outerRectWidth = Math_ceilToNearestPowerOfTwo(outerRectWidth);
+						outerRectHeight = Math_ceilToNearestPowerOfTwo(outerRectHeight);
 						let outerRectData = new Uint8Array(outerRectWidth * outerRectHeight);
 
 						ctx.canvas.width = outerRectWidth;
@@ -290,8 +298,8 @@ var computeBoundedWords = async function(context) {
 							rectTop: outerRectTop,
 						} = await Worker_getMessage(boundWordWorker);
 
-						let innerRectLeft = outerRectLeft + (outerRectWidth - innerRectWidth) / 2;
-						let innerRectTop = outerRectTop + (outerRectHeight - innerRectHeight) / 2;
+						let rectLeft = outerRectLeft + (outerRectWidth - rectWidth) / 2;
+						let rectTop = outerRectTop + (outerRectHeight - rectHeight) / 2;
 
 						boundedWords.push({
 							key,
@@ -302,12 +310,12 @@ var computeBoundedWords = async function(context) {
 							fontStyle,
 							fontVariant,
 							fontWeight,
-							rectLeft: innerRectLeft,
-							rectTop: innerRectTop,
-							rectWidth: innerRectWidth,
-							rectHeight: innerRectHeight,
-							textWidth: innerTextWidth,
-							textHeight: innerTextHeight,
+							rectLeft,
+							rectTop,
+							rectWidth,
+							rectHeight,
+							textWidth,
+							textHeight,
 							color,
 						});
 					}

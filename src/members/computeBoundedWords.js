@@ -5,6 +5,7 @@ import Array_sortBy from '../helpers/Array/sortBy';
 import Array_dropRightUntil from '../helpers/Array/dropRightUntil';
 import Math_mapLinear from '../helpers/Math/mapLinear';
 import Math_turnToRad from '../helpers/Math/turnToRad';
+import Math_ceilToNearestPowerOfTwo from '../helpers/Math/ceilToNearestPowerOfTwo';
 import D2_rectAfterRotation from '../helpers/D2/rectAfterRotation';
 
 import boundWordWorkerContent from 'objectURL!../workers/boundWord.js';
@@ -53,6 +54,8 @@ export default async function(context) {
 			let gridResolution = Math.pow(2, 22);
 			let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
 			let gridHeight = Math.floor(gridResolution / gridWidth);
+			gridWidth = Math_ceilToNearestPowerOfTwo(gridWidth);
+			gridHeight = Math_ceilToNearestPowerOfTwo(gridHeight);
 
 			boundWordWorker.postMessage({gridWidth, gridHeight});
 
@@ -95,6 +98,8 @@ export default async function(context) {
 						let outerTextHeight = textHeight + 2 * outerTextPadding;
 						let [rectWidth, rectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotationRad);
 						let [outerRectWidth, outerRectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
+						outerRectWidth = Math_ceilToNearestPowerOfTwo(outerRectWidth);
+						outerRectHeight = Math_ceilToNearestPowerOfTwo(outerRectHeight);
 						let outerRectData = new Uint8Array(outerRectWidth * outerRectHeight);
 
 						ctx.canvas.width = outerRectWidth;
