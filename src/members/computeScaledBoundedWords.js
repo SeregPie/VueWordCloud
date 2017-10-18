@@ -22,7 +22,7 @@ export default function() {
 		scaleFactor *= maxFontSize / currentMaxFontSize;
 	}
 
-	return words.map(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+	return words.map(({key, text, weight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
 		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
 		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
 		rectWidth *= scaleFactor;
@@ -30,6 +30,6 @@ export default function() {
 		textWidth *= scaleFactor;
 		textHeight *= scaleFactor;
 		fontSize *= scaleFactor;
-		return {key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
+		return {key, text, weight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
 	});
 }

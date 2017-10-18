@@ -43,6 +43,22 @@ Include the code in your page via a CDN.
 
 ```
 
+---
+
+Pass custom renderer for the words.
+
+```html
+
+<vue-word-cloud :words="words">
+	<template scope="word">
+		<div style="cursor: pointer;" :title="`${word.text} (${word.weight})`" @click="onWordClick(word)">
+			{{ text }}
+		</div>
+	</template>
+</vue-word-cloud>
+
+```
+
 ## properties
 
 `words = []`

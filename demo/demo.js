@@ -104,6 +104,13 @@
 		},
 
 		methods: {
+			onWordClick({text, color}) {
+				this.$notify({
+					dangerouslyUseHTMLString: true,
+					message: `You clicked on the word <b style="color: ${color}">${text}</b>.`,
+				});
+			},
+
 			updateContainerSize() {
 				let {width, height} = this.$el.getBoundingClientRect();
 				this.containerWidth = width;

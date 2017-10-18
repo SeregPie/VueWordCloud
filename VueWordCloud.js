@@ -304,6 +304,7 @@ var computeBoundedWords = async function(context) {
 						boundedWords.push({
 							key,
 							text,
+							weight,
 							rotation,
 							fontFamily,
 							fontSize,
@@ -371,7 +372,7 @@ var computeScaledBoundedWords = function() {
 		scaleFactor *= maxFontSize / currentMaxFontSize;
 	}
 
-	return words.map(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
+	return words.map(({key, text, weight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
 		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
 		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
 		rectWidth *= scaleFactor;
@@ -379,8 +380,12 @@ var computeScaledBoundedWords = function() {
 		textWidth *= scaleFactor;
 		textHeight *= scaleFactor;
 		fontSize *= scaleFactor;
-		return {key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
+		return {key, text, weight, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight};
 	});
+};
+
+let defaultCreateWordElement = function({text}) {
+	return text;
 };
 
 let VueWordCloud = {
@@ -453,6 +458,7 @@ let VueWordCloud = {
 			default: Infinity,
 		},
 
+		/*
 		animationDuration: {
 			type: Number,
 			default: 5000,
@@ -462,6 +468,7 @@ let VueWordCloud = {
 			type: String,
 			default: 'ease',
 		},
+		*/
 
 		containerSizeUpdateInterval: {
 			type: Number,
@@ -535,6 +542,7 @@ let VueWordCloud = {
 		scaledBoundedWords: computeScaledBoundedWords,
 
 		domWords() {
+			/*
 			let words = [...this.scaledBoundedWords];
 			let wordsCount = words.length;
 			let transitionDuration = this.animationDuration / 4;
@@ -557,6 +565,14 @@ let VueWordCloud = {
 				};
 			});
 			return domWords;
+			*/
+		},
+
+		createWordElement() {
+			if (this.$scopedSlots.default) {
+				return this.$scopedSlots.default;
+			}
+			return defaultCreateWordElement;
 		},
 
 		updateContainerSizeTrigger() {
@@ -575,16 +591,77 @@ let VueWordCloud = {
 
 	methods: {
 		domRenderer(createElement) {
-			return createElement('div', {
-				style: {
-					position: 'relative',
-					width: '100%',
-					height: '100%',
-					overflow: 'hidden',
+			let words = [...this.scaledBoundedWords];
+			let createWordElement = this.createWordElement;
+			return createElement(
+				'div',
+				{
+					style: {
+						position: 'relative',
+						width: '100%',
+						height: '100%',
+						overflow: 'hidden',
+					},
 				},
-			}, Object.entries(this.domWords).map(([key, {style, text}]) =>
-				createElement('div', {key, style}, text)
-			));
+				words.map(({
+					key,
+					text,
+					weight,
+					color,
+					fontFamily,
+					fontSize,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+					rotation,
+					rectLeft,
+					rectTop,
+					rectWidth,
+					rectHeight,
+					textWidth,
+					textHeight,
+				}) =>
+					createElement(
+						'div',
+						{
+							key,
+							style: {
+								position: 'absolute',
+								left: `${rectLeft + rectWidth / 2}px`,
+								top: `${rectTop + rectHeight / 2}px`,
+								transform: `rotate(${rotation}turn)`,
+							},
+						},
+						[createElement(
+							'div',
+							{
+								style: {
+									position: 'absolute',
+									left: '50%',
+									top: '50%',
+									width: `${textWidth}px`,
+									height: `${textHeight}px`,
+									color: color,
+									font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
+									whiteSpace: 'nowrap',
+									transform: 'translate(-50%, -50%)',
+								},
+							},
+							createWordElement({
+								text,
+								weight,
+								color,
+								fontFamily,
+								fontSize,
+								fontStyle,
+								fontVariant,
+								fontWeight,
+								rotation,
+							}),
+						)],
+					)
+				),
+			);
 		},
 
 		canvasRenderer(createElement) {

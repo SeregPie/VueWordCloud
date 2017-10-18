@@ -1,0 +1,8 @@
+.FancyWord {
+	cursor: pointer;
+	transition: transform 0.3s ease 0.2s;
+}
+
+.FancyWord:hover {
+	transform: scale3d(1.1, 1.1, 1);
+}

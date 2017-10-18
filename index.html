@@ -15,6 +15,7 @@
 		<link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Roboto|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco" rel="stylesheet"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.2/theme-chalk/index.css"/>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.2/index.js"></script>
+		<link rel="stylesheet" href="demo/demo.css"/>
 	</head>
 	<body style="height: 100%; font-family: Roboto;">
 		<div style="height: 100%; display: flex; justify-content: center; align-items: center;" v-cloak id="demo">
@@ -29,7 +30,7 @@
 					</div>
 					<div style="flex: 1; overflow-x: hidden; overflow-y: auto; padding: 0 16px;">
 						<el-form label-position="right" label-width="125px">
-							<el-form-item label="active" hidden>
+							<el-form-item v-if="false" label="active">
 								<el-switch
 									v-model="active"
 								></el-switch>
@@ -52,7 +53,7 @@
 									></el-option>
 								</el-select>
 							</el-form-item>
-							<el-form-item label="rotation" hidden>
+							<el-form-item v-if="false" label="rotation">
 								<el-radio-group v-model="rotation">
 									<el-radio-button :label="horizontalRotation">a</el-radio-button>
 									<el-radio-button :label="diagonalRotation">b</el-radio-button>
@@ -88,7 +89,7 @@
 									</el-radio>
 								</div>
 							</el-form-item>
-							<el-form-item label="animation duration">
+							<el-form-item v-if="false" label="animation duration">
 								<el-row>
 									<el-col :span="18">
 										<div style="padding: 0 10px;">
@@ -165,7 +166,6 @@
 							</el-form-item>
 						</el-form>
 					</div>
-
 				</div>
 				<div style="box-sizing: border-box; flex: 1; padding: 16px;">
 					<div style="box-sizing: border-box; width: 100%; height: 100%; border-radius: 32px; padding: 16px; background-color: GhostWhite;">
@@ -179,7 +179,20 @@
 							:max-font-size="(maxFontSize < 100) ? maxFontSize : Infinity"
 							:animation-duration="animationDuration"
 							style="min-width: 256px; min-height: 256px;"
-						></vue-word-cloud>
+						>
+							<template scope="{text, weight, color}">
+								<el-tooltip placement="top" :open-delay="300">
+									<div slot="content">
+										<div style="text-align: center;">
+											{{ text }}<br/>({{ weight }})
+										</div>
+									</div>
+									<div class="FancyWord" @click="onWordClick({text, color})">
+										{{ text }}
+									</div>
+								</el-tooltip>
+							</template>
+						</vue-word-cloud>
 					</div>
 				</div>
 			</div>

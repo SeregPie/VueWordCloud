@@ -131,6 +131,7 @@ export default async function(context) {
 						boundedWords.push({
 							key,
 							text,
+							weight,
 							rotation,
 							fontFamily,
 							fontSize,
