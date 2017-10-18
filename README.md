@@ -158,9 +158,3 @@ The value of `4` is the same as the value of `1/4`. The value of `3/2` is the sa
 `animationDuration = 5000`
 
 *type*: `Number`
-
----
-
-`containerSizeUpdateInterval = 1000`
-
-*type*: `Number`

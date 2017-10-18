@@ -481,7 +481,7 @@ let VueWordCloud = {
 	},
 
 	mounted() {
-		this.startContainerSizeUpdate();
+		this.updateContainerSizeTrigger();
 	},
 
 	computed: {
@@ -559,11 +559,13 @@ let VueWordCloud = {
 			return domWords;
 		},
 
-		startContainerSizeUpdate() {
+		updateContainerSizeTrigger() {
 			return function() {
 				if (!this._isDestroyed) {
 					setTimeout(() => {
-						this.startContainerSizeUpdate();
+						requestAnimationFrame(() => {
+							this.updateContainerSizeTrigger();
+						});
 					}, this.containerSizeUpdateInterval);
 					this.updateContainerSize();
 				}
