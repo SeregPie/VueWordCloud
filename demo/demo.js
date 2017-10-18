@@ -69,8 +69,15 @@
 			supportedFontFamilies,
 
 			fontSizeRatio: 0,
-			maxFontSize: 200,
+			maxFontSize: 105,
 			animationDuration: 5000,
+
+			containerWidth: 0,
+			containerHeight: 0,
+		},
+
+		mounted() {
+			this.updateContainerSizeTrigger();
 		},
 
 		computed: {
@@ -80,6 +87,27 @@
 					.map(line => /^(.+)\s+(\d+)$/.exec(line))
 					.filter(matched => matched)
 					.map(([, text, size]) => [text, Number.parseInt(size)]);
+			},
+
+			updateContainerSizeTrigger() {
+				return function() {
+					if (!this._isDestroyed) {
+						setTimeout(() => {
+							requestAnimationFrame(() => {
+								this.updateContainerSizeTrigger();
+							});
+						}, 1000);
+						this.updateContainerSize();
+					}
+				};
+			},
+		},
+
+		methods: {
+			updateContainerSize() {
+				let {width, height} = this.$el.getBoundingClientRect();
+				this.containerWidth = width;
+				this.containerHeight = height;
 			},
 		},
 	});

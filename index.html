@@ -17,144 +17,173 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-alpha.2/index.js"></script>
 	</head>
 	<body style="height: 100%; font-family: Roboto;">
-		<el-container style="height: 100%;" v-cloak id="demo">
-			<el-aside width="400px">
-				<div style="text-align: center;">
-					<a href="https://github.com/SeregPie/VueWordCloud" target="_blank">
-						<el-button type="text" style="font-size: 28px;">
-							<i class="fa fa-github"></i> VueWordCloud
-						</el-button>
-					</a>
+		<div style="height: 100%; display: flex; justify-content: center; align-items: center;" v-cloak id="demo">
+			<div style="width: 100%; height: 100%; display: flex;">
+				<div style="display: flex; flex-direction: column;">
+					<div style="padding: 16px;">
+						<a href="https://github.com/SeregPie/VueWordCloud" target="_blank">
+							<el-button type="text" style="padding: 0; font-size: 28px;">
+								<i class="fa fa-github"></i> VueWordCloud
+							</el-button>
+						</a>
+					</div>
+					<div style="flex: 1; overflow-x: hidden; overflow-y: auto; padding: 0 16px;">
+						<el-form :label-position="containerWidth < 960 ? 'top' : 'right'" label-width="125px">
+							<el-form-item label="active" hidden>
+								<el-switch
+									v-model="active"
+								></el-switch>
+							</el-form-item>
+							<el-form-item label="words &amp; weights">
+								<el-input
+									type="textarea"
+									v-model="wordsInput"
+									:rows="9"
+								></el-input>
+							</el-form-item>
+							<el-form-item label="font family">
+								<el-select v-model="fontFamily" style="width: 100%;">
+									<el-option
+										v-for="fontFamily in supportedFontFamilies"
+										:key="fontFamily"
+										:label="fontFamily"
+										:value="fontFamily"
+										:style="{fontFamily}"
+									></el-option>
+								</el-select>
+							</el-form-item>
+							<el-form-item label="rotation" hidden>
+								<el-radio-group v-model="rotation">
+									<el-radio-button :label="horizontalRotation">a</el-radio-button>
+									<el-radio-button :label="diagonalRotation">b</el-radio-button>
+									<el-radio-button :label="randomHorizontalVerticalRotation">c</el-radio-button>
+									<el-radio-button :label="randomHorizontalVerticalDiagonalsRotation">d</el-radio-button>
+									<el-radio-button :label="randomRotation">e</el-radio-button>
+								</el-radio-group>
+							</el-form-item>
+							<el-form-item label="rotation">
+								<div>
+									<el-radio v-model="rotation" :label="horizontalRotation">
+										horizontal
+									</el-radio>
+								</div>
+								<div>
+									<el-radio v-model="rotation" :label="diagonalRotation">
+										diagonal
+									</el-radio>
+								</div>
+								<div>
+									<el-radio v-model="rotation" :label="randomHorizontalVerticalRotation">
+										horizontal and vertical
+									</el-radio>
+								</div>
+								<div>
+									<el-radio v-model="rotation" :label="randomHorizontalVerticalDiagonalsRotation">
+										horizontal, vertical and diagonals
+									</el-radio>
+								</div>
+								<div>
+									<el-radio v-model="rotation" :label="randomRotation">
+										fully random
+									</el-radio>
+								</div>
+							</el-form-item>
+							<el-form-item label="animation duration">
+								<el-row>
+									<el-col :span="18">
+										<div style="padding: 0 10px;">
+											<el-slider
+												:min="0"
+												:max="15000"
+												:step="100"
+												:show-tooltip="false"
+												v-model="animationDuration"
+											></el-slider>
+										</div>
+									</el-col>
+									<el-col :span="6">
+										<div style="text-align: right;">
+											<template v-if="animationDuration > 0">
+												{{ (animationDuration / 1000).toFixed(1) }} s
+											</template>
+											<template v-else>
+												none
+											</template>
+										</div>
+									</el-col>
+								</el-row>
+							</el-form-item>
+							<el-form-item label="font size ratio">
+								<el-row>
+									<el-col :span="18">
+										<div style="padding: 0 10px;">
+											<el-slider
+												:min="0"
+												:max="20"
+												:step="1"
+												:show-tooltip="false"
+												v-model="fontSizeRatio"
+											></el-slider>
+										</div>
+									</el-col>
+									<el-col :span="6">
+										<div style="text-align: right;">
+											<template v-if="fontSizeRatio > 0">
+												{{ fontSizeRatio }} x
+											</template>
+											<template v-else>
+												none
+											</template>
+										</div>
+									</el-col>
+								</el-row>
+							</el-form-item>
+							<el-form-item label="max font size">
+								<el-row>
+									<el-col :span="18">
+										<div style="padding: 0 10px;">
+											<el-slider
+												:min="10"
+												:max="105"
+												:step="5"
+												:show-tooltip="false"
+												v-model="maxFontSize"
+											></el-slider>
+										</div>
+									</el-col>
+									<el-col :span="6">
+										<div style="text-align: right;">
+											<template v-if="maxFontSize > 100">
+												none
+											</template>
+											<template v-else>
+												{{ maxFontSize }} px
+											</template>
+										</div>
+									</el-col>
+								</el-row>
+							</el-form-item>
+						</el-form>
+					</div>
+
 				</div>
-				<el-form label-position="right" label-width="125px">
-					<el-form-item label="active" hidden>
-						<el-switch
-							v-model="active"
-						></el-switch>
-					</el-form-item>
-					<el-form-item label="words &amp; weights">
-						<el-input
-							type="textarea"
-							v-model="wordsInput"
-							:rows="9"
-						></el-input>
-					</el-form-item>
-					<el-form-item label="font family">
-						<el-select v-model="fontFamily" style="width: 100%;">
-							<el-option
-								v-for="fontFamily in supportedFontFamilies"
-								:key="fontFamily"
-								:label="fontFamily"
-								:value="fontFamily"
-								:style="{fontFamily}"
-							></el-option>
-						</el-select>
-					</el-form-item>
-					<el-form-item label="rotation">
-						<el-radio-group v-model="rotation" style="line-height: 1; padding-top: 11px;">
-							<div>
-								<el-radio :label="horizontalRotation">
-									horizontal
-								</el-radio>
-							</div>
-							<div>
-								<el-radio :label="diagonalRotation">
-									diagonal
-								</el-radio>
-							</div>
-							<div>
-								<el-radio :label="randomHorizontalVerticalRotation">
-									horizontal and vertical
-								</el-radio>
-							</div>
-							<div>
-								<el-radio :label="randomHorizontalVerticalDiagonalsRotation">
-									horizontal, vertical and diagonals
-								</el-radio>
-							</div>
-							<div>
-								<el-radio :label="randomRotation">
-									fully random
-								</el-radio>
-							</div>
-						</el-radio-group>
-					</el-form-item>
-					<el-form-item label="animation duration">
-						<div style="display: flex;">
-							<div style="flex: 1; padding: 0 10px;">
-								<el-slider
-									:min="0"
-									:max="15000"
-									:step="100"
-									:show-tooltip="false"
-									v-model="animationDuration"
-								></el-slider>
-							</div>
-							<div style="width: 75px; text-align: right;">
-								<template v-if="animationDuration > 0">
-									{{ (animationDuration / 1000).toFixed(1) }} s
-								</template>
-								<template v-else>
-									none
-								</template>
-							</div>
-						</div>
-					</el-form-item>
-					<el-form-item label="font size ratio">
-						<div style="display: flex;">
-							<div style="flex: 1; padding: 0 10px;">
-								<el-slider
-									:min="0"
-									:max="20"
-									:step="1"
-									:show-tooltip="false"
-									v-model="fontSizeRatio"
-								></el-slider>
-							</div>
-							<div style="width: 75px; text-align: right;">
-								<template v-if="fontSizeRatio > 0">
-									{{ fontSizeRatio }} x
-								</template>
-								<template v-else>
-									none
-								</template>
-							</div>
-						</div>
-					</el-form-item>
-					<el-form-item label="max font size">
-						<div style="display: flex;">
-							<div style="flex: 1; padding: 0 10px;">
-								<el-slider
-									:min="1"
-									:max="200"
-									:step="1"
-									:show-tooltip="false"
-									v-model="maxFontSize"
-								></el-slider>
-							</div>
-							<div style="width: 75px; text-align: right;">
-								{{ maxFontSize }} px
-							</div>
-						</div>
-					</el-form-item>
-				</el-form>
-			</el-aside>
-			<el-container>
-				<el-main>
-					<vue-word-cloud
-						v-if="active"
-						:words="words"
-						:color="randomColor"
-						:font-family="fontFamily"
-						:rotation="rotation"
-						:font-size-ratio="fontSizeRatio"
-						:max-font-size="maxFontSize"
-						:animation-duration="animationDuration"
-						style="min-width: 256px; min-height: 256px;"
-					></vue-word-cloud>
-				</el-main>
-			</el-container>
-		</el-container>
+				<div style="box-sizing: border-box; flex: 1; padding: 16px;">
+					<div style="box-sizing: border-box; width: 100%; height: 100%; border-radius: 32px; padding: 16px; background-color: GhostWhite;">
+						<vue-word-cloud
+							v-if="active"
+							:words="words"
+							:color="randomColor"
+							:font-family="fontFamily"
+							:rotation="rotation"
+							:font-size-ratio="fontSizeRatio"
+							:max-font-size="(maxFontSize < 100) ? maxFontSize : Infinity"
+							:animation-duration="animationDuration"
+							style="min-width: 256px; min-height: 256px;"
+						></vue-word-cloud>
+					</div>
+				</div>
+			</div>
+		</div>
 		<script src="demo/demo.js"></script>
 	</body>
 </html>
