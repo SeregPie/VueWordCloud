@@ -1,6 +1,6 @@
 {
 	"name": "vuewordcloud",
-	"version": "17.10.16",
+	"version": "17.10.18",
 	"description": "A word cloud generator.",
 	"main": "VueWordCloud.min.js",
 	"repository": {
