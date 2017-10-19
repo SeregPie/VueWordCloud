@@ -1,8 +1,14 @@
 .FancyWord {
 	cursor: pointer;
-	transition: transform 0.3s ease 0.2s;
+	transition-property: transform, text-shadow;
+	transition-duration: 0.3s;
+	transition-delay: 0.2s;
+	backface-visibility: hidden;
+	image-rendering: optimizeSpeed;
 }
 
 .FancyWord:hover {
+	text-shadow: 0 -4px 4px rgba(0,0,0,0.2);
 	transform: scale3d(1.1, 1.1, 1);
+	z-index: 999999;
 }
