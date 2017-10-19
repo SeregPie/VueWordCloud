@@ -139,17 +139,12 @@ var Array_last = function(array) {
 };
 
 var Array_sortBy = function(array, iteratee) {
-	return array.slice().sort((value, otherValue) => {
-		value = iteratee(value);
-		otherValue = iteratee(otherValue);
-		if (value < otherValue) {
-			return -1;
-		}
-		if (value > otherValue) {
-			return 1;
-		}
-		return 0;
-	});
+	return array
+		.map(value => [iteratee(value), value])
+		.sort(([value], [otherValue]) =>
+			value > otherValue ? 1 : value < otherValue ? -1 : 0
+		)
+		.map(([, value]) => value);
 };
 
 var Array_dropRightUntil = function(array, iteratee) {
