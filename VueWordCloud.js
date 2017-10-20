@@ -170,10 +170,6 @@ var Math_turnToRad = function(v) {
 	return v * 2 * Math.PI;
 };
 
-var Math_ceilToNearestPowerOfTwo = function(v) {
-	return Math.pow(2, Math.ceil(Math.log(v) / Math.LN2));
-};
-
 var D2_rectAfterRotation = function(width, height, rotation) {
 	return [
 		Math.ceil((width * Math.abs(Math.cos(rotation)) + height * Math.abs(Math.sin(rotation)))),
@@ -227,8 +223,8 @@ var computeBoundedWords = async function(context) {
 			let gridResolution = Math.pow(2, 22);
 			let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
 			let gridHeight = Math.floor(gridResolution / gridWidth);
-			gridWidth = Math_ceilToNearestPowerOfTwo(gridWidth);
-			gridHeight = Math_ceilToNearestPowerOfTwo(gridHeight);
+			//gridWidth = Math_ceilToNearestPowerOfTwo(gridWidth);
+			//gridHeight = Math_ceilToNearestPowerOfTwo(gridHeight);
 
 			boundWordWorker.postMessage({gridWidth, gridHeight});
 
@@ -271,8 +267,8 @@ var computeBoundedWords = async function(context) {
 						let outerTextHeight = textHeight + 2 * outerTextPadding;
 						let [rectWidth, rectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotationRad);
 						let [outerRectWidth, outerRectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
-						outerRectWidth = Math_ceilToNearestPowerOfTwo(outerRectWidth);
-						outerRectHeight = Math_ceilToNearestPowerOfTwo(outerRectHeight);
+						//outerRectWidth = Math_ceilToNearestPowerOfTwo(outerRectWidth);
+						//outerRectHeight = Math_ceilToNearestPowerOfTwo(outerRectHeight);
 						let outerRectData = new Uint8Array(outerRectWidth * outerRectHeight);
 
 						ctx.canvas.width = outerRectWidth;

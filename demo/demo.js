@@ -74,6 +74,7 @@
 
 			containerWidth: 0,
 			containerHeight: 0,
+			drawerActive: false,
 		},
 
 		mounted() {
@@ -96,10 +97,14 @@
 							requestAnimationFrame(() => {
 								this.updateContainerSizeTrigger();
 							});
-						}, 1000);
+						}, 111);
 						this.updateContainerSize();
 					}
 				};
+			},
+
+			drawerWidth() {
+
 			},
 		},
 
