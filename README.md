@@ -51,9 +51,9 @@ Pass custom renderer for the words.
 
 <vue-word-cloud :words="words">
   <template slot-scope="word">
-	<div style="cursor: pointer;" :title="word.weight" @click="onWordClick(word)">
-	  {{ text }}
-	</div>
+    <div style="cursor: pointer;" :title="word.weight" @click="onWordClick(word)">
+      {{ text }}
+    </div>
   </template>
 </vue-word-cloud>
 
