@@ -1,10 +1,10 @@
 (function() {
 
-	let _sample = function(array) {
+	let Array_sample = function(array) {
 		return array[Math.floor(array.length * Math.random())];
 	};
 
-	let _sampleN = function(array, n) {
+	let Array_sampleBy = function(array, n) {
 		return array[n % array.length];
 	};
 
@@ -17,7 +17,7 @@
 	];
 
 	let randomColor = function() {
-		return _sample(['#EBBD58', '#4ACF71', '#10C3B8', '#7E06C4', '#22074C']);
+		return Array_sample(['#EBBD58', '#4ACF71', '#10C3B8', '#7E06C4', '#22074C']);
 	};
 
 	let horizontalRotation = function() {
@@ -29,11 +29,11 @@
 	};
 
 	let randomHorizontalVerticalRotation = function([text]) {
-		return _sampleN([0, 3/4], text.length);
+		return Array_sampleBy([0, 3/4], text.length);
 	};
 
 	let randomHorizontalVerticalDiagonalsRotation = function([text]) {
-		return _sampleN([0, 1/8, 3/4, 7/8], text.length);
+		return Array_sampleBy([0, 1/8, 3/4, 7/8], text.length);
 	};
 
 	let randomRotation = function() {
@@ -52,7 +52,7 @@
 
 			randomColor,
 
-			rotation: _sample([
+			rotation: Array_sample([
 				horizontalRotation,
 				diagonalRotation,
 				randomHorizontalVerticalRotation,
@@ -65,7 +65,7 @@
 			randomHorizontalVerticalDiagonalsRotation,
 			randomRotation,
 
-			fontFamily: _sample(supportedFontFamilies),
+			fontFamily: Array_sample(supportedFontFamilies),
 			supportedFontFamilies,
 
 			fontSizeRatio: 0,

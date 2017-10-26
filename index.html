@@ -3,7 +3,7 @@
 	<head>
 		<title>VueWordCloud</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
@@ -35,7 +35,7 @@
 						</a>
 					</div>
 				</div>
-				<div style="flex: 1;">
+				<div style="flex: 1; position: relative;">
 					<div style="position: absolute; top:0; bottom:0; display: flex;" :style="{left: (containerWidth > 640 || drawerActive) ? 0 : '-280px', width: containerWidth > 640 ? '100%' : 'calc(100% + 280px)'}">
 						<div style="overflow-x: hidden; overflow-y: auto; padding: 16px;" :style="{width: `${(containerWidth > 800) ? 400 : 280}px`}">
 							<el-form :label-position="(containerWidth > 800) ? 'right' : 'top'" label-width="120px">
@@ -176,7 +176,7 @@
 							</el-form>
 						</div>
 						<div style="flex: 1; padding: 16px;">
-							<div style="width: 100%; height: 100%; border-radius: 32px; padding: 16px; background-color: GhostWhite;">
+							<div style="box-sizing: border-box; width: 100%; height: 100%; border-radius: 32px; padding: 16px; background-color: GhostWhite;">
 								<vue-word-cloud
 									v-if="active"
 									:words="words"

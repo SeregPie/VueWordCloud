@@ -1,8 +1,12 @@
 import path from 'path';
 import rollup from 'rollup';
+import babel from 'rollup-plugin-babel';
+import nodeResolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import minify from 'rollup-plugin-babel-minify';
 
 const createObjectURL = (function() {
-	let importeePrefix = 'objectURL!';
+	const importeePrefix = 'objectURL!';
 
 	return function() {
 		let plugins;
@@ -36,18 +40,33 @@ const createObjectURL = (function() {
 	};
 })();
 
+let globals = {
+	'vue': 'Vue',
+};
+
 export default {
 	input: 'src/VueWordCloud.js',
-	external: ['vue'],
+	external: Object.keys(globals),
 	output: {
 		file: 'VueWordCloud.js',
 		format: 'umd',
 		name: 'VueWordCloud',
-		globals: {
-			'vue': 'Vue',
-		},
+		globals,
 	},
 	plugins: [
 		createObjectURL(),
+		babel({
+			exclude: 'node_modules/**',
+			presets: [
+				['env', {modules: false}],
+			],
+			plugins: ['transform-runtime'],
+			runtimeHelpers: true,
+		}),
+		nodeResolve(),
+		commonjs({
+			include: 'node_modules/**',
+		}),
+		minify({comments: false}),
 	],
 };
