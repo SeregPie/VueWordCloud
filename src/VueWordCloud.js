@@ -2,10 +2,12 @@ import Vue from 'vue';
 
 import InterruptError from './helpers/InterruptError';
 import Promise_delay from './helpers/Promise/delay';
+import Element_getBoundingClientRect from './helpers/Element/getBoundingClientRect';
 
 import computeNormalizedWords from './members/computeNormalizedWords.js';
 import computeBoundedWords from './members/computeBoundedWords.js';
 import computeScaledBoundedWords from './members/computeScaledBoundedWords.js';
+import domRenderer from './members/domRenderer.js';
 
 let defaultCreateWordElement = function({text}) {
 	return text;
@@ -213,78 +215,7 @@ let VueWordCloud = {
 	},
 
 	methods: {
-		domRenderer(createElement) {
-			let words = [...this.scaledBoundedWords];
-			let createWordElement = this.createWordElement;
-			return createElement(
-				'div',
-				{
-					style: {
-						position: 'relative',
-						width: '100%',
-						height: '100%',
-					},
-				},
-				words.map(({
-					key,
-					text,
-					weight,
-					color,
-					fontFamily,
-					fontSize,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-					rotation,
-					rectLeft,
-					rectTop,
-					rectWidth,
-					rectHeight,
-					textWidth,
-					textHeight,
-				}) =>
-					createElement(
-						'div',
-						{
-							key,
-							style: {
-								position: 'absolute',
-								left: `${rectLeft + rectWidth / 2}px`,
-								top: `${rectTop + rectHeight / 2}px`,
-								transform: `rotate(${rotation}turn)`,
-							},
-						},
-						[createElement(
-							'div',
-							{
-								style: {
-									position: 'absolute',
-									left: '50%',
-									top: '50%',
-									width: `${textWidth}px`,
-									height: `${textHeight}px`,
-									color: color,
-									font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
-									whiteSpace: 'nowrap',
-									transform: 'translate(-50%, -50%)',
-								},
-							},
-							createWordElement({
-								text,
-								weight,
-								color,
-								fontFamily,
-								fontSize,
-								fontStyle,
-								fontVariant,
-								fontWeight,
-								rotation,
-							}),
-						)],
-					)
-				),
-			);
-		},
+		domRenderer,
 
 		canvasRenderer(createElement) {
 			// todo?
@@ -311,7 +242,7 @@ let VueWordCloud = {
 		},
 
 		updateContainerSize() {
-			let {width, height} = this.$el.getBoundingClientRect();
+			let {width, height} = Element_getBoundingClientRect(this.$el);
 			this.containerWidth = width;
 			this.containerHeight = height;
 		},
