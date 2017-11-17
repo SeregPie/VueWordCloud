@@ -4,7 +4,7 @@
 		<title>VueWordCloud</title>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Object.entries"></script>
+		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Number.parseInt,Object.entries"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.4/vue.min.js"></script>
 		<style>
 			[v-cloak] {
@@ -87,7 +87,7 @@
 						class="px-2 py-0"
 						v-model="model.animationDuration.value"
 						:min="0"
-						:max="model.animationDuration.values.length - 1"
+						:max="model.animationDuration.possibleValues.length - 1"
 						color="deep-orange"
 						hide-details
 					></v-slider>
@@ -105,7 +105,7 @@
 						class="px-2 py-0"
 						v-model="model.fontSizeRatio.value"
 						:min="0"
-						:max="model.fontSizeRatio.values.length - 1"
+						:max="model.fontSizeRatio.possibleValues.length - 1"
 						color="deep-orange"
 						hide-details
 					></v-slider>

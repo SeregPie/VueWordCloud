@@ -132,12 +132,12 @@
 					})(),
 
 					animationDuration: {
-						values: [0, 1, 2, 3, 4, 5, 10],
+						possibleValues: [0, 1, 2, 3, 4, 5, 10],
 						value: 0,
 					},
 
 					fontSizeRatio: {
-						values: [0, 1, 2, 3, 4, 5, 10, 20, 30],
+						possibleValues: [0, 1, 2, 3, 4, 5, 10, 20, 30],
 						value: 0,
 					},
 
@@ -186,17 +186,19 @@
 			},
 
 			animationDuration: function() {
-				let values = this.model.animationDuration.values;
-				let valueIndex = this.model.animationDuration.value;
+				var possibleValues = this.model.animationDuration.possibleValues;
+				var valueIndex = this.model.animationDuration.value;
+				var value = possibleValues[valueIndex];
 
-				return values[valueIndex] * 1000;
+				return value * 1000;
 			},
 
 			fontSizeRatio: function() {
-				let values = this.model.fontSizeRatio.values;
-				let valueIndex = this.model.fontSizeRatio.value;
+				var possibleValues = this.model.fontSizeRatio.possibleValues;
+				var valueIndex = this.model.fontSizeRatio.value;
+				var value = possibleValues[valueIndex];
 
-				return values[valueIndex];
+				return value;
 			},
 
 			maxFontSize: function() {
