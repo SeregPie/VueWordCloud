@@ -1,6 +1,11 @@
 export default function(createElement) {
-	let words = [...this.scaledBoundedWords];
-	let createWordElement = this.createWordElement;
+	let words = this.scaledBoundedWords;
+	let createWordElement;
+	if (this.$scopedSlots.default) {
+		createWordElement = this.$scopedSlots.default;
+	} else {
+		createWordElement = this.$scopedSlots.default;
+	}
 	return createElement(
 		'div',
 		{
@@ -54,19 +59,24 @@ export default function(createElement) {
 							transform: 'translate(-50%, -50%)',
 						},
 					},
-					createWordElement({
-						text,
-						weight,
-						color,
-						fontFamily,
-						fontSize,
-						fontStyle,
-						fontVariant,
-						fontWeight,
-						rotation,
-					}),
-				)],
+					[(() => {
+						if (this.$scopedSlots.default) {
+							return this.$scopedSlots.default({
+								text,
+								weight,
+								color,
+								fontFamily,
+								fontSize,
+								fontStyle,
+								fontVariant,
+								fontWeight,
+								rotation,
+							});
+						}
+						return text;
+					})()]
+				)]/*,*/
 			)
-		),
+		)/*,*/
 	);
 }

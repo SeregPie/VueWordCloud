@@ -1,24 +1,19 @@
 import Vue from 'vue';
 
+import Array_sample from './helpers/Array/sample';
+import Function_noop from './helpers/Function/noop';
 import InterruptError from './helpers/InterruptError';
 import Promise_delay from './helpers/Promise/delay';
-import Element_getBoundingClientRect from './helpers/Element/getBoundingClientRect';
 
-import computeNormalizedWords from './members/computeNormalizedWords.js';
-import computeBoundedWords from './members/computeBoundedWords.js';
-import computeScaledBoundedWords from './members/computeScaledBoundedWords.js';
-import domRenderer from './members/domRenderer.js';
-
-let defaultCreateWordElement = function({text}) {
-	return text;
-};
+import render from './members/render';
+import computeNormalizedWords from './members/computeNormalizedWords';
+import computeBoundedWords from './members/computeBoundedWords';
+import computeScaledBoundedWords from './members/computeScaledBoundedWords';
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
 
-	render(createElement) {
-		return this.renderer(createElement);
-	},
+	render,
 
 	props: {
 		words: {
@@ -43,7 +38,7 @@ let VueWordCloud = {
 			default() {
 				let values = [0, 3/4];
 				return function() {
-					return values[Math.floor(Math.random() * values.length)];
+					return Array_sample(values);
 				};
 			},
 		},
@@ -83,19 +78,7 @@ let VueWordCloud = {
 			default: Infinity,
 		},
 
-		/*
-		animationDuration: {
-			type: Number,
-			default: 5000,
-		},
-
-		animationEasing: {
-			type: String,
-			default: 'ease',
-		},
-		*/
-
-		containerSizeUpdateInterval: {
+		intervalBetweenUpdateContainerSize: {
 			type: Number,
 			default: 1000,
 		},
@@ -106,108 +89,27 @@ let VueWordCloud = {
 			containerWidth: 0,
 			containerHeight: 0,
 
-			//domWords: {},
-
 			fulfilledBoundedWords: [],
 		};
 	},
 
 	mounted() {
-		this.updateContainerSizeTrigger();
+		this.startToUpdateContainerSize();
 	},
 
 	computed: {
-		renderer() {
-			return this.domRenderer;
-		},
-
 		normalizedWords: computeNormalizedWords,
-
-		boundedWords() {
-			(async () => {
-				try {
-					this.fulfilledBoundedWords = await this.promisedBoundedWords;
-				} catch (error) {
-					// console.log(error);
-					// continue regardless of error
-				}
-			})();
-			return this.fulfilledBoundedWords;
-		},
-
-		promisedBoundedWords() {
-			return this.computeBoundedWords();
-		},
-
-		computeBoundedWords() {
-			let outerToken;
-			return async function() {
-				let self = this;
-				let innerToken = (outerToken = {});
-				return await computeBoundedWords.call(this, {
-					get interrupted() {
-						return innerToken !== outerToken || self._isDestroyed;
-					},
-
-					throwIfInterrupted() {
-						if (this.interrupted) {
-							throw new InterruptError();
-						}
-					},
-
-					async delayIfNotInterrupted(ms) {
-						this.throwIfInterrupted();
-						await Promise_delay(ms);
-						this.throwIfInterrupted();
-					},
-				});
-			};
-		},
-
+		boundedWords: computeBoundedWords,
 		scaledBoundedWords: computeScaledBoundedWords,
 
-		domWords() {
-			/*
-			let words = [...this.scaledBoundedWords];
-			let wordsCount = words.length;
-			let transitionDuration = this.animationDuration / 4;
-			let transitionDelay = (this.animationDuration - transitionDuration) / wordsCount;
-			let transitionEasing = this.animationEasing;
-			let domWords = {};
-			words.forEach(({key, text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}, index) => {
-				domWords[key] = {
-					style: {
-						position: 'absolute',
-						left: `${rectLeft + rectWidth / 2 - textWidth / 2}px`,
-						top: `${rectTop + rectHeight / 2}px`,
-						color: color,
-						font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/0`, fontFamily].join(' '),
-						transform: `rotate(${rotation}turn)`,
-						whiteSpace: 'nowrap',
-						transition: ['all', `${Math.round(transitionDuration)}ms`, transitionEasing, `${Math.round(transitionDelay * index)}ms`].join(' '),
-					},
-					text,
-				};
-			});
-			return domWords;
-			*/
-		},
-
-		createWordElement() {
-			if (this.$scopedSlots.default) {
-				return this.$scopedSlots.default;
-			}
-			return defaultCreateWordElement;
-		},
-
-		updateContainerSizeTrigger() {
+		startToUpdateContainerSize() {
 			return function() {
 				if (!this._isDestroyed) {
 					setTimeout(() => {
 						requestAnimationFrame(() => {
-							this.updateContainerSizeTrigger();
+							this.startToUpdateContainerSize();
 						});
-					}, this.containerSizeUpdateInterval);
+					}, this.intervalBetweenUpdateContainerSize);
 					this.updateContainerSize();
 				}
 			};
@@ -215,40 +117,16 @@ let VueWordCloud = {
 	},
 
 	methods: {
-		domRenderer,
-
-		canvasRenderer(createElement) {
-			// todo?
-			/*
-			let canvas = document.createElement('canvas');
-			let ctx = canvas.getContext('2d');
-			this.boundedWords.forEach(({text, color, fontFamily, fontSize, fontStyle, fontVariant, fontWeight, rotation, rectLeft, rectTop, rectWidth, rectHeight, textWidth, textHeight}) => {
-				ctx.save();
-				ctx.font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
-				ctx.fillStyle = color;
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText(text, 0, 0);
-				ctx.translate(rectLeft + rectWidth / 2, rectTop + rectHeight / 2);
-				ctx.rotate(Math_turnToRad(rotation));
-				ctx.restore();
-			});
-			return canvas;
-			*/
-		},
-
-		svgRenderer(createElement) {
-			// todo?
-		},
-
 		updateContainerSize() {
-			let {width, height} = Element_getBoundingClientRect(this.$el);
+			let {width, height} = this.$el.getBoundingClientRect();
 			this.containerWidth = width;
 			this.containerHeight = height;
 		},
 	},
 };
 
-Vue.component(VueWordCloud.name, VueWordCloud);
-
 export default VueWordCloud;
+
+if (typeof window !== 'undefined') {
+	Vue.component(VueWordCloud.name, VueWordCloud);
+}

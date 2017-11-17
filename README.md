@@ -31,6 +31,14 @@ Include the code in your page via a CDN.
 
 ```
 
+Include [polyfills](https://polyfill.io/) to support older browsers.
+
+```html
+
+<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Number.isFinite,Object.entries"></script>
+
+```
+
 ## usage
 
 ```html

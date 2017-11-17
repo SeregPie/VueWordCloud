@@ -1,5 +1,5 @@
-import Iterable_min from '../helpers/Iterable/min';
-import Iterable_max from '../helpers/Iterable/max';
+import Array_min from '../helpers/Array/min';
+import Array_max from '../helpers/Array/max';
 
 export default function() {
 	let words = this.boundedWords;
@@ -7,17 +7,17 @@ export default function() {
 	let containerHeight = this.containerHeight;
 	let maxFontSize = this.maxFontSize;
 
-	let containedLeft = Iterable_min(words, ({rectLeft}) => rectLeft);
-	let containedRight = Iterable_max(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
+	let containedLeft = Array_min(words, ({rectLeft}) => rectLeft);
+	let containedRight = Array_max(words, ({rectLeft, rectWidth}) => rectLeft + rectWidth);
 	let containedWidth = containedRight - containedLeft;
 
-	let containedTop = Iterable_min(words, ({rectTop}) => rectTop);
-	let containedBottom = Iterable_max(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
+	let containedTop = Array_min(words, ({rectTop}) => rectTop);
+	let containedBottom = Array_max(words, ({rectTop, rectHeight}) => rectTop + rectHeight);
 	let containedHeight = containedBottom - containedTop;
 
 	let scaleFactor = Math.min(containerWidth / containedWidth, containerHeight / containedHeight);
 
-	let currentMaxFontSize = Iterable_max(words, ({fontSize}) => fontSize) * scaleFactor;
+	let currentMaxFontSize = Array_max(words, ({fontSize}) => fontSize) * scaleFactor;
 	if (currentMaxFontSize > maxFontSize) {
 		scaleFactor *= maxFontSize / currentMaxFontSize;
 	}
