@@ -1,211 +1,169 @@
 <!DOCTYPE html>
-<html style="height: 100%;">
+<html>
 	<head>
 		<title>VueWordCloud</title>
-		<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.js"></script>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Object.entries"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.4/vue.min.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
 			}
 		</style>
 		<script src="VueWordCloud.js"></script>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
-		<link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Roboto|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco" rel="stylesheet"/>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-beta.1/theme-chalk/index.css"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/element-ui/2.0.0-beta.1/index.js"></script>
-		<link rel="stylesheet" href="demo/demo.css"/>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.1/vuetify.min.css"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.1/vuetify.min.js"></script>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco"/>
 	</head>
-	<body style="height: 100%; font-family: Roboto;">
-		<div style="width: 100%; height: 100%; overflow: hidden;" v-cloak id="demo">
-			<div v-if="containerWidth > 320 && containerHeight > 320" style="width: 100%; height: 100%; display: flex; flex-direction: column;">
-				<div style="display: flex; justify-content: space-between; padding: 8px 16px;">
-					<div v-if="containerWidth > 640"></div>
-					<div v-else>
-						<el-button type="text" style="padding: 0; font-size: 28px;" @click="drawerActive = !drawerActive">
-							<i class="fa fa-bars"></i>
-						</el-button>
-					</div>
-					<div>
-						<a href="https://github.com/SeregPie/VueWordCloud" target="_blank">
-							<el-button type="text" style="padding: 0; font-size: 28px;">
-								<i class="fa fa-github"></i> VueWordCloud
-							</el-button>
-						</a>
-					</div>
+	<body>
+		<v-app id="App" v-cloak>
+			<v-navigation-drawer fixed clipped app v-model="drawer">
+				<div v-if="false" class="ma-3">
+					<v-switch
+						label="active"
+						v-model="active"
+						color="deep-orange"
+						hide-details
+					></v-switch>
 				</div>
-				<div style="flex: 1; position: relative;">
-					<div style="position: absolute; top:0; bottom:0; display: flex;" :style="{left: (containerWidth > 640 || drawerActive) ? 0 : '-280px', width: containerWidth > 640 ? '100%' : 'calc(100% + 280px)'}">
-						<div style="overflow-x: hidden; overflow-y: auto; padding: 16px;" :style="{width: `${(containerWidth > 800) ? 400 : 280}px`}">
-							<el-form :label-position="(containerWidth > 800) ? 'right' : 'top'" label-width="120px">
-								<el-form-item v-if="false" label="active">
-									<el-switch
-										v-model="active"
-									></el-switch>
-								</el-form-item>
-								<el-form-item label="words &amp; weights">
-									<el-input
-										type="textarea"
-										v-model="wordsInput"
-										:rows="9"
-									></el-input>
-								</el-form-item>
-								<el-form-item label="font family">
-									<el-select v-model="fontFamily" style="width: 100%;">
-										<el-option
-											v-for="fontFamily in supportedFontFamilies"
-											:key="fontFamily"
-											:label="fontFamily"
-											:value="fontFamily"
-											:style="{fontFamily}"
-										></el-option>
-									</el-select>
-								</el-form-item>
-								<el-form-item v-if="false" label="rotation">
-									<el-radio-group v-model="rotation">
-										<el-radio-button :label="horizontalRotation">a</el-radio-button>
-										<el-radio-button :label="diagonalRotation">b</el-radio-button>
-										<el-radio-button :label="randomHorizontalVerticalRotation">c</el-radio-button>
-										<el-radio-button :label="randomHorizontalVerticalDiagonalsRotation">d</el-radio-button>
-										<el-radio-button :label="randomRotation">e</el-radio-button>
-									</el-radio-group>
-								</el-form-item>
-								<el-form-item label="rotation">
-									<div>
-										<el-radio v-model="rotation" :label="horizontalRotation">
-											horizontal
-										</el-radio>
-									</div>
-									<div>
-										<el-radio v-model="rotation" :label="diagonalRotation">
-											diagonal
-										</el-radio>
-									</div>
-									<div>
-										<el-radio v-model="rotation" :label="randomHorizontalVerticalRotation">
-											horizontal and vertical
-										</el-radio>
-									</div>
-									<div>
-										<el-radio v-model="rotation" :label="randomHorizontalVerticalDiagonalsRotation">
-											horizontal, vertical and diagonals
-										</el-radio>
-									</div>
-									<div>
-										<el-radio v-model="rotation" :label="randomRotation">
-											fully random
-										</el-radio>
-									</div>
-								</el-form-item>
-								<el-form-item v-if="false" label="animation duration">
-									<el-row>
-										<el-col :span="18">
-											<div style="padding: 0 10px; line-height: 1.15;">
-												<el-slider
-													:min="0"
-													:max="15000"
-													:step="100"
-													:show-tooltip="false"
-													v-model="animationDuration"
-												></el-slider>
-											</div>
-										</el-col>
-										<el-col :span="6">
-											<div style="text-align: right;">
-												<template v-if="animationDuration > 0">
-													{{ (animationDuration / 1000).toFixed(1) }} s
-												</template>
-												<template v-else>
-													none
-												</template>
-											</div>
-										</el-col>
-									</el-row>
-								</el-form-item>
-								<el-form-item label="font size ratio">
-									<el-row>
-										<el-col :span="18">
-											<div style="padding: 0 10px; line-height: 1.15;">
-												<el-slider
-													:min="0"
-													:max="20"
-													:step="1"
-													:show-tooltip="false"
-													v-model="fontSizeRatio"
-												></el-slider>
-											</div>
-										</el-col>
-										<el-col :span="6">
-											<div style="text-align: right;">
-												<template v-if="fontSizeRatio > 0">
-													{{ fontSizeRatio }} x
-												</template>
-												<template v-else>
-													none
-												</template>
-											</div>
-										</el-col>
-									</el-row>
-								</el-form-item>
-								<el-form-item label="max font size">
-									<el-row>
-										<el-col :span="18">
-											<div style="padding: 0 10px; line-height: 1.15;">
-												<el-slider
-													:min="10"
-													:max="105"
-													:step="5"
-													:show-tooltip="false"
-													v-model="maxFontSize"
-												></el-slider>
-											</div>
-										</el-col>
-										<el-col :span="6">
-											<div style="text-align: right;">
-												<template v-if="maxFontSize > 100">
-													none
-												</template>
-												<template v-else>
-													{{ maxFontSize }} px
-												</template>
-											</div>
-										</el-col>
-									</el-row>
-								</el-form-item>
-							</el-form>
-						</div>
-						<div style="flex: 1; padding: 16px;">
-							<div style="box-sizing: border-box; width: 100%; height: 100%; border-radius: 32px; padding: 16px; background-color: GhostWhite;">
-								<vue-word-cloud
-									v-if="active"
-									:words="words"
-									:color="randomColor"
-									:font-family="fontFamily"
-									:rotation="rotation"
-									:font-size-ratio="fontSizeRatio"
-									:max-font-size="(maxFontSize > 100) ? Infinity : maxFontSize"
-									:animation-duration="animationDuration"
-								>
-									<template slot-scope="{text, weight, color}">
-										<el-tooltip placement="top" :open-delay="300">
-											<div slot="content">
-												<div style="text-align: center;">
-													{{ text }}<br/>({{ weight }})
-												</div>
-											</div>
-											<div class="FancyWord" @click="onWordClick({text, color})">
-												{{ text }}
-											</div>
-										</el-tooltip>
-									</template>
-								</vue-word-cloud>
-							</div>
-						</div>
-					</div>
+				<div class="ma-3">
+					<v-text-field
+						label="words & weights"
+						v-model="model.words.value"
+						multi-line
+						:rows="9"
+						color="deep-orange"
+						hide-details
+					></v-text-field>
 				</div>
-			</div>
-		</div>
-		<script src="demo/demo.js"></script>
+				<div class="ma-3">
+					<v-select
+						label="font family"
+						:items="model.fontFamily.possibleValues"
+						v-model="model.fontFamily.value"
+						color="deep-orange"
+						hide-details
+					>
+						<template slot="item" slot-scope="data">
+							<span :style="{fontFamily: data.item}">
+								{{ data.item }}
+							</span>
+						</template>
+					</v-select>
+				</div>
+				<div class="ma-3">
+					<div class="subheading grey--text text--darken-1">
+						rotation
+					</div>
+					<v-btn-toggle mandatory v-model="model.rotation.value">
+						<v-btn
+							v-for="item in model.rotation.possibleItems"
+							:value="item.value"
+							flat
+							color="deep-orange"
+						>
+							<template v-if="item.icon">
+								<v-icon>{{ item.icon }}</v-icon>
+							</template>
+							<template v-else>
+								{{ item.text }}
+							</template>
+						</v-btn>
+					</v-btn-toggle>
+				</div>
+				<div v-if="false" class="ma-3">
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<div class="subheading grey--text text--darken-1">
+							animation duration
+						</div>
+						<v-chip color="deep-orange" text-color="white" small>
+							{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
+						</v-chip>
+					</div>
+					<v-slider
+						class="px-2 py-0"
+						v-model="model.animationDuration.value"
+						:min="0"
+						:max="model.animationDuration.values.length - 1"
+						color="deep-orange"
+						hide-details
+					></v-slider>
+				</div>
+				<div class="ma-3">
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<div class="subheading grey--text text--darken-1">
+							font size ratio
+						</div>
+						<v-chip color="deep-orange" text-color="white" small>
+							{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
+						</v-chip>
+					</div>
+					<v-slider
+						class="px-2 py-0"
+						v-model="model.fontSizeRatio.value"
+						:min="0"
+						:max="model.fontSizeRatio.values.length - 1"
+						color="deep-orange"
+						hide-details
+					></v-slider>
+				</div>
+				<div class="ma-3">
+					<div style="display: flex; justify-content: space-between; align-items: center;">
+						<div class="subheading grey--text text--darken-1">
+							max font size
+						</div>
+						<v-chip color="deep-orange" text-color="white" small>
+							{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
+						</v-chip>
+					</div>
+					<v-slider
+						class="px-2 py-0"
+						v-model="model.maxFontSize.value"
+						:min="model.maxFontSize.min"
+						:max="model.maxFontSize.max"
+						:step="model.maxFontSize.step"
+						color="deep-orange"
+						hide-details
+					></v-slider>
+				</div>
+			</v-navigation-drawer>
+			<v-toolbar color="deep-orange darken-3" dark fixed clipped-left app>
+				<v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+				<v-toolbar-title>VueWordCloud</v-toolbar-title>
+				<v-spacer></v-spacer>
+				<v-btn icon href="https://github.com/SeregPie/VueWordCloud" target="_blank">
+					<v-icon>fa-github</v-icon>
+				</v-btn>
+			</v-toolbar>
+			<v-content>
+				<v-container fluid fill-height>
+					<vue-word-cloud
+						v-if="active"
+						:words="words"
+						:color="randomColor"
+						:font-family="fontFamily"
+						:rotation="rotation"
+						:font-size-ratio="fontSizeRatio"
+						:max-font-size="maxFontSize"
+						:animation-duration="animationDuration"
+					>
+						<template slot-scope="{text, weight, color}">
+							<v-tooltip top :open-delay="300">
+								<div slot="activator">
+									{{ text }}
+								</div>
+								<div class="text-xs-center">
+									{{ text }}<br/>({{ weight }})
+								</div>
+							</v-tooltip>
+						</template>
+					</vue-word-cloud>
+				</v-container>
+			</v-content>
+		</v-app>
+		<script src="demo/index.js"></script>
 	</body>
 </html>
