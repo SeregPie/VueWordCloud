@@ -3,12 +3,11 @@ import Array_first from '../helpers/Array/first';
 import Array_last from '../helpers/Array/last';
 import Array_sortBy from '../helpers/Array/sortBy';
 import D2_rectAfterRotation from '../helpers/D2/rectAfterRotation';
-import Math_ceilToNearestPowerOfTwo from '../helpers/Math/ceilToNearestPowerOfTwo';
+import Math_ceilPowerOfTwo from '../helpers/Math/ceilPowerOfTwo';
 import Math_mapLinear from '../helpers/Math/mapLinear';
 import Math_turnToRad from '../helpers/Math/turnToRad';
 
 let iterateRectCenterOut = function(rectWidth, rectHeight, iteratee) {
-
 	if (rectWidth > 0 && rectHeight > 0) {
 
 		let stepLeft, stepTop;
@@ -108,13 +107,8 @@ let iterateRectCenterOut = function(rectWidth, rectHeight, iteratee) {
 	throw new Error();
 };
 
-export default function() {
-	let containerWidth = this.containerWidth;
-	let containerHeight = this.containerHeight;
-	let words = this.normalizedWords;
-	let fontSizeRatio = this.fontSizeRatio;
-
-	let boundedWords = [];
+export default function(words, containerWidth, containerHeight, fontSizeRatio) {
+	let returns = [];
 
 	if (words.length > 0 && containerWidth > 0 && containerHeight > 0) {
 
@@ -146,27 +140,23 @@ export default function() {
 		let gridResolution = Math.pow(2, 22);
 		let gridWidth = Math.floor(Math.sqrt(containerAspect * gridResolution));
 		let gridHeight = Math.floor(gridResolution / gridWidth);
-		//gridWidth = Math_ceilToNearestPowerOfTwo(gridWidth);
-		//gridHeight = Math_ceilToNearestPowerOfTwo(gridHeight);
+		//gridWidth = Math_ceilPowerOfTwo(gridWidth);
+		//gridHeight = Math_ceilPowerOfTwo(gridHeight);
 
 		let gridData = Array(gridWidth * gridHeight).fill(0);
 
-		for (let i = 0, ii = words.length; i < ii; ++i) {
-			let word = words[i];
-
+		words.forEach(({
+			key,
+			text,
+			weight,
+			rotation,
+			fontFamily,
+			fontStyle,
+			fontVariant,
+			fontWeight,
+			color,
+		}) => {
 			try {
-				let {
-					key,
-					text,
-					weight,
-					rotation,
-					fontFamily,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-					color,
-				} = word;
-
 				let fontSize = 4 * convertWeightToFontSize(weight);
 				let rotationRad = Math_turnToRad(rotation);
 
@@ -188,8 +178,8 @@ export default function() {
 					let outerTextHeight = textHeight + 2 * outerTextPadding;
 					let [innerRectWidth, innerRectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotationRad);
 					let [rectWidth, rectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
-					//rectWidth = Math_ceilToNearestPowerOfTwo(rectWidth);
-					//rectHeight = Math_ceilToNearestPowerOfTwo(rectHeight);
+					//rectWidth = Math_ceilPowerOfTwo(rectWidth);
+					//rectHeight = Math_ceilPowerOfTwo(rectHeight);
 					let rectData = Array(rectWidth * rectHeight).fill(0);
 
 					ctx.canvas.width = rectWidth;
@@ -236,31 +226,23 @@ export default function() {
 					let innerRectLeft = rectLeft + (rectWidth - innerRectWidth) / 2;
 					let innerRectTop = rectTop + (rectHeight - innerRectHeight) / 2;
 
-					boundedWords.push({
+					returns.push({
 						key,
-						text,
-						weight,
-						rotation,
-						fontFamily,
 						fontSize,
-						fontStyle,
-						fontVariant,
-						fontWeight,
+						textWidth,
+						textHeight,
 						rectLeft: innerRectLeft,
 						rectTop: innerRectTop,
 						rectWidth: innerRectWidth,
 						rectHeight: innerRectHeight,
-						textWidth,
-						textHeight,
-						color,
 					});
 				}
 			} catch (error) {
 				// console.log(error);
 				// continue regardless of error
 			}
-		}
+		});
 	}
 
-	return boundedWords;
+	return returns;
 }

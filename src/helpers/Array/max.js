@@ -1,5 +1,8 @@
 export default function(array, iteratee) {
 	if (array.length > 0) {
-		return array.map(iteratee).reduce((previousValue, currentValue) => Math.max(previousValue, currentValue));
+		if (iteratee) {
+			array = array.map(iteratee);
+		}
+		return array.reduce((maxValue, currentValue) => Math.max(maxValue, currentValue));
 	}
 }

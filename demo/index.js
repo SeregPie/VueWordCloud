@@ -90,6 +90,19 @@
 						};
 					})(),
 
+					color: (function() {
+						var possibleValues = [
+							['#d99cd1', '#c99cd1', '#b99cd1', '#a99cd1'],
+							['#403030', '#f97a7a'],
+							['#31a50d', '#d1b022', '#74482a'],
+							['#ffd077', '#3bc4c7', '#3a9eea', '#ff4e69', '#461e47'],
+						];
+						return {
+							possibleValues: possibleValues,
+							value: Array_sample(possibleValues),
+						};
+					})(),
+
 					rotation: (function() {
 						var possibleItems = [
 							{
@@ -152,10 +165,6 @@
 					})(),
 				},
 
-				randomColor: function() {
-					return Array_sample(['#EBBD58', '#4ACF71', '#10C3B8', '#7E06C4', '#22074C']);
-				},
-
 				drawer: true,
 			};
 		},
@@ -172,13 +181,22 @@
 					})
 					.map(function(matched) {
 						var text = matched[1];
-						var size = Number.parseInt(matched[2]);
+						var size = parseInt(matched[2]);
 						return [text, size];
 					});
 			},
 
 			fontFamily: function() {
 				return this.model.fontFamily.value;
+			},
+
+			color: function() {
+				var value = this.model.color.value;
+
+				return function(word) {
+					var text = word[0];
+					return Array_sampleBy(value, text.length);
+				};
 			},
 
 			rotation: function() {

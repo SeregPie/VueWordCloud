@@ -4,8 +4,8 @@
 		<title>VueWordCloud</title>
 		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Number.parseInt,Object.entries"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.4/vue.min.js"></script>
+		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Object.entries,Object.values"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.8/vue.min.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
@@ -14,8 +14,8 @@
 		<script src="VueWordCloud.js"></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.1/vuetify.min.css"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.1/vuetify.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.2/vuetify.min.css"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.2/vuetify.min.js"></script>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco"/>
 	</head>
 	<body>
@@ -53,6 +53,27 @@
 							</span>
 						</template>
 					</v-select>
+				</div>
+				<div class="ma-3">
+					<div class="subheading grey--text text--darken-1">
+						color
+					</div>
+					<v-btn-toggle mandatory v-model="model.color.value">
+						<v-btn
+							v-for="value in model.color.possibleValues"
+							:value="value"
+							flat
+							color="deep-orange"
+						>
+							<div style="margin: 2px; width: 24px; height: 24px; display: flex;">
+								<div
+									v-for="color in value"
+									style="flex: 1;"
+									:style="{backgroundColor: color}"
+								></div>
+							</div>
+						</v-btn>
+					</v-btn-toggle>
 				</div>
 				<div class="ma-3">
 					<div class="subheading grey--text text--darken-1">
@@ -143,7 +164,7 @@
 					<vue-word-cloud
 						v-if="active"
 						:words="words"
-						:color="randomColor"
+						:color="color"
 						:font-family="fontFamily"
 						:rotation="rotation"
 						:font-size-ratio="fontSizeRatio"

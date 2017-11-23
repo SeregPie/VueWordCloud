@@ -1,11 +1,4 @@
-export default function(createElement) {
-	let words = this.scaledBoundedWords;
-	let createWordElement;
-	if (this.$scopedSlots.default) {
-		createWordElement = this.$scopedSlots.default;
-	} else {
-		createWordElement = this.$scopedSlots.default;
-	}
+export default function(createElement, boundedWords, keyedPopulatedWords, createWordElement) {
 	return createElement(
 		'div',
 		{
@@ -15,25 +8,28 @@ export default function(createElement) {
 				height: '100%',
 			},
 		},
-		words.map(({
+		boundedWords.map(({
 			key,
-			text,
-			weight,
-			color,
-			fontFamily,
 			fontSize,
-			fontStyle,
-			fontVariant,
-			fontWeight,
-			rotation,
+			textWidth,
+			textHeight,
 			rectLeft,
 			rectTop,
 			rectWidth,
 			rectHeight,
-			textWidth,
-			textHeight,
-		}) =>
-			createElement(
+		}) => {
+			let {
+				originalWord,
+				text,
+				weight,
+				rotation,
+				fontFamily,
+				fontStyle,
+				fontVariant,
+				fontWeight,
+				color,
+			} = keyedPopulatedWords[key];
+			return createElement(
 				'div',
 				{
 					key,
@@ -59,24 +55,20 @@ export default function(createElement) {
 							transform: 'translate(-50%, -50%)',
 						},
 					},
-					[(() => {
-						if (this.$scopedSlots.default) {
-							return this.$scopedSlots.default({
-								text,
-								weight,
-								color,
-								fontFamily,
-								fontSize,
-								fontStyle,
-								fontVariant,
-								fontWeight,
-								rotation,
-							});
-						}
-						return text;
-					})()]
-				)]/*,*/
-			)
-		)/*,*/
+					[createWordElement({
+						originalWord,
+						text,
+						weight,
+						rotation,
+						fontFamily,
+						fontStyle,
+						fontVariant,
+						fontWeight,
+						color,
+						fontSize,
+					})],
+				)],
+			);
+		}),
 	);
 }

@@ -1,19 +1,29 @@
 import Vue from 'vue';
 
 import Array_sample from './helpers/Array/sample';
-import Function_noop from './helpers/Function/noop';
-import InterruptError from './helpers/InterruptError';
-import Promise_delay from './helpers/Promise/delay';
+import Function_constant from './helpers/Function/constant';
+import Function_isFunction from './helpers/Function/isFunction';
+import Reflect_isEqual from './helpers/Reflect/isEqual';
 
 import render from './members/render';
-import computeNormalizedWords from './members/computeNormalizedWords';
+import computeKeyedPopulatedWords from './members/computeKeyedPopulatedWords';
+import computeBoundableWords from './members/computeBoundableWords';
 import computeBoundedWords from './members/computeBoundedWords';
 import computeScaledBoundedWords from './members/computeScaledBoundedWords';
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
 
-	render,
+	render(createElement) {
+		return render(
+			createElement,
+			this.scaledBoundedWords,
+			this.keyedPopulatedWords,
+			this.$scopedSlots.default
+				? this.$scopedSlots.default
+				: ({text}) => text,
+		);
+	},
 
 	props: {
 		words: {
@@ -89,7 +99,7 @@ let VueWordCloud = {
 			containerWidth: 0,
 			containerHeight: 0,
 
-			fulfilledBoundedWords: [],
+			boundableWords: undefined,
 		};
 	},
 
@@ -98,9 +108,109 @@ let VueWordCloud = {
 	},
 
 	computed: {
-		normalizedWords: computeNormalizedWords,
-		boundedWords: computeBoundedWords,
-		scaledBoundedWords: computeScaledBoundedWords,
+		computeText() {
+			let value = this.text;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeWeight() {
+			let value = this.weight;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeRotation() {
+			let value = this.rotation;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeFontFamily() {
+			let value = this.fontFamily;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeFontStyle() {
+			let value = this.fontStyle;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeFontVariant() {
+			let value = this.fontVariant;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeFontWeight() {
+			let value = this.fontWeight;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		computeColor() {
+			let value = this.color;
+			if (Function_isFunction(value)) {
+				return value;
+			}
+			return Function_constant(value);
+		},
+
+		keyedPopulatedWords() {
+			return computeKeyedPopulatedWords(
+				this.words,
+				this.computeText,
+				this.computeWeight,
+				this.computeRotation,
+				this.computeFontFamily,
+				this.computeFontStyle,
+				this.computeFontVariant,
+				this.computeFontWeight,
+				this.computeColor,
+			);
+		},
+
+		populatedWords() {
+			return Object.values(this.keyedPopulatedWords);
+		},
+
+		watch$boundableWords() {
+			return computeBoundableWords(this.populatedWords);
+		},
+
+		boundedWords() {
+			return computeBoundedWords(
+				this.boundableWords,
+				this.containerWidth,
+				this.containerHeight,
+				this.fontSizeRatio,
+			);
+		},
+
+		scaledBoundedWords() {
+			return computeScaledBoundedWords(
+				this.boundedWords,
+				this.containerWidth,
+				this.containerHeight,
+				this.maxFontSize,
+			);
+		},
 
 		startToUpdateContainerSize() {
 			return function() {
@@ -113,6 +223,17 @@ let VueWordCloud = {
 					this.updateContainerSize();
 				}
 			};
+		},
+	},
+
+	watch: {
+		watch$boundableWords: {
+			handler(newValue, oldValue) {
+				if (!Reflect_isEqual(newValue, oldValue)) {
+					this.boundableWords = Object.freeze(newValue);
+				}
+			},
+			immediate: true,
 		},
 	},
 
