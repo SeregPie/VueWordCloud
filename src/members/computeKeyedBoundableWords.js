@@ -1,5 +1,7 @@
+import Object_mapValues from '../helpers/Object/mapValues';
+
 export default function(words) {
-	return words.map(({
+	return Object_mapValues(words, ({
 		key,
 		text,
 		weight,

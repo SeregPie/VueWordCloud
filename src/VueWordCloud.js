@@ -7,7 +7,7 @@ import Reflect_isEqual from './helpers/Reflect/isEqual';
 
 import render from './members/render';
 import computeKeyedPopulatedWords from './members/computeKeyedPopulatedWords';
-import computeBoundableWords from './members/computeBoundableWords';
+import computeKeyedBoundableWords from './members/computeKeyedBoundableWords';
 import computeBoundedWords from './members/computeBoundedWords';
 import computeScaledBoundedWords from './members/computeScaledBoundedWords';
 
@@ -99,7 +99,7 @@ let VueWordCloud = {
 			containerWidth: 0,
 			containerHeight: 0,
 
-			boundableWords: undefined,
+			keyedBoundableWords: undefined,
 		};
 	},
 
@@ -186,12 +186,12 @@ let VueWordCloud = {
 			);
 		},
 
-		populatedWords() {
-			return Object.values(this.keyedPopulatedWords);
+		watch$keyedBoundableWords() {
+			return computeKeyedBoundableWords(this.keyedPopulatedWords);
 		},
 
-		watch$boundableWords() {
-			return computeBoundableWords(this.populatedWords);
+		boundableWords() {
+			return Object.values(this.keyedPopulatedWords);
 		},
 
 		boundedWords() {
@@ -227,10 +227,10 @@ let VueWordCloud = {
 	},
 
 	watch: {
-		watch$boundableWords: {
+		watch$keyedBoundableWords: {
 			handler(newValue, oldValue) {
 				if (!Reflect_isEqual(newValue, oldValue)) {
-					this.boundableWords = Object.freeze(newValue);
+					this.keyedBoundableWords = Object.freeze(newValue);
 				}
 			},
 			immediate: true,
