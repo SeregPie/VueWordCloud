@@ -181,7 +181,7 @@
 					})
 					.map(function(matched) {
 						var text = matched[1];
-						var size = parseInt(matched[2]);
+						var size = Number.parseInt(matched[2]);
 						return [text, size];
 					});
 			},

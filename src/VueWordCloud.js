@@ -191,7 +191,7 @@ let VueWordCloud = {
 		},
 
 		boundableWords() {
-			return Object.values(this.keyedPopulatedWords);
+			return Object.values(this.keyedBoundableWords);
 		},
 
 		boundedWords() {
