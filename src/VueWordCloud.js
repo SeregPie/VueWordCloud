@@ -110,66 +110,42 @@ let VueWordCloud = {
 	computed: {
 		computeText() {
 			let value = this.text;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeWeight() {
 			let value = this.weight;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeRotation() {
 			let value = this.rotation;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeFontFamily() {
 			let value = this.fontFamily;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeFontStyle() {
 			let value = this.fontStyle;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeFontVariant() {
 			let value = this.fontVariant;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeFontWeight() {
 			let value = this.fontWeight;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		computeColor() {
 			let value = this.color;
-			if (Function_isFunction(value)) {
-				return value;
-			}
-			return Function_constant(value);
+			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		keyedPopulatedWords() {
