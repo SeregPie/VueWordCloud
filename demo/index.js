@@ -174,7 +174,7 @@
 				return this.model.words.value
 					.split(/[\r\n]+/)
 					.map(function(line) {
-						return /^(.+)\s+(\d+)$/.exec(line);
+						return /^(.+)\s+(-?\d+)$/.exec(line);
 					})
 					.filter(function(matched) {
 						return matched;
