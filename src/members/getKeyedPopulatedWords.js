@@ -4,14 +4,14 @@ import String_isString from '../helpers/String/isString';
 
 export default function(
 	originalWords,
-	computeText,
-	computeWeight,
-	computeRotation,
-	computeFontFamily,
-	computeFontStyle,
-	computeFontVariant,
-	computeFontWeight,
-	computeColor,
+	getText,
+	getWeight,
+	getRotation,
+	getFontFamily,
+	getFontStyle,
+	getFontVariant,
+	getFontWeight,
+	getColor,
 ) {
 	let returns = {};
 	originalWords.forEach(originalWord => {
@@ -49,28 +49,28 @@ export default function(
 			}
 		}
 		if (text === undefined) {
-			text = computeText(originalWord);
+			text = getText(originalWord);
 		}
 		if (weight === undefined) {
-			weight = computeWeight(originalWord);
+			weight = getWeight(originalWord);
 		}
 		if (rotation === undefined) {
-			rotation = computeRotation(originalWord);
+			rotation = getRotation(originalWord);
 		}
 		if (fontFamily === undefined) {
-			fontFamily = computeFontFamily(originalWord);
+			fontFamily = getFontFamily(originalWord);
 		}
 		if (fontStyle === undefined) {
-			fontStyle = computeFontStyle(originalWord);
+			fontStyle = getFontStyle(originalWord);
 		}
 		if (fontVariant === undefined) {
-			fontVariant = computeFontVariant(originalWord);
+			fontVariant = getFontVariant(originalWord);
 		}
 		if (fontWeight === undefined) {
-			fontWeight = computeFontWeight(originalWord);
+			fontWeight = getFontWeight(originalWord);
 		}
 		if (color === undefined) {
-			color = computeColor(originalWord);
+			color = getColor(originalWord);
 		}
 		if (key === undefined) {
 			key = JSON.stringify([

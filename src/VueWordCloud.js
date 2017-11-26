@@ -6,10 +6,10 @@ import Function_isFunction from './helpers/Function/isFunction';
 import Reflect_isEqual from './helpers/Reflect/isEqual';
 
 import render from './members/render';
-import computeKeyedPopulatedWords from './members/computeKeyedPopulatedWords';
-import computeKeyedBoundableWords from './members/computeKeyedBoundableWords';
-import computeBoundedWords from './members/computeBoundedWords';
-import computeScaledBoundedWords from './members/computeScaledBoundedWords';
+import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
+import getKeyedBoundableWords from './members/getKeyedBoundableWords';
+import getBoundedWords from './members/getBoundedWords';
+import getScaledBoundedWords from './members/getScaledBoundedWords';
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
@@ -108,62 +108,62 @@ let VueWordCloud = {
 	},
 
 	computed: {
-		computeText() {
+		getText() {
 			let value = this.text;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeWeight() {
+		getWeight() {
 			let value = this.weight;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeRotation() {
+		getRotation() {
 			let value = this.rotation;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeFontFamily() {
+		getFontFamily() {
 			let value = this.fontFamily;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeFontStyle() {
+		getFontStyle() {
 			let value = this.fontStyle;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeFontVariant() {
+		getFontVariant() {
 			let value = this.fontVariant;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeFontWeight() {
+		getFontWeight() {
 			let value = this.fontWeight;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
-		computeColor() {
+		getColor() {
 			let value = this.color;
 			return Function_isFunction(value) ? value : Function_constant(value);
 		},
 
 		keyedPopulatedWords() {
-			return computeKeyedPopulatedWords(
+			return getKeyedPopulatedWords(
 				this.words,
-				this.computeText,
-				this.computeWeight,
-				this.computeRotation,
-				this.computeFontFamily,
-				this.computeFontStyle,
-				this.computeFontVariant,
-				this.computeFontWeight,
-				this.computeColor,
+				this.getText,
+				this.getWeight,
+				this.getRotation,
+				this.getFontFamily,
+				this.getFontStyle,
+				this.getFontVariant,
+				this.getFontWeight,
+				this.getColor,
 			);
 		},
 
 		watch$keyedBoundableWords() {
-			return computeKeyedBoundableWords(this.keyedPopulatedWords);
+			return getKeyedBoundableWords(this.keyedPopulatedWords);
 		},
 
 		boundableWords() {
@@ -171,7 +171,7 @@ let VueWordCloud = {
 		},
 
 		boundedWords() {
-			return computeBoundedWords(
+			return getBoundedWords(
 				this.boundableWords,
 				this.containerWidth,
 				this.containerHeight,
@@ -180,7 +180,7 @@ let VueWordCloud = {
 		},
 
 		scaledBoundedWords() {
-			return computeScaledBoundedWords(
+			return getScaledBoundedWords(
 				this.boundedWords,
 				this.containerWidth,
 				this.containerHeight,

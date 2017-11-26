@@ -1,23 +1,23 @@
-export default function(rectWidth, rectHeight, iteratee) {
+export default function(width, height, iteratee) {
 
-	if (rectWidth > 0 && rectHeight > 0) {
+	if (width > 0 && height > 0) {
 
 		let stepLeft, stepTop;
-		if (rectWidth > rectHeight) {
+		if (width > height) {
 			stepLeft = 1;
-			stepTop = rectHeight / rectWidth;
+			stepTop = height / width;
 		} else
-		if (rectHeight > rectWidth) {
+		if (height > width) {
 			stepTop = 1;
-			stepLeft = rectWidth / rectHeight;
+			stepLeft = width / height;
 		} else {
 			stepLeft = stepTop = 1;
 		}
 
-		let startLeft = Math.floor(rectWidth / 2);
-		let startTop = Math.floor(rectHeight / 2);
-		let endLeft = rectWidth - startLeft;
-		let endTop = rectHeight - startTop;
+		let startLeft = Math.floor(width / 2);
+		let startTop = Math.floor(height / 2);
+		let endLeft = width - startLeft;
+		let endTop = height - startTop;
 
 		if (startLeft < endLeft) {
 			for (let left = startLeft; left <= endLeft; ++left) {
@@ -41,7 +41,7 @@ export default function(rectWidth, rectHeight, iteratee) {
 		let previousEndLeft = endLeft;
 		let previousEndTop = endTop;
 
-		while (endLeft < rectWidth || endTop < rectHeight) {
+		while (endLeft < width || endTop < height) {
 
 			startLeft -= stepLeft;
 			startTop -= stepTop;
