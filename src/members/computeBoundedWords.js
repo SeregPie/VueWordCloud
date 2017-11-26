@@ -1,5 +1,5 @@
 import Array_sortBy from '../helpers/Array/sortBy';
-import D2_rectAfterRotation from '../helpers/D2/rectAfterRotation';
+import D2_rotateRect from '../helpers/D2/rotateRect';
 import Math_ceilPowerOfTwo from '../helpers/Math/ceilPowerOfTwo';
 import Math_turnToRad from '../helpers/Math/turnToRad';
 
@@ -44,8 +44,8 @@ export default function(words, containerWidth, containerHeight, fontSizeRatio) {
 					let outerTextPadding = Math.max(ctx.measureText('m').width, fontSize);
 					let outerTextWidth = textWidth + 2 * outerTextPadding;
 					let outerTextHeight = textHeight + 2 * outerTextPadding;
-					let [innerRectWidth, innerRectHeight] = D2_rectAfterRotation(textWidth, textHeight, rotationRad);
-					let [rectWidth, rectHeight] = D2_rectAfterRotation(outerTextWidth, outerTextHeight, rotationRad);
+					let [innerRectWidth, innerRectHeight] = D2_rotateRect(textWidth, textHeight, rotationRad);
+					let [rectWidth, rectHeight] = D2_rotateRect(outerTextWidth, outerTextHeight, rotationRad);
 					//rectWidth = Math_ceilPowerOfTwo(rectWidth);
 					//rectHeight = Math_ceilPowerOfTwo(rectHeight);
 					ctx.canvas.width = rectWidth;
@@ -59,7 +59,7 @@ export default function(words, containerWidth, containerHeight, fontSizeRatio) {
 					let image = new Uint8Array(rectWidth * rectHeight);
 					let imageData = ctx.getImageData(0, 0, rectWidth, rectHeight).data;
 					for (let i = 0, ii = image.length; i < ii; ++i) {
-						image[i] = imageData[i * 4 + 3] ? 1 : 0;
+						image[i] = imageData[i * 4 + 3];
 					}
 					let occupiedImagePixels = [];
 					for (let left = 0; left < rectWidth; ++left) {
