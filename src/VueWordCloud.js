@@ -1,5 +1,3 @@
-import Vue from 'vue';
-
 import Array_sample from './helpers/Array/sample';
 import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
@@ -224,6 +222,6 @@ let VueWordCloud = {
 
 export default VueWordCloud;
 
-if (typeof window !== 'undefined') {
-	Vue.component(VueWordCloud.name, VueWordCloud);
+if (typeof window !== 'undefined' && window.Vue) {
+	window.Vue.component(VueWordCloud.name, VueWordCloud);
 }

@@ -22,16 +22,32 @@ npm install vuewordcloud
 
 ### ES2015
 
+Register the component globally.
+
+```js
+
+import Vue from 'vue';
+import VueWordCloud from 'vuewordcloud';
+
+Vue.component(VueWordCloud.name, VueWordCloud);
+
+```
+
+*or*
+
+Register the component in the scope of another instance.
+
 ```js
 
 import VueWordCloud from 'vuewordcloud';
 
 export default {
-  /* ... */
+  // ...
   components: {
     VueWordCloud,
   },
 };
+
 
 ```
 
@@ -44,13 +60,7 @@ export default {
 
 ```
 
-If Vue is detected, the component will be registered automatically. Otherwise register it manually.
-
-```html
-
-Vue.component(VueWordCloud.name, VueWordCloud);
-
-```
+If Vue is detected, the component will be registered automatically.
 
 Include [polyfills](https://polyfill.io/) to support older browsers.
 
@@ -96,11 +106,11 @@ Pass custom renderer for the words.
 
 The words to place into the cloud. A value of the array could be either an object, an array or a string.
 
-Object: `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.
+`Object`: `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.
 
-Array: `[text, weight]`.
+`Array`: `[text, weight]`.
 
-String: `text`.
+`String`: `text`.
 
 ---
 
