@@ -12,7 +12,7 @@ A word cloud generator.
 
 ## setup
 
-Install the [package](https://www.npmjs.com/package/vuewordcloud) via npm.
+### NPM
 
 ```sh
 
@@ -20,14 +20,35 @@ npm install vuewordcloud
 
 ```
 
----
+### ES2015
 
-Include the code in your page via a CDN.
+```js
+
+import VueWordCloud from 'vuewordcloud';
+
+export default {
+  /* ... */
+  components: {
+    VueWordCloud,
+  },
+};
+
+```
+
+### Browser
 
 ```html
 
 <script src="https://unpkg.com/vue"></script>
 <script src="https://unpkg.com/vuewordcloud"></script>
+
+```
+
+If Vue is detected, the component will be registered automatically. Otherwise register it manually.
+
+```html
+
+Vue.component(VueWordCloud.name, VueWordCloud);
 
 ```
 
@@ -60,7 +81,7 @@ Pass custom renderer for the words.
 <vue-word-cloud :words="words">
   <template slot-scope="word">
     <div style="cursor: pointer;" :title="word.weight" @click="onWordClick(word)">
-      {{ text }}
+      {{ word.text }}
     </div>
   </template>
 </vue-word-cloud>
@@ -75,7 +96,7 @@ Pass custom renderer for the words.
 
 The words to place into the cloud. A value of the array could be either an object, an array or a string.
 
-Object: `{text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.
+Object: `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.
 
 Array: `[text, weight]`.
 
