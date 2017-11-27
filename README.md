@@ -48,7 +48,6 @@ export default {
   },
 };
 
-
 ```
 
 ### Browser
