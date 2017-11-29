@@ -1,39 +1,39 @@
 {
-  "name": "vuewordcloud",
-  "version": "17.10.27",
-  "description": "A word cloud generator.",
-  "main": "VueWordCloud.js",
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "prepublishOnly": "npm run build"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SeregPie/VueWordCloud.git"
-  },
-  "keywords": [
-    "cloud",
-    "component",
-    "draw",
-    "key",
-    "tag",
-    "vue",
-    "word"
-  ],
-  "author": "Sergej Sintschilin",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/SeregPie/VueWordCloud/issues"
-  },
-  "homepage": "https://github.com/SeregPie/VueWordCloud#readme",
-  "dependencies": {
-    "vue": "^2.5.8"
-  },
-  "devDependencies": {
-    "eslint": "^4.12.0",
-    "rollup": "^0.52.0",
-    "rollup-plugin-buble": "^0.18.0",
-    "rollup-plugin-uglify": "^2.0.1"
-  }
+	"name": "vuewordcloud",
+	"version": "17.10.27",
+	"description": "A word cloud generator.",
+	"main": "VueWordCloud.js",
+	"scripts": {
+		"build": "rollup -c",
+		"dev": "rollup -c -w",
+		"prepublishOnly": "npm run build"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SeregPie/VueWordCloud.git"
+	},
+	"keywords": [
+		"cloud",
+		"component",
+		"draw",
+		"key",
+		"tag",
+		"vue",
+		"word"
+	],
+	"author": "Sergej Sintschilin",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/SeregPie/VueWordCloud/issues"
+	},
+	"homepage": "https://github.com/SeregPie/VueWordCloud#readme",
+	"dependencies": {
+		"vue": "^2.5.9"
+	},
+	"devDependencies": {
+		"eslint": "^4.12.0",
+		"rollup": "^0.52.0",
+		"rollup-plugin-buble": "^0.18.0",
+		"rollup-plugin-uglify": "^2.0.1"
+	}
 }
