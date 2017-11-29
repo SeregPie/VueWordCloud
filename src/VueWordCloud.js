@@ -15,11 +15,11 @@ let VueWordCloud = {
 	render(createElement) {
 		return render(
 			createElement,
+			Object.assign({
+				default: ({text}) => text,
+			}, this.$scopedSlots),
 			this.scaledBoundedWords,
 			this.keyedPopulatedWords,
-			this.$scopedSlots.default
-				? this.$scopedSlots.default
-				: ({text}) => text,
 		);
 	},
 

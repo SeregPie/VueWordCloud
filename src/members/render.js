@@ -1,4 +1,4 @@
-export default function(createElement, boundedWords, keyedPopulatedWords, createWordElement) {
+export default function(createElement, scopedSlots, boundedWords, keyedPopulatedWords) {
 	return createElement(
 		'div',
 		{
@@ -55,7 +55,7 @@ export default function(createElement, boundedWords, keyedPopulatedWords, create
 							transform: 'translate(-50%, -50%)',
 						},
 					},
-					[createWordElement({
+					[scopedSlots.default({
 						originalWord,
 						text,
 						weight,
