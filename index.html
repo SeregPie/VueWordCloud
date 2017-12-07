@@ -14,14 +14,25 @@
 		<script src="VueWordCloud.js"></script>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.3/vuetify.min.css"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/0.17.3/vuetify.min.js"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-alpha.1/vuetify.min.css"/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-alpha.1/vuetify.min.js"></script>
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Bungee+Inline|Cabin+Sketch|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Kranky|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light|Sue+Ellen+Francisco"/>
 	</head>
 	<body>
-		<v-app id="App" v-cloak>
-			<v-navigation-drawer fixed clipped app v-model="drawer">
-				<div v-if="false" class="ma-3">
+		<v-app
+			v-cloak
+			id="App"
+		>
+			<v-navigation-drawer
+				clipped
+				fixed
+				v-model="drawer"
+				app
+			>
+				<div
+					v-if="false"
+					class="ma-3"
+				>
 					<v-switch
 						label="active"
 						v-model="active"
@@ -31,11 +42,11 @@
 				</div>
 				<div class="ma-3">
 					<v-text-field
-						label="words & weights"
+						label="words &amp; weights"
 						v-model="model.words.value"
+						color="deep-orange"
 						multi-line
 						:rows="9"
-						color="deep-orange"
 						hide-details
 					></v-text-field>
 				</div>
@@ -58,14 +69,17 @@
 					<div class="subheading grey--text text--darken-1">
 						color
 					</div>
-					<v-btn-toggle mandatory v-model="model.color.value">
+					<v-btn-toggle
+						mandatory
+						v-model="model.color.value"
+					>
 						<v-btn
 							v-for="value in model.color.possibleValues"
 							:value="value"
 							flat
 							color="deep-orange"
 						>
-							<div style="margin: 2px; width: 24px; height: 24px; display: flex;">
+							<div style="display: flex; margin: 2px; width: 24px; height: 24px;">
 								<div
 									v-for="color in value"
 									style="flex: 1;"
@@ -79,7 +93,10 @@
 					<div class="subheading grey--text text--darken-1">
 						rotation
 					</div>
-					<v-btn-toggle mandatory v-model="model.rotation.value">
+					<v-btn-toggle
+						mandatory
+						v-model="model.rotation.value"
+					>
 						<v-btn
 							v-for="item in model.rotation.possibleItems"
 							:value="item.value"
@@ -95,21 +112,28 @@
 						</v-btn>
 					</v-btn-toggle>
 				</div>
-				<div v-if="false" class="ma-3">
+				<div
+					v-if="false"
+					class="ma-3"
+				>
 					<div style="display: flex; justify-content: space-between; align-items: center;">
 						<div class="subheading grey--text text--darken-1">
 							animation duration
 						</div>
-						<v-chip color="deep-orange" text-color="white" small>
+						<v-chip
+							small
+							color="deep-orange"
+							text-color="white"
+						>
 							{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
 						</v-chip>
 					</div>
 					<v-slider
-						class="px-2 py-0"
 						v-model="model.animationDuration.value"
-						:min="0"
-						:max="model.animationDuration.possibleValues.length - 1"
 						color="deep-orange"
+						class="px-2 py-0"
+						:max="model.animationDuration.possibleValues.length - 1"
+						:min="0"
 						hide-details
 					></v-slider>
 				</div>
@@ -118,16 +142,20 @@
 						<div class="subheading grey--text text--darken-1">
 							font size ratio
 						</div>
-						<v-chip color="deep-orange" text-color="white" small>
+						<v-chip
+							small
+							color="deep-orange"
+							text-color="white"
+						>
 							{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
 						</v-chip>
 					</div>
 					<v-slider
-						class="px-2 py-0"
 						v-model="model.fontSizeRatio.value"
-						:min="0"
-						:max="model.fontSizeRatio.possibleValues.length - 1"
 						color="deep-orange"
+						class="px-2 py-0"
+						:max="model.fontSizeRatio.possibleValues.length - 1"
+						:min="0"
 						hide-details
 					></v-slider>
 				</div>
@@ -136,31 +164,48 @@
 						<div class="subheading grey--text text--darken-1">
 							max font size
 						</div>
-						<v-chip color="deep-orange" text-color="white" small>
+						<v-chip
+							small
+							color="deep-orange"
+							text-color="white"
+						>
 							{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
 						</v-chip>
 					</div>
 					<v-slider
-						class="px-2 py-0"
 						v-model="model.maxFontSize.value"
-						:min="model.maxFontSize.min"
-						:max="model.maxFontSize.max"
-						:step="model.maxFontSize.step"
 						color="deep-orange"
+						class="px-2 py-0"
+						:max="model.maxFontSize.max"
+						:min="model.maxFontSize.min"
+						:step="model.maxFontSize.step"
 						hide-details
 					></v-slider>
 				</div>
 			</v-navigation-drawer>
-			<v-toolbar color="deep-orange darken-3" dark fixed clipped-left app>
+			<v-toolbar
+				dark
+				color="deep-orange darken-3"
+				clipped-left
+				fixed
+				app
+			>
 				<v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
 				<v-toolbar-title>VueWordCloud</v-toolbar-title>
 				<v-spacer></v-spacer>
-				<v-btn icon href="https://github.com/SeregPie/VueWordCloud" target="_blank">
+				<v-btn
+					icon
+					href="https://github.com/SeregPie/VueWordCloud"
+					target="_blank"
+				>
 					<v-icon>fa-github</v-icon>
 				</v-btn>
 			</v-toolbar>
 			<v-content>
-				<v-container fluid fill-height>
+				<v-container
+					fluid
+					fill-height
+				>
 					<vue-word-cloud
 						v-if="active"
 						:words="words"
@@ -172,7 +217,7 @@
 						:animation-duration="animationDuration"
 					>
 						<template slot-scope="word">
-							<v-tooltip top :open-delay="300">
+							<v-tooltip top>
 								<div slot="activator">
 									{{ word.text }}
 								</div>
