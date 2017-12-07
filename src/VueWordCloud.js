@@ -3,25 +3,14 @@ import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
 import Reflect_isEqual from './helpers/Reflect/isEqual';
 
-import render from './members/render';
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
 import getKeyedBoundableWords from './members/getKeyedBoundableWords';
 import getBoundedWords from './members/getBoundedWords';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
+import render from './members/render';
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
-
-	render(createElement) {
-		return render(
-			createElement,
-			Object.assign({
-				default: ({text}) => text,
-			}, this.$scopedSlots),
-			this.scaledBoundedWords,
-			this.keyedPopulatedWords,
-		);
-	},
 
 	props: {
 		words: {
@@ -99,10 +88,6 @@ let VueWordCloud = {
 
 			keyedBoundableWords: undefined,
 		};
-	},
-
-	mounted() {
-		this.startToUpdateContainerSize();
 	},
 
 	computed: {
@@ -211,12 +196,27 @@ let VueWordCloud = {
 		},
 	},
 
+	mounted() {
+		this.startToUpdateContainerSize();
+	},
+
 	methods: {
 		updateContainerSize() {
 			let {width, height} = this.$el.getBoundingClientRect();
 			this.containerWidth = width;
 			this.containerHeight = height;
 		},
+	},
+
+	render(createElement) {
+		return render(
+			createElement,
+			Object.assign({
+				default: ({text}) => text,
+			}, this.$scopedSlots),
+			this.scaledBoundedWords,
+			this.keyedPopulatedWords,
+		);
 	},
 };
 

@@ -35,39 +35,43 @@ export default function(createElement, scopedSlots, boundedWords, keyedPopulated
 					key,
 					style: {
 						position: 'absolute',
-						left: `${rectLeft + rectWidth / 2}px`,
 						top: `${rectTop + rectHeight / 2}px`,
+						left: `${rectLeft + rectWidth / 2}px`,
 						transform: `rotate(${rotation}turn)`,
 					},
 				},
-				[createElement(
-					'div',
-					{
-						style: {
-							position: 'absolute',
-							left: '50%',
-							top: '50%',
-							//width: `${textWidth}px`,
-							//height: `${textHeight}px`,
-							color: color,
-							font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
-							whiteSpace: 'nowrap',
-							transform: 'translate(-50%, -50%)',
+				[
+					createElement(
+						'div',
+						{
+							style: {
+								position: 'absolute',
+								top: '50%',
+								left: '50%',
+								transform: 'translate(-50%, -50%)',
+								//width: `${textWidth}px`,
+								//height: `${textHeight}px`,
+								whiteSpace: 'nowrap',
+								color: color,
+								font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
+							},
 						},
-					},
-					[scopedSlots.default({
-						originalWord,
-						text,
-						weight,
-						rotation,
-						fontFamily,
-						fontStyle,
-						fontVariant,
-						fontWeight,
-						color,
-						fontSize,
-					})],
-				)],
+						[
+							scopedSlots.default({
+								originalWord,
+								text,
+								weight,
+								rotation,
+								fontFamily,
+								fontStyle,
+								fontVariant,
+								fontWeight,
+								color,
+								fontSize,
+							}),
+						],
+					),
+				],
 			);
 		}),
 	);
