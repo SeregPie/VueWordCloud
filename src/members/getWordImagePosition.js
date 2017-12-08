@@ -1,25 +1,22 @@
 import findWordImagePositionBy from './findWordImagePositionBy';
+import getOccupiedPixels from './getOccupiedPixels';
 
 export default function(
-	[totalImage, totalImageWidth, totalImageHeight],
-	[image, imageWidth, imageHeight],
+	cloudImage,
+	cloudImageWidth,
+	cloudImageHeight,
+	wordImage,
+	wordImageWidth,
+	wordImageHeight,
 ) {
-	let occupiedPixels = [];
-	for (let pixelLeft = 0; pixelLeft < imageWidth; ++pixelLeft) {
-		for (let pixelTop = 0; pixelTop < imageHeight; ++pixelTop) {
-			let pixel = image[imageWidth * pixelTop + pixelLeft];
-			if (pixel) {
-				occupiedPixels.push([pixelLeft, pixelTop]);
-			}
-		}
-	}
-	return findWordImagePositionBy(totalImageWidth - imageWidth, totalImageHeight - imageHeight, ([imageLeft, imageTop]) => {
-		for (let i = 0, ii = occupiedPixels.length; i < ii; ++i) {
-			let [pixelLeft, pixelTop] = occupiedPixels[i];
-			let totalPixelLeft = pixelLeft + imageLeft;
-			let totalPixelTop = pixelTop + imageTop;
-			let totalPixel = totalImage[totalImageWidth * totalPixelTop + totalPixelLeft];
-			if (totalPixel) {
+	let occupiedWordPixels = getOccupiedPixels(wordImage, wordImageWidth, wordImageHeight);
+	return findWordImagePositionBy(cloudImageWidth - wordImageWidth, cloudImageHeight - wordImageHeight, ([wordImageLeft, wordImageTop]) => {
+		for (let i = 0, ii = occupiedWordPixels.length; i < ii; ++i) {
+			let [wordPixelLeft, wordPixelTop] = occupiedWordPixels[i];
+			let cloudPixelLeft = wordPixelLeft + wordImageLeft;
+			let cloudPixelTop = wordPixelTop + wordImageTop;
+			let cloudPixel = cloudImage[cloudImageWidth * cloudPixelTop + cloudPixelLeft];
+			if (cloudPixel) {
 				return false;
 			}
 		}

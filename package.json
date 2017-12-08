@@ -31,8 +31,8 @@
 		"vue": "^2.5.9"
 	},
 	"devDependencies": {
-		"eslint": "^4.12.0",
-		"rollup": "^0.52.0",
+		"eslint": "^4.12.1",
+		"rollup": "^0.52.1",
 		"rollup-plugin-buble": "^0.18.0",
 		"rollup-plugin-uglify": "^2.0.1"
 	}

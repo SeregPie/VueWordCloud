@@ -1,14 +1,20 @@
 export default function(
-	[totalImage, totalImageWidth, totalImageHeight],
-	[image, imageLeft, imageTop, imageWidth, imageHeight],
+	cloudImage,
+	cloudImageWidth,
+	cloudImageHeight,
+	wordImageLeft,
+	wordImageTop,
+	wordImage,
+	wordImageWidth,
+	wordImageHeight,
 ) {
-	for (let pixelLeft = 0; pixelLeft < imageWidth; ++pixelLeft) {
-		for (let pixelTop = 0; pixelTop < imageHeight; ++pixelTop) {
-			let pixel = image[imageWidth * pixelTop + pixelLeft];
-			if (pixel) {
-				let totalPixelLeft = pixelLeft + imageLeft;
-				let totalPixelTop = pixelTop + imageTop;
-				totalImage[totalImageWidth * totalPixelTop + totalPixelLeft] = pixel;
+	for (let wordPixelLeft = 0; wordPixelLeft < wordImageWidth; ++wordPixelLeft) {
+		for (let wordPixelTop = 0; wordPixelTop < wordImageHeight; ++wordPixelTop) {
+			let wordPixel = wordImage[wordImageWidth * wordPixelTop + wordPixelLeft];
+			if (wordPixel) {
+				let cloudPixelLeft = wordPixelLeft + wordImageLeft;
+				let cloudPixelTop = wordPixelTop + wordImageTop;
+				cloudImage[cloudImageWidth * cloudPixelTop + cloudPixelLeft] = wordPixel;
 			}
 		}
 	}
