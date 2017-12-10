@@ -105,11 +105,11 @@ Pass custom renderer for the words.
 | `text` | `[String, Function]` | `''` | The text for each word.<br/>The function will be called with the original word as parameter. |
 | `weight` | `[String, Function]` | `1` | The weight for each word.<br/>The function will be called with the original word as parameter. |
 | `rotation` | `[Number, Function]` | * | The rotation of each word. The units for the rotation must be turns (1 turn is 360 degrees).<br/>The function will be called with the original word as parameter.<br/>The default value is a function, that returns a random value from `[0, 0.75]`. |
-| `fontFamily` | `[String, Function]` | `serif` | The font family for each word.<br/>The function will be called with the original word as parameter. |
-| `fontStyle` | `[String, Function]` | `normal` | The font style for each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.<br/>The function will be called with the original word as parameter. |
-| `fontVariant` | `[String, Function]` | `normal` | The font variant for each word. Possible values are `'normal'` and `'small-caps'`.<br/>The function will be called with the original word as parameter. |
-| `fontWeight` | `[String, Function]` | `normal` | The font weight for each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.<br/>The function will be called with the original word as parameter. |
-| `color` | `[String, Function]` | `Black` | The color for each word.<br/>The function will be called with the original word as parameter. |
+| `fontFamily` | `[String, Function]` | `'serif'` | The font family for each word.<br/>The function will be called with the original word as parameter. |
+| `fontStyle` | `[String, Function]` | `'normal'` | The font style for each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.<br/>The function will be called with the original word as parameter. |
+| `fontVariant` | `[String, Function]` | `'normal'` | The font variant for each word. Possible values are `'normal'` and `'small-caps'`.<br/>The function will be called with the original word as parameter. |
+| `fontWeight` | `[String, Function]` | `'normal'` | The font weight for each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.<br/>The function will be called with the original word as parameter. |
+| `color` | `[String, Function]` | `'Black'` | The color for each word.<br/>The function will be called with the original word as parameter. |
 | `fontSizeRatio` | `Number` | `0` | The font size of the words will be scaled to respect the given ratio. For example, if the value equals `5`, then the biggest word will be 5 times bigger than the smallest one. The value can be an integer or a fraction. For example, the value `4` has the same effect as the value `1/4`. |
 | `maxFontSize` | `Number` | `Infinity` | The maximum font size of the placed words. |
 | `animationDuration` | `Number` | `5000` | The duration of the animation, when words are placed. |
