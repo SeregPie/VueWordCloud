@@ -111,5 +111,5 @@ Pass custom renderer for the words.
 | `fontWeight` | `[String, Function]` | `normal` | The font weight for each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.<br/>The function will be called with the original word as parameter. |
 | `color` | `[String, Function]` | `Black` | The color for each word.<br/>The function will be called with the original word as parameter. |
 | `fontSizeRatio` | `Number` | `0` | The font size of the words will be scaled to respect the given ratio. For example, if the ratio equals `5`, then the biggest word will be 5 times bigger than the smallest one. The values can be integers as well as fractions. For example, the value `4` has the same effect as the value `1/4`. |
-| `maxFontSize` | `Number` | `Infinity` | The maximum font size of the drawn words. |
-| `animationDuration` | `Number` | `5000` | The duration of the animation, when words are drawn. |
+| `maxFontSize` | `Number` | `Infinity` | The maximum font size of the placed words. |
+| `animationDuration` | `Number` | `5000` | The duration of the animation, when words are placed. |
