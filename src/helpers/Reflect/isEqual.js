@@ -1,21 +1,21 @@
 import Object_isObject from '../Object/isObject';
 
-let isEqual = function(something, otherSomething) {
-	if (something === otherSomething) {
+let isEqual = function(value, otherValue) {
+	if (value === otherValue) {
 		return true;
 	}
-	if (Array.isArray(something)) {
-		if (Array.isArray(otherSomething)) {
-			if (something.length === otherSomething.length) {
-				return something.every((something, index) => isEqual(something, otherSomething[index]));
+	if (Array.isArray(value)) {
+		if (Array.isArray(otherValue)) {
+			if (value.length === otherValue.length) {
+				return value.every((value, index) => isEqual(value, otherValue[index]));
 			}
 		}
 	} else
-	if (Object_isObject(something)) {
-		if (Object_isObject(otherSomething)) {
-			let somethingEntries = Object.entries(something);
-			if (somethingEntries.length === Object.keys(otherSomething).length) {
-				return somethingEntries.every(([key, something]) => isEqual(something, otherSomething[key]));
+	if (Object_isObject(value)) {
+		if (Object_isObject(otherValue)) {
+			let valueEntries = Object.entries(value);
+			if (valueEntries.length === Object.keys(otherValue).length) {
+				return valueEntries.every(([key, value]) => isEqual(value, otherValue[key]));
 			}
 		}
 	}

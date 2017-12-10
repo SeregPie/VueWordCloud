@@ -1,6 +1,7 @@
 import Array_sample from './helpers/Array/sample';
 import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
+import Function_noop from './helpers/Function/noop';
 import Reflect_isEqual from './helpers/Reflect/isEqual';
 
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
@@ -87,6 +88,7 @@ let VueWordCloud = {
 			containerHeight: 0,
 
 			keyedBoundableWords: undefined,
+			fulfilledBoundedWords: Object.freeze([]),
 		};
 	},
 
@@ -145,7 +147,7 @@ let VueWordCloud = {
 			);
 		},
 
-		watch$keyedBoundableWords() {
+		watchedKeyedBoundableWords() {
 			return getKeyedBoundableWords(this.keyedPopulatedWords);
 		},
 
@@ -154,6 +156,16 @@ let VueWordCloud = {
 		},
 
 		boundedWords() {
+			Promise
+				.resolve(this.promisedBoundedWords)
+				.then(value => {
+					this.fulfilledBoundedWords = Object.freeze(value);
+				})
+				.catch(Function_noop);
+			return this.fulfilledBoundedWords;
+		},
+
+		promisedBoundedWords() {
 			return getBoundedWords(
 				this.boundableWords,
 				this.containerWidth,
@@ -186,7 +198,7 @@ let VueWordCloud = {
 	},
 
 	watch: {
-		watch$keyedBoundableWords: {
+		watchedKeyedBoundableWords: {
 			handler(newValue, oldValue) {
 				if (!Reflect_isEqual(newValue, oldValue)) {
 					this.keyedBoundableWords = Object.freeze(newValue);
