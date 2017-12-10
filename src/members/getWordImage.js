@@ -1,3 +1,5 @@
+import Math_turnToRad from '../helpers/Math/turnToRad';
+
 export default function(
 	text,
 	fontStyle,
