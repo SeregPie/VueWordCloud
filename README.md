@@ -44,7 +44,7 @@ import VueWordCloud from 'vuewordcloud';
 export default {
   // ...
   components: {
-    VueWordCloud,
+    [VueWordCloud.name]: VueWordCloud,
   },
 };
 
@@ -88,9 +88,9 @@ Pass custom renderer for the words.
 ```html
 
 <vue-word-cloud :words="words">
-  <template slot-scope="word">
-    <div style="cursor: pointer;" :title="word.weight" @click="onWordClick(word)">
-      {{ word.text }}
+  <template slot-scope="{text, weight, originalWord}">
+    <div style="cursor: pointer;" :title="weight" @click="onWordClick(originalWord)">
+      {{ text }}
     </div>
   </template>
 </vue-word-cloud>
@@ -99,116 +99,17 @@ Pass custom renderer for the words.
 
 ## properties
 
-`words = []`
-
-*type*: `Array`
-
-The words to place into the cloud. A value of the array could be either an object, an array or a string.
-
-`Object`: `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.
-
-`Array`: `[text, weight]`.
-
-`String`: `text`.
-
----
-
-`text = ''`
-
-*type*: `String` or `Function`
-
-The text of each word.
-
----
-
-`weight = 1`
-
-*type*: `Number` or `Function`
-
-The weight of each word.
-
----
-
-`rotation`
-
-*type*: `Number` or `Function`
-
-The rotation of each word. The units for the rotation are turns (1 turn is 360 degrees).
-
----
-
-`fontFamily = 'serif'`
-
-*type*: `String` or `Function`
-
-The font family.
-
----
-
-`fontStyle = 'normal'`
-
-*type*: `String` or `Function`
-
-The font style of each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.
-
----
-
-`fontVariant = 'normal'`
-
-*type*: `String` or `Function`
-
-The font variant of each word. Possible values are `'normal'` and `'small-caps'`.
-
----
-
-`fontWeight = 'normal'`
-
-*type*: `String` or `Function`
-
-The font weight of each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.
-
----
-
-`color = 'Black'`
-
-*type*: `String` or `Function`
-
-The color of each word.
-
----
-
-`text`<br/>
-`weight`<br/>
-`color`<br/>
-`rotation`<br/>
-`fontFamily`<br/>
-`fontStyle`<br/>
-`fontVariant`<br/>
-`fontWeight`<br/>
-
-If the property is a function, it will be called with a given word as the first paramater, awaiting the corresponding attribute in return. The attribute is assigned to each word, where the attribute is not already present.
-
----
-
-`fontSizeRatio`
-
-*type*: `Number`
-
-By default, if we have a word with a weight of 1 and a word with a weight of 500, we can only read the big word, the one are so small that it won't be readable in most cases.
-
-If `fontSizeRatio` is specified, the words' font size will be scaled to respect the given ratio.
-For example, if the ratio equals `5`, this means that the biggest word will be 5 times bigger than the smallest one, improving readability.
-
-The value of `4` is the same as the value of `1/4`. The value of `3/2` is the same as the value of `2/3`.
-
----
-
-`maxFontSize = Infinity`
-
-*type*: `Number`
-
----
-
-`animationDuration = 5000`
-
-*type*: `Number`
+| property | type | default | description |
+| ---: | :--- | :--- | :--- |
+| `words` | `Array` | [] | The words to place into the cloud. A value of the array could be either an object, an array or a string.<br/>If the value is an object, it will be resolved to `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.<br/>If the value is an array, it will be resolved to `[text, weight]`.<br/>If the value is a string, it will be resolved to `text`. |
+| `text` | `[String, Function]` | `''` | The text for each word.<br/>The function will be called with the original word as parameter. |
+| `weight` | `[String, Function]` | `1` | The weight for each word.<br/>The function will be called with the original word as parameter. |
+| `rotation` | `[Number, Function]` | * | The rotation of each word. The units for the rotation must be turns (1 turn is 360 degrees).<br/>The function will be called with the original word as parameter.<br/>The default value is a function, that returns a random value from `[0, 0.75]`. |
+| `fontFamily` | `[String, Function]` | `serif` | The font family for each word.<br/>The function will be called with the original word as parameter. |
+| `fontStyle` | `[String, Function]` | `normal` | The font style for each word. Possible values are `'normal'`, `'italic'` and `'oblique'`.<br/>The function will be called with the original word as parameter. |
+| `fontVariant` | `[String, Function]` | `normal` | The font variant for each word. Possible values are `'normal'` and `'small-caps'`.<br/>The function will be called with the original word as parameter. |
+| `fontWeight` | `[String, Function]` | `normal` | The font weight for each word. Possible values are `'normal'`, `'bold'`, `'bolder'`, `'lighter'` and `'100'` to `'900'`.<br/>The function will be called with the original word as parameter. |
+| `color` | `[String, Function]` | `Black` | The color for each word.<br/>The function will be called with the original word as parameter. |
+| `fontSizeRatio` | `Number` | `0` | The font size of the words will be scaled to respect the given ratio. For example, if the ratio equals `5`, then the biggest word will be 5 times bigger than the smallest one. The values can be integers as well as fractions. For example, the value `4` has the same effect as the value `1/4`. |
+| `maxFontSize` | `Number` | `Infinity` | The maximum font size of the drawn words. |
+| `animationDuration` | `Number` | `5000` | The duration of the animation, when words are drawn. |
