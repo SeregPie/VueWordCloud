@@ -101,7 +101,7 @@ Pass custom renderer for the words.
 
 | property | type | default | description |
 | ---: | :--- | :--- | :--- |
-| `words` | `Array` | [] | The words to place into the cloud. A value of the array could be either an object, an array or a string.<br/>If the value is an object, it will be resolved to `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.<br/>If the value is an array, it will be resolved to `[text, weight]`.<br/>If the value is a string, it will be resolved to `text`. |
+| `words` | `Array` | `[]` | The words to place into the cloud. A value of the array could be either an object, an array or a string.<br/>If the value is an object, it will be resolved to `{key, text, weight, rotation, fontFamily, fontStyle, fontVariant, fontWeight, color}`.<br/>If the value is an array, it will be resolved to `[text, weight]`.<br/>If the value is a string, it will be resolved to `text`. |
 | `text` | `[String, Function]` | `''` | The text for each word.<br/>The function will be called with the original word as parameter. |
 | `weight` | `[String, Function]` | `1` | The weight for each word.<br/>The function will be called with the original word as parameter. |
 | `rotation` | `[Number, Function]` | * | The rotation of each word. The units for the rotation must be turns (1 turn is 360 degrees).<br/>The function will be called with the original word as parameter.<br/>The default value is a function, that returns a random value from `[0, 0.75]`. |
