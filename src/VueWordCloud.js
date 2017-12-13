@@ -2,10 +2,8 @@ import Array_sample from './helpers/Array/sample';
 import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
 import Function_noop from './helpers/Function/noop';
-import Reflect_isEqual from './helpers/Reflect/isEqual';
 
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
-import getKeyedBoundableWords from './members/getKeyedBoundableWords';
 import getBoundedWords from './members/getBoundedWords';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
 import render from './members/render';
@@ -76,6 +74,11 @@ let VueWordCloud = {
 			default: Infinity,
 		},
 
+		animationDuration: {
+			type: Number,
+			default: 5000,
+		},
+
 		intervalBetweenUpdateContainerSize: {
 			type: Number,
 			default: 1000,
@@ -87,7 +90,6 @@ let VueWordCloud = {
 			containerWidth: 0,
 			containerHeight: 0,
 
-			keyedBoundableWords: undefined,
 			fulfilledBoundedWords: Object.freeze([]),
 		};
 	},
@@ -147,19 +149,11 @@ let VueWordCloud = {
 			);
 		},
 
-		watchedKeyedBoundableWords() {
-			return getKeyedBoundableWords(this.keyedPopulatedWords);
-		},
-
-		boundableWords() {
-			return Object.values(this.keyedBoundableWords);
-		},
-
 		boundedWords() {
 			Promise
 				.resolve(this.promisedBoundedWords)
 				.then(value => {
-					this.fulfilledBoundedWords = Object.freeze(value);
+					this.fulfilledBoundedWords = value;
 				})
 				.catch(Function_noop);
 			return this.fulfilledBoundedWords;
@@ -167,7 +161,7 @@ let VueWordCloud = {
 
 		promisedBoundedWords() {
 			return getBoundedWords(
-				this.boundableWords,
+				this.keyedPopulatedWords,
 				this.containerWidth,
 				this.containerHeight,
 				this.fontSizeRatio,
@@ -197,17 +191,6 @@ let VueWordCloud = {
 		},
 	},
 
-	watch: {
-		watchedKeyedBoundableWords: {
-			handler(newValue, oldValue) {
-				if (!Reflect_isEqual(newValue, oldValue)) {
-					this.keyedBoundableWords = Object.freeze(newValue);
-				}
-			},
-			immediate: true,
-		},
-	},
-
 	mounted() {
 		this.startToUpdateContainerSize();
 	},
@@ -227,7 +210,7 @@ let VueWordCloud = {
 				default: ({text}) => text,
 			}, this.$scopedSlots),
 			this.scaledBoundedWords,
-			this.keyedPopulatedWords,
+			this.animationDuration,
 		);
 	},
 };

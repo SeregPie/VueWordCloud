@@ -17,25 +17,8 @@ export default function(words, containerWidth, containerHeight, maxFontSize) {
 		scaleFactor *= maxFontSize / currentMaxFontSize;
 	}
 
-	return words.map(({
-		key,
-		fontSize,
-		textWidth,
-		textHeight,
-		rectLeft,
-		rectTop,
-		rectWidth,
-		rectHeight,
-	}) => {
-		fontSize *= scaleFactor;
-		textWidth *= scaleFactor;
-		textHeight *= scaleFactor;
-		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
-		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
-		rectWidth *= scaleFactor;
-		rectHeight *= scaleFactor;
-		return {
-			key,
+	return words.map(word => {
+		let {
 			fontSize,
 			textWidth,
 			textHeight,
@@ -43,6 +26,24 @@ export default function(words, containerWidth, containerHeight, maxFontSize) {
 			rectTop,
 			rectWidth,
 			rectHeight,
-		};
+		} = word;
+
+		fontSize *= scaleFactor;
+		textWidth *= scaleFactor;
+		textHeight *= scaleFactor;
+		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
+		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
+		rectWidth *= scaleFactor;
+		rectHeight *= scaleFactor;
+
+		return Object.assign({}, word, {
+			fontSize,
+			textWidth,
+			textHeight,
+			rectLeft,
+			rectTop,
+			rectWidth,
+			rectHeight,
+		});
 	});
 }

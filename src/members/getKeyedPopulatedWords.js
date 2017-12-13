@@ -85,8 +85,8 @@ export default function(
 			key += '!';
 		}
 		returns[key] = {
-			key,
 			originalWord,
+			key,
 			text,
 			weight,
 			rotation,

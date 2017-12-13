@@ -1,4 +1,9 @@
-export default function(createElement, scopedSlots, boundedWords, keyedPopulatedWords) {
+export default function(
+	createElement,
+	scopedSlots,
+	words,
+	animationDuration,
+) {
 	return createElement(
 		'div',
 		{
@@ -8,8 +13,17 @@ export default function(createElement, scopedSlots, boundedWords, keyedPopulated
 				height: '100%',
 			},
 		},
-		boundedWords.map(({
+		words.map(({
+			originalWord,
 			key,
+			text,
+			weight,
+			rotation,
+			fontFamily,
+			fontStyle,
+			fontVariant,
+			fontWeight,
+			color,
 			fontSize,
 			textWidth,
 			textHeight,
@@ -18,17 +32,6 @@ export default function(createElement, scopedSlots, boundedWords, keyedPopulated
 			rectWidth,
 			rectHeight,
 		}) => {
-			let {
-				originalWord,
-				text,
-				weight,
-				rotation,
-				fontFamily,
-				fontStyle,
-				fontVariant,
-				fontWeight,
-				color,
-			} = keyedPopulatedWords[key];
 			return createElement(
 				'div',
 				{
@@ -38,6 +41,10 @@ export default function(createElement, scopedSlots, boundedWords, keyedPopulated
 						top: `${rectTop + rectHeight / 2}px`,
 						left: `${rectLeft + rectWidth / 2}px`,
 						transform: `rotate(${rotation}turn)`,
+						color: color,
+						transitionDuration: `${Math.round(animationDuration)}ms`,
+						transitionProperty: 'all',
+						font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
 					},
 				},
 				[
@@ -52,8 +59,6 @@ export default function(createElement, scopedSlots, boundedWords, keyedPopulated
 								//width: `${textWidth}px`,
 								//height: `${textHeight}px`,
 								whiteSpace: 'nowrap',
-								color: color,
-								font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
 							},
 						},
 						[

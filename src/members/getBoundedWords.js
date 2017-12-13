@@ -10,9 +10,10 @@ import placeWordPixels from './placeWordPixels';
 
 let aaaa = 4; // renameMe
 
-export default function(words, containerWidth, containerHeight, fontSizeRatio) {
+export default function(keyedWords, containerWidth, containerHeight, fontSizeRatio) {
 	let returns = [];
 	if (containerWidth > 0 && containerHeight > 0) {
+		let words = Object.values(keyedWords);
 		if (words.length > 0) {
 			let containerAspect = containerWidth / containerHeight;
 			let wordFontSizes = getWordFontSizes(words, fontSizeRatio);
@@ -145,8 +146,7 @@ export default function(words, containerWidth, containerHeight, fontSizeRatio) {
 						}
 						let rectLeft = imageLeft + (imageWidth - rectWidth) / 2;
 						let rectTop = imageTop + (imageHeight - rectHeight) / 2;
-						returns.push({
-							key,
+						returns.push(Object.assign({
 							fontSize,
 							textWidth,
 							textHeight,
@@ -154,7 +154,7 @@ export default function(words, containerWidth, containerHeight, fontSizeRatio) {
 							rectTop,
 							rectWidth,
 							rectHeight,
-						});
+						}, keyedWords[key]));
 					});
 					return returns;
 				});

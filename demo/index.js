@@ -146,7 +146,7 @@
 
 					animationDuration: {
 						possibleValues: [0, 1, 2, 3, 4, 5, 10],
-						value: 0,
+						value: 3,
 					},
 
 					fontSizeRatio: {
