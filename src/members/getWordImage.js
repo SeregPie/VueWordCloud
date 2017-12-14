@@ -19,6 +19,8 @@ export default function(
 	ctx.translate(imageWidth / 2, imageHeight / 2);
 	ctx.rotate(rotation);
 	ctx.font = font;
+	ctx.shadowColor = '#000000';
+	ctx.shadowBlur = fontSize / 32;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.fillText(text, 0, 0);
