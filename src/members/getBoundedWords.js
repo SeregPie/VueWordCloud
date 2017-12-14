@@ -101,9 +101,6 @@ export default function(context, words, containerWidth, containerHeight, fontSiz
 					});
 					return words;
 				})
-				.catch(error => {
-					console.log(error);
-				})
 				.finally(() => {
 					getBoundedWordsWorker.terminate();
 				});
