@@ -1,6 +1,6 @@
 {
 	"name": "vuewordcloud",
-	"version": "17.10.27",
+	"version": "17.12.14",
 	"description": "A word cloud generator.",
 	"main": "VueWordCloud.js",
 	"scripts": {
@@ -28,7 +28,7 @@
 	},
 	"homepage": "https://github.com/SeregPie/VueWordCloud#readme",
 	"dependencies": {
-		"vue": "^2.5.9"
+		"vue": "^2.5.11"
 	},
 	"devDependencies": {
 		"eslint": "^4.12.1",
