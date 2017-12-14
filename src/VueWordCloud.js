@@ -208,6 +208,9 @@ let VueWordCloud = {
 				Promise
 					.resolve(this['promised$' + key])
 					.then(value => {
+						if (Object_isObject(value)) {
+							value = Object.freeze(value);
+						}
 						this['fulfilled$' + key] = value;
 					})
 					.catch(errorHandler);
