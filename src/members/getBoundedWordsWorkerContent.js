@@ -1,4 +1,3 @@
-import Array_fill from '../helpers/Array/fill';
 import Array_sortBy from '../helpers/Array/sortBy';
 import Math_log2 from '../helpers/Math/log2';
 
@@ -33,12 +32,12 @@ self.addEventListener('message', ({data}) => {
 			let resolution = Math.pow(2, 16); // fixMe (2^32 is max)
 			let totalImageWidth = Math.floor(Math.sqrt(containerAspect * resolution));
 			let totalImageHeight = Math.floor(resolution / totalImageWidth);
-			let totalImage = Array_fill(new Array(totalImageWidth * totalImageHeight), 0);
+			let totalImage = new Uint8Array(totalImageWidth * totalImageHeight);
 			totalImageLayers = [[totalImage, totalImageWidth, totalImageHeight]];
 			for (let i = 1; i < imageLayers.length; ++i) {
 				totalImageWidth *= 2;
 				totalImageHeight *= 2;
-				totalImage = Array_fill(new Array(totalImageWidth * totalImageHeight), 0);
+				totalImage = new Uint8Array(totalImageWidth * totalImageHeight);
 				totalImageLayers.unshift([totalImage, totalImageWidth, totalImageHeight]);
 			}
 		}

@@ -1,4 +1,3 @@
-import Array_fill from '../helpers/Array/fill';
 import Math_turnToRad from '../helpers/Math/turnToRad';
 
 export default function(
@@ -25,7 +24,7 @@ export default function(
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.fillText(text, 0, 0);
-	let image = Array_fill(new Array(imageWidth * imageHeight), 0);
+	let image = new Uint8Array(imageWidth * imageHeight);
 	let imageData = ctx.getImageData(0, 0, imageWidth, imageHeight).data;
 	for (let i = 0, ii = image.length; i < ii; ++i) {
 		image[i] = imageData[i * 4 + 3];

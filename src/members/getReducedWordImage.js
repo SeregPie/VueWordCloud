@@ -1,5 +1,3 @@
-import Array_fill from '../helpers/Array/fill';
-
 export default function(
 	originalImage,
 	originalImageWidth,
@@ -8,7 +6,7 @@ export default function(
 ) {
 	let reducedImageWidth = originalImageWidth / pixelSize;
 	let reducedImageHeight = originalImageHeight / pixelSize;
-	let reducedImage = Array_fill(new Array(reducedImageWidth * reducedImageHeight), 0);
+	let reducedImage = new Uint8Array(reducedImageWidth * reducedImageHeight);
 	for (let reducedPixelLeft = 0; reducedPixelLeft < reducedImageWidth; ++reducedPixelLeft) {
 		for (let reducedPixelTop = 0; reducedPixelTop < reducedImageHeight; ++reducedPixelTop) {
 			offsetPixelsLoop:
