@@ -2,11 +2,27 @@ import Array_sample from './helpers/Array/sample';
 import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
 import Function_noop from './helpers/Function/noop';
+import Function_stubArray from './helpers/Function/stubArray';
+import Object_isObject from './helpers/Object/isObject';
 
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
 import getBoundedWords from './members/getBoundedWords';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
 import render from './members/render';
+
+let asyncComputed = {
+	boundedWords: {
+		get() {
+			return getBoundedWords(
+				this.keyedPopulatedWords,
+				this.containerWidth,
+				this.containerHeight,
+				this.fontSizeRatio,
+			);
+		},
+		default: Function_stubArray,
+	}
+};
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
@@ -14,9 +30,7 @@ let VueWordCloud = {
 	props: {
 		words: {
 			type: Array,
-			default() {
-				return [];
-			},
+			default: Function_stubArray,
 		},
 
 		text: {
@@ -86,12 +100,21 @@ let VueWordCloud = {
 	},
 
 	data() {
-		return {
+		let returns = {
 			containerWidth: 0,
 			containerHeight: 0,
-
-			fulfilledBoundedWords: Object.freeze([]),
 		};
+		Object.entries(asyncComputed).forEach(([key, def]) => {
+			let defaultValue = def.default;
+			if (Function_isFunction(defaultValue)) {
+				defaultValue = defaultValue.call(this);
+			}
+			if (Object_isObject(defaultValue)) {
+				defaultValue = Object.freeze(defaultValue);
+			}
+			returns['fulfilled$' + key] = defaultValue;
+		});
+		return returns;
 	},
 
 	computed: {
@@ -149,25 +172,6 @@ let VueWordCloud = {
 			);
 		},
 
-		boundedWords() {
-			Promise
-				.resolve(this.promisedBoundedWords)
-				.then(value => {
-					this.fulfilledBoundedWords = value;
-				})
-				.catch(Function_noop);
-			return this.fulfilledBoundedWords;
-		},
-
-		promisedBoundedWords() {
-			return getBoundedWords(
-				this.keyedPopulatedWords,
-				this.containerWidth,
-				this.containerHeight,
-				this.fontSizeRatio,
-			);
-		},
-
 		scaledBoundedWords() {
 			return getScaledBoundedWords(
 				this.boundedWords,
@@ -189,6 +193,33 @@ let VueWordCloud = {
 				}
 			};
 		},
+	},
+
+	beforeCreate() {
+		Object.entries(asyncComputed).forEach(([key, def]) => {
+			let errorHandler = def.errorHandler || Function_noop;
+			this.$options.computed[key] = function() {
+				Promise
+					.resolve(this['promised$' + key])
+					.then(value => {
+						this['fulfilled$' + key] = value;
+					})
+					.catch(errorHandler);
+				return this['fulfilled$' + key];
+			};
+			let outerToken;
+			this.$options.computed['promised$' + key] = function() {
+				let innerToken = (outerToken = {});
+				return Promise
+					.resolve(def.get.call(this))
+					.then(value => {
+						if (innerToken !== outerToken || this._isDestroyed) {
+							throw new Error();
+						}
+						return value;
+					});
+			};
+		});
 	},
 
 	mounted() {

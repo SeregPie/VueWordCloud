@@ -1,5 +1,6 @@
 import Array_sortBy from '../helpers/Array/sortBy';
 import Math_ceilPowerOfTwo from '../helpers/Math/ceilPowerOfTwo';
+import Promise_delay from '../helpers/Promise/delay';
 
 import getWordFontSizes from './getWordFontSizes';
 import getWordElementMeasures from './getWordElementMeasures';
@@ -27,8 +28,7 @@ export default function(keyedWords, containerWidth, containerHeight, fontSizeRat
 					fontVariant,
 					fontWeight,
 				}) =>
-					Promise
-						.resolve()
+					Promise_delay(1)
 						.then(() => {
 							let fontSize = Math.pow(aaaa - 1, 2) * wordFontSizes[key] + 1;
 							let [
