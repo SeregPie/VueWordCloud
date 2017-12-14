@@ -5,6 +5,7 @@ import Function_noop from './helpers/Function/noop';
 import Function_stubArray from './helpers/Function/stubArray';
 import Object_isObject from './helpers/Object/isObject';
 
+import AsyncComputedContext from './members/AsyncComputedContext';
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
 import getBoundedWords from './members/getBoundedWords';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
@@ -12,9 +13,10 @@ import render from './members/render';
 
 let asyncComputed = {
 	boundedWords: {
-		get() {
+		get(context) {
 			return getBoundedWords(
-				this.keyedPopulatedWords,
+				context,
+				this.populatedWords,
 				this.containerWidth,
 				this.containerHeight,
 				this.fontSizeRatio,
@@ -172,6 +174,10 @@ let VueWordCloud = {
 			);
 		},
 
+		populatedWords() {
+			return Object.values(this.keyedPopulatedWords);
+		},
+
 		scaledBoundedWords() {
 			return getScaledBoundedWords(
 				this.boundedWords,
@@ -207,15 +213,17 @@ let VueWordCloud = {
 					.catch(errorHandler);
 				return this['fulfilled$' + key];
 			};
-			let outerToken;
+			let outerContext = new AsyncComputedContext();
 			this.$options.computed['promised$' + key] = function() {
-				let innerToken = (outerToken = {});
+				outerContext.interrupt();
+				let innerContext = (outerContext = new AsyncComputedContext());
 				return Promise
-					.resolve(def.get.call(this))
+					.resolve(def.get.call(this, innerContext))
 					.then(value => {
-						if (innerToken !== outerToken || this._isDestroyed) {
+						if (this._isDestroyed) {
 							throw new Error();
 						}
+						innerContext.throwIfInterrupted();
 						return value;
 					});
 			};
