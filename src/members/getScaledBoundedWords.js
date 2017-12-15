@@ -31,8 +31,8 @@ export default function(words, containerWidth, containerHeight, maxFontSize) {
 		fontSize *= scaleFactor;
 		textWidth *= scaleFactor;
 		textHeight *= scaleFactor;
-		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor + containerWidth / 2;
-		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor + containerHeight / 2;
+		rectLeft = (rectLeft - (containedLeft + containedRight) / 2) * scaleFactor;
+		rectTop = (rectTop - (containedTop + containedBottom) / 2) * scaleFactor;
 		rectWidth *= scaleFactor;
 		rectHeight *= scaleFactor;
 
