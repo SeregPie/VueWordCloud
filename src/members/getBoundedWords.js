@@ -66,9 +66,10 @@ export default function(context, words, containerWidth, containerHeight, fontSiz
 				}, word);
 			});
 			let getBoundedWordsWorker = new Worker(getBoundedWordsWorkerContent);
-			context.onInterrupt(() => {
+			let fin = function() {
 				getBoundedWordsWorker.terminate();
-			});
+			};
+			context.onInterrupt(fin);
 			getBoundedWordsWorker.postMessage({
 				words: words.map(({
 					key,
@@ -88,22 +89,20 @@ export default function(context, words, containerWidth, containerHeight, fontSiz
 				containerAspect,
 				aaaa,
 			});
-			return Worker_getMessage(getBoundedWordsWorker)
-				.then(value => {
-					let keyedWords = {};
-					words.forEach(word => {
-						let {key} = word;
-						keyedWords[key] = word;
-					});
-					value.forEach(value => {
-						let {key} = value;
-						Object.assign(keyedWords[key], value);
-					});
-					return words;
-				})
-				.finally(() => {
-					getBoundedWordsWorker.terminate();
+			let returns = Worker_getMessage(getBoundedWordsWorker).then(value => {
+				let keyedWords = {};
+				words.forEach(word => {
+					let {key} = word;
+					keyedWords[key] = word;
 				});
+				value.forEach(value => {
+					let {key} = value;
+					Object.assign(keyedWords[key], value);
+				});
+				return words;
+			});
+			returns.then(fin, fin);
+			return returns;
 		}
 	}
 	return [];

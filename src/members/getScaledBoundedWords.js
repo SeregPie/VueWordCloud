@@ -16,7 +16,7 @@ export default function(words, containerWidth, containerHeight, maxFontSize) {
 	if (currentMaxFontSize > maxFontSize) {
 		scaleFactor *= maxFontSize / currentMaxFontSize;
 	}
-	console.log(words);
+
 	return words.map(word => {
 		let {
 			fontSize,

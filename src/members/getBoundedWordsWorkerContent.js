@@ -7,14 +7,13 @@ import placeWordPixels from './placeWordPixels';
 
 self.addEventListener('message', ({data}) => {
 	let {words, containerAspect, aaaa} = data;
-	words = words.map(word => {
+	words.forEach(word => {
 		let {imageWidth, imageHeight} = word;
-		let cccc = Math_log2(Math.min(imageWidth, imageHeight) / Math.pow(aaaa, 2)); //renameMe
-		return Object.assign({cccc}, word);
+		word.cccc = Math_log2(Math.min(imageWidth, imageHeight) / Math.pow(aaaa, 2)); //renameMe
 	});
 	words = Array_sortBy(words, ({cccc}) => -cccc);
 	let totalImageLayers;
-	words = words.map(({
+	let returns = words.map(({
 		key,
 		rectWidth,
 		rectHeight,
@@ -84,5 +83,5 @@ self.addEventListener('message', ({data}) => {
 			rectTop,
 		};
 	});
-	self.postMessage(words);
+	self.postMessage(returns);
 });
