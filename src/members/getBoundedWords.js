@@ -7,7 +7,7 @@ import getWordImage from './getWordImage';
 
 import getBoundedWordsWorkerContent from 'objectURL!./getBoundedWordsWorkerContent.js';
 
-let aaaa = 4; // renameMe
+const fontSizePower = 4;
 
 export default function(context, words, containerWidth, containerHeight, fontSizeRatio) {
 	if (containerWidth > 0 && containerHeight > 0) {
@@ -24,7 +24,7 @@ export default function(context, words, containerWidth, containerHeight, fontSiz
 					fontVariant,
 					fontWeight,
 				} = word;
-				let fontSize = Math.pow(aaaa - 1, 2) * wordFontSizes[key] + 1;
+				let fontSize = Math.pow(fontSizePower - 1, 2) * wordFontSizes[key] + 1;
 				let [
 					textWidth,
 					textHeight,
@@ -87,7 +87,7 @@ export default function(context, words, containerWidth, containerHeight, fontSiz
 					imageHeight,
 				})),
 				containerAspect,
-				aaaa,
+				fontSizePower,
 			});
 			let returns = Worker_getMessage(getBoundedWordsWorker).then(value => {
 				let keyedWords = {};

@@ -6,12 +6,12 @@ import getReducedWordImage from './getReducedWordImage';
 import placeWordPixels from './placeWordPixels';
 
 self.addEventListener('message', ({data}) => {
-	let {words, containerAspect, aaaa} = data;
+	let {words, containerAspect, fontSizePower} = data;
 	words.forEach(word => {
 		let {imageWidth, imageHeight} = word;
-		word.cccc = Math_log2(Math.min(imageWidth, imageHeight) / Math.pow(aaaa, 2)); //renameMe
+		word.imagePower = Math_log2(Math.min(imageWidth, imageHeight) / Math.pow(fontSizePower, 2));
 	});
-	words = Array_sortBy(words, ({cccc}) => -cccc);
+	words = Array_sortBy(words, ({imagePower}) => -imagePower);
 	let totalImageLayers;
 	let returns = words.map(({
 		key,
@@ -20,15 +20,15 @@ self.addEventListener('message', ({data}) => {
 		image,
 		imageWidth,
 		imageHeight,
-		cccc,
+		imagePower,
 	}) => {
 		let imageLayers = [[image, imageWidth, imageHeight]];
-		for (let i = 1; i < cccc; ++i) {
+		for (let i = 1; i < imagePower; ++i) {
 			([image, imageWidth, imageHeight] = getReducedWordImage(image, imageWidth, imageHeight, 2));
 			imageLayers.push([image, imageWidth, imageHeight]);
 		}
 		if (totalImageLayers === undefined) {
-			let resolution = Math.pow(2, 16); // fixMe (2^32 is max)
+			let resolution = Math.pow(2, 16);
 			let totalImageWidth = Math.floor(Math.sqrt(containerAspect * resolution));
 			let totalImageHeight = Math.floor(resolution / totalImageWidth);
 			let totalImage = new Uint8Array(totalImageWidth * totalImageHeight);
