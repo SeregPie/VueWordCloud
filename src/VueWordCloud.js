@@ -4,6 +4,7 @@ import Function_isFunction from './helpers/Function/isFunction';
 import Function_noop from './helpers/Function/noop';
 import Function_stubArray from './helpers/Function/stubArray';
 import Object_isObject from './helpers/Object/isObject';
+import Promise_wrap from './helpers/Promise/wrap';
 
 import AsyncComputedContext from './members/AsyncComputedContext';
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
@@ -241,15 +242,13 @@ let VueWordCloud = {
 			this.$options.computed['promised$' + key] = function() {
 				outerContext.interrupt();
 				let innerContext = (outerContext = new AsyncComputedContext());
-				return Promise
-					.resolve(def.get.call(this, innerContext))
-					.then(value => {
-						if (this._isDestroyed) {
-							throw new Error();
-						}
-						innerContext.throwIfInterrupted();
-						return value;
-					});
+				return Promise_wrap(() => def.get.call(this, innerContext)).then(value => {
+					if (this._isDestroyed) {
+						throw new Error();
+					}
+					innerContext.throwIfInterrupted();
+					return value;
+				});
 			};
 		});
 	},
