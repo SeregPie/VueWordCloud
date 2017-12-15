@@ -56,6 +56,6 @@ export default {
 	plugins: [
 		createObjectURL(),
 		buble(),
-		uglify(),
+		//uglify(),
 	],
 };
