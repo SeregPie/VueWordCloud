@@ -15,6 +15,21 @@ import render from './members/render';
 const fontSizePower = 4;
 
 let asyncComputed = {
+	measuredWords: {
+		get(context) {
+			return getMeasuredWords(
+				context,
+				this.populatedWords,
+				fontSizePower,
+				this.fontSizeRatio,
+			);
+		},
+		default: Function_stubArray,
+		/*errorHandler(error) {
+			console.log(error);
+		},*/
+	},
+
 	boundedWords: {
 		get(context) {
 			return getBoundedWords(
@@ -26,6 +41,9 @@ let asyncComputed = {
 			);
 		},
 		default: Function_stubArray,
+		/*errorHandler(error) {
+			console.log(error);
+		},*/
 	},
 };
 
@@ -179,14 +197,6 @@ let VueWordCloud = {
 
 		populatedWords() {
 			return Object.values(this.keyedPopulatedWords);
-		},
-
-		measuredWords() {
-			return getMeasuredWords(
-				this.populatedWords,
-				fontSizePower,
-				this.fontSizeRatio,
-			);
 		},
 
 		scaledBoundedWords() {
