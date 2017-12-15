@@ -461,7 +461,7 @@ var getScaledBoundedWords = function(words, containerWidth, containerHeight, max
 	if (currentMaxFontSize > maxFontSize) {
 		scaleFactor *= maxFontSize / currentMaxFontSize;
 	}
-
+	console.log(words);
 	return words.map(function (word) {
 		var fontSize = word.fontSize;
 		var textWidth = word.textWidth;
