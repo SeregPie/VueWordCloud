@@ -7,23 +7,26 @@ import Object_isObject from './helpers/Object/isObject';
 
 import AsyncComputedContext from './members/AsyncComputedContext';
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
+import getMeasuredWords from './members/getMeasuredWords';
 import getBoundedWords from './members/getBoundedWords';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
 import render from './members/render';
+
+const fontSizePower = 4;
 
 let asyncComputed = {
 	boundedWords: {
 		get(context) {
 			return getBoundedWords(
 				context,
-				this.populatedWords,
+				this.measuredWords,
+				fontSizePower,
 				this.containerWidth,
 				this.containerHeight,
-				this.fontSizeRatio,
 			);
 		},
 		default: Function_stubArray,
-	}
+	},
 };
 
 let VueWordCloud = {
@@ -176,6 +179,14 @@ let VueWordCloud = {
 
 		populatedWords() {
 			return Object.values(this.keyedPopulatedWords);
+		},
+
+		measuredWords() {
+			return getMeasuredWords(
+				this.populatedWords,
+				fontSizePower,
+				this.fontSizeRatio,
+			);
 		},
 
 		scaledBoundedWords() {
