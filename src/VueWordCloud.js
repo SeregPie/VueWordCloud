@@ -209,6 +209,19 @@ let VueWordCloud = {
 			);
 		},
 
+		transitionDuration() {
+			let wordsCount = this.scaledBoundedWords.length;
+			let animationDuration = this.animationDuration;
+			return wordsCount > 0 ? animationDuration / Math.min(4, wordsCount) : 0;
+		},
+
+		transitionDelay() {
+			let wordsCount = this.scaledBoundedWords.length;
+			let animationDuration = this.animationDuration;
+			let transitionDuration = this.transitionDuration;
+			return wordsCount > 1 ? (animationDuration - transitionDuration) / (wordsCount - 1) : 0;
+		},
+
 		startToUpdateContainerSize() {
 			return function() {
 				if (!this._isDestroyed) {
@@ -272,7 +285,8 @@ let VueWordCloud = {
 				default: ({text}) => text,
 			}, this.$scopedSlots),
 			this.scaledBoundedWords,
-			this.animationDuration,
+			this.transitionDuration,
+			this.transitionDelay,
 		);
 	},
 };

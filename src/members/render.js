@@ -2,14 +2,9 @@ export default function(
 	createElement,
 	scopedSlots,
 	words,
-	animationDuration,
+	transitionDuration,
+	transitionDelay,
 ) {
-	let transitionDuration = words.length > 0
-		? animationDuration / Math.min(4, words.length)
-		: 0;
-	let transitionDelay = words.length > 1
-		? (animationDuration - transitionDuration) / (words.length - 1)
-		: 0;
 	return createElement(
 		'div',
 		{
