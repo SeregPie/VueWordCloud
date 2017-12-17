@@ -12,7 +12,7 @@ A word cloud generator.
 
 ## setup
 
-### NPM
+### npm
 
 ```sh
 
@@ -20,7 +20,7 @@ npm install vuewordcloud
 
 ```
 
-### ES2015
+### ES module
 
 Register the component globally.
 
@@ -50,7 +50,7 @@ export default {
 
 ```
 
-### Browser
+### browser
 
 ```html
 
