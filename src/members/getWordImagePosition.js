@@ -15,8 +15,7 @@ export default function(
 			let [wordPixelLeft, wordPixelTop] = occupiedWordPixels[i];
 			let cloudPixelLeft = wordPixelLeft + wordImageLeft;
 			let cloudPixelTop = wordPixelTop + wordImageTop;
-			let cloudPixel = cloudImage[cloudImageWidth * cloudPixelTop + cloudPixelLeft];
-			if (cloudPixel) {
+			if (cloudImage[cloudImageWidth * cloudPixelTop + cloudPixelLeft]) {
 				return false;
 			}
 		}

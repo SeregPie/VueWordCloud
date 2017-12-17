@@ -13,8 +13,12 @@ export default function(
 			let wordPixel = wordImage[wordImageWidth * wordPixelTop + wordPixelLeft];
 			if (wordPixel) {
 				let cloudPixelLeft = wordPixelLeft + wordImageLeft;
-				let cloudPixelTop = wordPixelTop + wordImageTop;
-				cloudImage[cloudImageWidth * cloudPixelTop + cloudPixelLeft] = wordPixel;
+				if (cloudPixelLeft > 0 && cloudPixelLeft < cloudImageWidth) {
+					let cloudPixelTop = wordPixelTop + wordImageTop;
+					if (cloudPixelTop > 0 && cloudPixelTop < cloudImageHeight) {
+						cloudImage[cloudImageWidth * cloudPixelTop + cloudPixelLeft] = wordPixel;
+					}
+				}
 			}
 		}
 	}

@@ -50,13 +50,12 @@
 						].forEach(function(text) {
 							words.push([text, 2]);
 						});
-						var value = words
-							.map(function(word) {
-								return word.join(' ');
-							})
-							.join('\n');
 						return {
-							value: value,
+							value: words
+								.map(function(word) {
+									return word.join(' ');
+								})
+								.join('\n'),
 						};
 					})(),
 
