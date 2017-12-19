@@ -1,9 +1,9 @@
 import Promise_wrap from '../helpers/Promise/wrap';
 import Worker_getMessage from '../helpers/Worker/getMessage';
 
-export default function(context, workerContent, data) {
+export default function(context, objectURL, data) {
 	return Promise_wrap(() => {
-		let worker = new Worker(workerContent);
+		let worker = new Worker(objectURL);
 		let terminateWorker = function() {
 			worker.terminate();
 		};

@@ -3,13 +3,14 @@ import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
 import Function_noop from './helpers/Function/noop';
 import Function_stubArray from './helpers/Function/stubArray';
-import Object_isObject from './helpers/Object/isObject';
 import Promise_wrap from './helpers/Promise/wrap';
 
-import AsyncComputedContext from './members/AsyncComputedContext';
+import AsyncComputedContext from './mixins/AsyncComputedContext';
+import runWorker from './mixins/runWorker';
+
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
 import getMeasuredWords from './members/getMeasuredWords';
-import getBoundedWords from './members/getBoundedWords';
+import getBoundedWords from 'stringify!./members/getBoundedWords';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
 import render from './members/render';
 
@@ -30,23 +31,44 @@ let asyncComputed = {
 			console.log(error);
 		},*/
 	},
+};
 
+let workerComputed = {
 	boundedWords: {
-		get(context) {
-			return getBoundedWords(
-				context,
-				this.measuredWords,
+		code: getBoundedWords,
+		data() {
+			let words = this.measuredWords;
+			let containerWidth = this.containerWidth;
+			let containerHeight = this.containerHeight;
+			return {
+				words,
 				fontSizePower,
-				this.containerWidth,
-				this.containerHeight,
-			);
+				containerWidth,
+				containerHeight,
+			};
 		},
 		default: Function_stubArray,
 		/*errorHandler(error) {
 			console.log(error);
 		},*/
-	},
+	}
 };
+
+Object.entries(workerComputed).forEach(([key, {
+	code,
+	data,
+	default: _default,
+	errorHandler,
+}]) => {
+	let objectURL = URL.createObjectURL(new Blob([code]));
+	asyncComputed[key] = {
+		get(context) {
+			return runWorker(context, objectURL, data.call(this));
+		},
+		default: _default,
+		errorHandler,
+	};
+});
 
 let VueWordCloud = {
 	name: 'VueWordCloud',
@@ -128,15 +150,8 @@ let VueWordCloud = {
 			containerWidth: 0,
 			containerHeight: 0,
 		};
-		Object.entries(asyncComputed).forEach(([key, def]) => {
-			let defaultValue = def.default;
-			if (Function_isFunction(defaultValue)) {
-				defaultValue = defaultValue.call(this);
-			}
-			if (Object_isObject(defaultValue)) {
-				defaultValue = Object.freeze(defaultValue);
-			}
-			returns['fulfilled$' + key] = defaultValue;
+		Object.keys(asyncComputed).forEach(key => {
+			returns['asyncComputed$trigger$' + key] = {};
 		});
 		return returns;
 	},
@@ -237,31 +252,36 @@ let VueWordCloud = {
 	},
 
 	beforeCreate() {
-		Object.entries(asyncComputed).forEach(([key, def]) => {
-			let errorHandler = def.errorHandler || Function_noop;
+		Object.entries(asyncComputed).forEach(([key, {
+			get,
+			default: currentValue,
+			errorHandler = Function_noop,
+		}]) => {
+			let outerContext;
 			this.$options.computed[key] = function() {
-				Promise
-					.resolve(this['promised$' + key])
+				this['asyncComputed$promise$' + key];
+				this['asyncComputed$trigger$' + key];
+				return currentValue;
+			};
+			this.$options.computed['asyncComputed$promise$' + key] = function() {
+				if (outerContext) {
+					outerContext.interrupt();
+				} else {
+					if (Function_isFunction(currentValue)) {
+						currentValue = currentValue.call(this);
+					}
+				}
+				let innerContext = (outerContext = new AsyncComputedContext());
+				return Promise_wrap(() => get.call(this, innerContext))
 					.then(value => {
-						if (Object_isObject(value)) {
-							value = Object.freeze(value);
+						if (this._isDestroyed) {
+							throw new Error();
 						}
-						this['fulfilled$' + key] = value;
+						innerContext.throwIfInterrupted();
+						currentValue = value;
+						this['asyncComputed$trigger$' + key] = {};
 					})
 					.catch(errorHandler);
-				return this['fulfilled$' + key];
-			};
-			let outerContext = new AsyncComputedContext();
-			this.$options.computed['promised$' + key] = function() {
-				outerContext.interrupt();
-				let innerContext = (outerContext = new AsyncComputedContext());
-				return Promise_wrap(() => def.get.call(this, innerContext)).then(value => {
-					if (this._isDestroyed) {
-						throw new Error();
-					}
-					innerContext.throwIfInterrupted();
-					return value;
-				});
 			};
 		});
 	},
