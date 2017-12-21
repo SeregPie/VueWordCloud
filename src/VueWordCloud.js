@@ -89,7 +89,7 @@ let VueWordCloud = {
 		},
 
 		rotation: {
-			type: [String, Function],
+			type: [Number, Function],
 			default() {
 				let values = [0, 3/4];
 				return function() {
