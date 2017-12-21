@@ -5,9 +5,8 @@ import Function_noop from './helpers/Function/noop';
 import Function_stubArray from './helpers/Function/stubArray';
 import Promise_wrap from './helpers/Promise/wrap';
 
-import AsyncComputedContext from './mixins/AsyncComputedContext';
-import runWorker from './mixins/runWorker';
-
+import AsyncComputedContext from './members/AsyncComputedContext';
+import runWorker from './members/runWorker';
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
 import getMeasuredWords from './members/getMeasuredWords';
 import getBoundedWords from 'stringify!./members/getBoundedWords';
