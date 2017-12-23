@@ -5,10 +5,16 @@ import getWordImagePosition from './getWordImagePosition';
 import getReducedWordImage from './getReducedWordImage';
 import placeWordPixels from './placeWordPixels';
 
+const totalImageResolution = Math.pow(2, 28);
+
 const getBoundedWords = function(words, fontSizePower, containerWidth, containerHeight) {
 	if (containerWidth > 0 && containerHeight > 0) {
 		let containerAspect = containerWidth / containerHeight;
-		let totalImageLayers;
+		let totalImageLayers = [];
+		let totalImageWidth = Math.floor(Math.sqrt(containerAspect * totalImageResolution));
+		let totalImageHeight = Math.floor(totalImageResolution / totalImageWidth);
+		let offsetLeft = Math.floor(totalImageWidth / 4);
+		let offsetTop = Math.floor(totalImageHeight / 4);
 		words = words.map(word => {
 			let {imageWidth, imageHeight} = word;
 			let imagePower = Math_log2(Math.min(imageWidth, imageHeight) / Math.pow(fontSizePower, 2));
@@ -40,20 +46,13 @@ const getBoundedWords = function(words, fontSizePower, containerWidth, container
 				([image, imageWidth, imageHeight] = getReducedWordImage(image, imageWidth, imageHeight, 2));
 				imageLayers.push([image, imageWidth, imageHeight]);
 			}
-			if (totalImageLayers === undefined) {
-				let resolution = Math.pow(2, 16);
-				let totalImageWidth = Math.floor(Math.sqrt(containerAspect * resolution));
-				let totalImageHeight = Math.floor(resolution / totalImageWidth);
-				let totalImage = new Uint8Array(totalImageWidth * totalImageHeight);
-				totalImageLayers = [[totalImage, totalImageWidth, totalImageHeight]];
-				for (let i = 1; i < imageLayers.length; ++i) {
-					totalImageWidth *= 2;
-					totalImageHeight *= 2;
-					totalImage = new Uint8Array(totalImageWidth * totalImageHeight);
-					totalImageLayers.unshift([totalImage, totalImageWidth, totalImageHeight]);
+			if (totalImageLayers.length < 1) {
+				for (let i = 0; i < imageLayers.length; ++i) {
+					let totalImage = new Uint8Array(totalImageWidth * totalImageHeight);
+					totalImageLayers.push(totalImage);
 				}
 			}
-			let [totalImage, totalImageWidth, totalImageHeight] = totalImageLayers[imageLayers.length - 1];
+			let totalImage = totalImageLayers[imageLayers.length - 1];
 			let [imageLeft, imageTop] = getWordImagePosition(
 				totalImage,
 				totalImageWidth,
@@ -73,9 +72,9 @@ const getBoundedWords = function(words, fontSizePower, containerWidth, container
 				imageHeight,
 			);
 			for (let i = imageLayers.length - 1; i-- > 0;) {
-				imageLeft *= 2;
-				imageTop *= 2;
-				[totalImage, totalImageWidth, totalImageHeight] = totalImageLayers[i];
+				imageLeft = (imageLeft - offsetLeft) * 2;
+				imageTop = (imageTop - offsetTop) * 2;
+				totalImage = totalImageLayers[i];
 				[image, imageWidth, imageHeight] = imageLayers[i];
 				placeWordPixels(
 					totalImage,

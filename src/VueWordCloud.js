@@ -9,7 +9,7 @@ import AsyncComputedContext from './members/AsyncComputedContext';
 import runWorker from './members/runWorker';
 import getKeyedPopulatedWords from './members/getKeyedPopulatedWords';
 import getMeasuredWords from './members/getMeasuredWords';
-import getBoundedWords from 'stringify!./members/getBoundedWords';
+import getBoundedWords from 'stringify!./members/getBoundedWords.js';
 import getScaledBoundedWords from './members/getScaledBoundedWords';
 import render from './members/render';
 
