@@ -13,8 +13,6 @@ const getBoundedWords = function(words, fontSizePower, containerWidth, container
 		let totalImageLayers = [];
 		let totalImageWidth = Math.floor(Math.sqrt(containerAspect * totalImageResolution));
 		let totalImageHeight = Math.floor(totalImageResolution / totalImageWidth);
-		let offsetLeft = Math.floor(totalImageWidth / 4);
-		let offsetTop = Math.floor(totalImageHeight / 4);
 		words = words.map(word => {
 			let {imageWidth, imageHeight} = word;
 			let imagePower = Math_log2(Math.min(imageWidth, imageHeight) / Math.pow(fontSizePower, 2));
@@ -72,23 +70,23 @@ const getBoundedWords = function(words, fontSizePower, containerWidth, container
 				imageHeight,
 			);
 			for (let i = imageLayers.length - 1; i-- > 0;) {
-				imageLeft = (imageLeft - offsetLeft) * 2;
-				imageTop = (imageTop - offsetTop) * 2;
+				imageLeft = (imageLeft - totalImageWidth / 4) * 2;
+				imageTop = (imageTop - totalImageHeight / 4) * 2;
 				totalImage = totalImageLayers[i];
 				[image, imageWidth, imageHeight] = imageLayers[i];
 				placeWordPixels(
 					totalImage,
 					totalImageWidth,
 					totalImageHeight,
-					imageLeft,
-					imageTop,
+					Math.floor(imageLeft),
+					Math.floor(imageTop),
 					image,
 					imageWidth,
 					imageHeight,
 				);
 			}
-			let rectLeft = imageLeft + (imageWidth - rectWidth) / 2;
-			let rectTop = imageTop + (imageHeight - rectHeight) / 2;
+			let rectLeft = Math.floor(imageLeft + (imageWidth - rectWidth) / 2);
+			let rectTop = Math.floor(imageTop + (imageHeight - rectHeight) / 2);
 			return {
 				originalWord,
 				key,
