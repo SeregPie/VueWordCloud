@@ -22,7 +22,7 @@ export default function(
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.fillText(text, 0, 0);
-	ctx.lineWidth = fontSize / 8;
+	ctx.lineWidth = 1;
 	ctx.strokeText(text, 0, 0);
 	let image = new Uint8Array(imageWidth * imageHeight);
 	let imageData = ctx.getImageData(0, 0, imageWidth, imageHeight).data;
