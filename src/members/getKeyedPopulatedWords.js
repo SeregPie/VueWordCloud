@@ -15,7 +15,6 @@ export default function(
 ) {
 	let returns = {};
 	originalWords.forEach(originalWord => {
-		let key;
 		let text;
 		let weight;
 		let rotation;
@@ -36,7 +35,6 @@ export default function(
 			} else
 			if (Object_isObject(originalWord)) {
 				({
-					key,
 					text,
 					weight,
 					rotation,
@@ -72,15 +70,13 @@ export default function(
 		if (color === undefined) {
 			color = getColor(originalWord);
 		}
-		if (key === undefined) {
-			key = JSON.stringify([
-				text,
-				fontFamily,
-				fontStyle,
-				fontVariant,
-				fontWeight,
-			]);
-		}
+		let key = JSON.stringify([
+			text,
+			fontFamily,
+			fontStyle,
+			fontVariant,
+			fontWeight,
+		]);
 		while (Object_hasOwn(returns, key)) {
 			key += '!';
 		}
