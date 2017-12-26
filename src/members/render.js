@@ -1,3 +1,5 @@
+import getWordFont from './getWordFont';
+
 export default function(
 	createElement,
 	scopedSlots,
@@ -54,7 +56,7 @@ export default function(
 						transform: `rotate(${rotation}turn)`,
 						color: color,
 						transition: ['all', `${transitionDuration}ms`, 'ease-in-out', `${transitionDelay * index}ms`].join(' '),
-						font: [fontStyle, fontVariant, fontWeight, `${fontSize}px/1`, fontFamily].join(' '),
+						font: getWordFont(fontStyle, fontVariant, fontWeight, fontSize, fontFamily),
 					},
 				},
 				[createElement(

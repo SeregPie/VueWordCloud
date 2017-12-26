@@ -1,5 +1,7 @@
 import Math_turnToRad from '../helpers/Math/turnToRad';
 
+import getWordFont from './getWordFont';
+
 export default function(
 	text,
 	fontStyle,
@@ -12,7 +14,7 @@ export default function(
 	rotation,
 ) {
 	rotation = Math_turnToRad(rotation);
-	let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
+	let font = getWordFont(fontStyle, fontVariant, fontWeight, fontSize, fontFamily);
 	let ctx = document.createElement('canvas').getContext('2d');
 	ctx.canvas.width = imageWidth;
 	ctx.canvas.height = imageHeight;
