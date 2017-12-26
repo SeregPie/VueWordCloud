@@ -5,8 +5,6 @@ import Math_ceilPowerOfTwo from '../helpers/Math/ceilPowerOfTwo';
 import Math_turnToRad from '../helpers/Math/turnToRad';
 import Promise_wrap from '../helpers/Promise/wrap';
 
-import getWordFont from './getWordFont';
-
 export default function(
 	text,
 	fontStyle,
@@ -18,7 +16,7 @@ export default function(
 ) {
 	return Promise_wrap(() => {
 		rotation = Math_turnToRad(rotation);
-		let font = getWordFont(fontStyle, fontVariant, fontWeight, fontSize, fontFamily);
+		let font = [fontStyle, fontVariant, fontWeight, `${fontSize}px`, fontFamily].join(' ');
 		return FontFace_load(font, text).catch(Function_noop).then(() => {
 			let ctx = document.createElement('canvas').getContext('2d');
 			ctx.font = font;
