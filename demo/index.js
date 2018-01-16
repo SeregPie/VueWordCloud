@@ -1,13 +1,5 @@
 (function() {
 
-	var Array_sample = function(array) {
-		return array[Math.floor(array.length * Math.random())];
-	};
-
-	var Array_sampleBy = function(array, n) {
-		return array[n % array.length];
-	};
-
 	new Vue({
 		el: '#App',
 
@@ -15,49 +7,10 @@
 			return {
 				active: true,
 
-				model: {
-					words: (function() {
-						var words = [['astronomy', 15]];
-						[
-							'Hydra', 'Virgo', 'Ursa Major', 'Cetus', 'Hercules', 'Eridanus',
-							'Pegasus', 'Draco', 'Centaurus', 'Aquarius', 'Ophiuchus', 'Leo',
-							'Great Void', 'Pisces', 'Sagittarius', 'Cygnus', 'Taurus', 'Camelopardalis',
-							'Andromeda', 'Puppis', 'Auriga', 'Aquila',
-						].forEach(function(text) {
-							words.push([text, 7]);
-						});
-						[
-							'Serpens', 'Perseus', 'Cassiopeia', 'Orion', 'Cepheus', 'Lynx',
-							'Libra', 'Gemini', 'Cancer', 'Vela', 'Scorpius', 'Carina',
-							'Monoceros', 'Sculptor', 'Phoenix', 'Canes Venatici', 'Aries', 'Capricornus',
-							'Fornax', 'Coma Berenices', 'Canis Major', 'Pavo',
-						].forEach(function(text) {
-							words.push([text, 4]);
-						});
-						[
-							'Grus', 'Microscopium', 'Lupus', 'Sextans', 'Tucana', 'Indus',
-							'Octans', 'Lepus', 'Lyra', 'Crater', 'Columba', 'Vulpecula',
-							'Ursa Minor', 'Telescopium', 'Horologium', 'Pictor', 'Piscis Austrinus', 'Hydrus',
-							'Antlia', 'Ara', 'Leo Minor', 'Pyxis',
-						].forEach(function(text) {
-							words.push([text, 3]);
-						});
-						[
-							'Apus', 'Lacerta', 'Delphinus', 'Corvus', 'Canis Minor', 'Dorado',
-							'Corona Borealis', 'Norma', 'Mensa', 'Volans', 'Musca', 'Triangulum',
-							'Chamaeleon', 'Corona Australis', 'Caelum', 'Reticulum', 'Triangulum Australe', 'Scutum',
-							'Circinus', 'Sagitta', 'Equuleus', 'Crux',
-						].forEach(function(text) {
-							words.push([text, 2]);
-						});
-						return {
-							value: words
-								.map(function(word) {
-									return word.join(' ');
-								})
-								.join('\n'),
-						};
-					})(),
+				form: {
+					words: {
+						value: '',
+					},
 
 					fontFamily: (function() {
 						var possibleValues = [
@@ -85,7 +38,7 @@
 						];
 						return {
 							possibleValues: possibleValues,
-							value: Array_sample(possibleValues),
+							value: chance.pickone(possibleValues),
 						};
 					})(),
 
@@ -98,7 +51,7 @@
 						];
 						return {
 							possibleValues: possibleValues,
-							value: Array_sample(possibleValues),
+							value: chance.pickone(possibleValues),
 						};
 					})(),
 
@@ -117,17 +70,23 @@
 								text: '315',
 							},
 							{
-								value: function(word) {
-									var text = word[0];
-									return Array_sampleBy([0, 3/4], text.length);
-								},
+								value: (function() {
+									var possibleValues = [0, 3/4];
+									return function(word) {
+										var text = word[0];
+										return possibleValues[text.length % possibleValues.length];
+									};
+								})(),
 								text: '0|270',
 							},
 							{
-								value: function(word) {
-									var text = word[0];
-									return Array_sampleBy([0, 1/8, 3/4, 7/8], text.length);
-								},
+								value: (function() {
+									var possibleValues = [0, 1/8, 3/4, 7/8];
+									return function(word) {
+										var text = word[0];
+										return possibleValues[text.length % possibleValues.length];
+									};
+								})(),
 								text: '0|45|270|315',
 							},
 							{
@@ -139,7 +98,7 @@
 						];
 						return {
 							possibleItems: possibleItems,
-							value: Array_sample(possibleItems).value,
+							value: chance.pickone(possibleItems).value,
 						};
 					})(),
 
@@ -170,7 +129,7 @@
 
 		computed: {
 			words: function() {
-				return this.model.words.value
+				return this.form.words.value
 					.split(/[\r\n]+/)
 					.map(function(line) {
 						return /^(.+)\s+(-?\d+)$/.exec(line);
@@ -186,44 +145,69 @@
 			},
 
 			fontFamily: function() {
-				return this.model.fontFamily.value;
+				return this.form.fontFamily.value;
 			},
 
 			color: function() {
-				var value = this.model.color.value;
-
+				var possibleValues = this.form.color.value;
 				return function(word) {
 					var text = word[0];
-					return Array_sampleBy(value, text.length);
+					return possibleValues[text.length % possibleValues.length];
 				};
 			},
 
 			rotation: function() {
-				return this.model.rotation.value;
+				return this.form.rotation.value;
 			},
 
 			animationDuration: function() {
-				var possibleValues = this.model.animationDuration.possibleValues;
-				var valueIndex = this.model.animationDuration.value;
+				var possibleValues = this.form.animationDuration.possibleValues;
+				var valueIndex = this.form.animationDuration.value;
 				var value = possibleValues[valueIndex];
 
 				return value * 1000;
 			},
 
 			fontSizeRatio: function() {
-				var possibleValues = this.model.fontSizeRatio.possibleValues;
-				var valueIndex = this.model.fontSizeRatio.value;
+				var possibleValues = this.form.fontSizeRatio.possibleValues;
+				var valueIndex = this.form.fontSizeRatio.value;
 				var value = possibleValues[valueIndex];
 
 				return value;
 			},
 
 			maxFontSize: function() {
-				var value = this.model.maxFontSize.value;
-				var min = this.model.maxFontSize.min;
-				var max = this.model.maxFontSize.max;
+				var value = this.form.maxFontSize.value;
+				var min = this.form.maxFontSize.min;
+				var max = this.form.maxFontSize.max;
 
 				return (value > min) ? min + max - value : Infinity;
+			},
+		},
+
+		created: function() {
+			this.randomizeText();
+		},
+
+		methods: {
+			randomizeText: function() {
+				this.form.words.value = [
+					[9, 1, 3],
+					[4, 5, 15],
+					[2, 5, 15],
+					[1, 25, 100],
+				]
+					.reduce(function(returns, item) {
+						var weigh = item[0];
+						var min = item[1];
+						var max = item[2];
+						chance.n(chance.word, chance.integer({min: min, max: max}))
+							.forEach(function(word) {
+								returns.push(word + ' ' + weigh);
+							});
+						return returns;
+					}, [])
+					.join('\n');
 			},
 		},
 	});

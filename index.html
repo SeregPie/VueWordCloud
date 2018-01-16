@@ -4,7 +4,7 @@
 		<meta charset="utf-8"/>
 		<meta
 			name="viewport"
-			content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 		/>
 		<title>VueWordCloud</title>
 		<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Array.prototype.@@iterator,Array.prototype.find,Array.prototype.includes,Number.isFinite,Number.parseInt,Object.entries,Object.values"></script>
@@ -17,18 +17,22 @@
 		<script src="VueWordCloud.js"></script>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+		/>
 		<link
 			rel="stylesheet"
-			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
+			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
+		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-alpha.3/vuetify.min.css"/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-alpha.3/vuetify.min.js"></script>
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-beta.4/vuetify.min.css"
+		/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-beta.4/vuetify.min.js"></script>
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
 		/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.13/chance.min.js"></script>
 	</head>
 	<body>
 		<v-app
@@ -54,18 +58,25 @@
 				<div class="ma-3">
 					<v-text-field
 						label="words &amp; weights"
-						v-model="model.words.value"
+						v-model="form.words.value"
 						color="deep-orange"
 						multi-line
 						:rows="9"
 						hide-details
 					></v-text-field>
+					<v-btn
+						block
+						color="primary"
+						@click="randomizeText"
+					>
+						randomize
+					</v-btn>
 				</div>
 				<div class="ma-3">
 					<v-select
 						label="font family"
-						:items="model.fontFamily.possibleValues"
-						v-model="model.fontFamily.value"
+						:items="form.fontFamily.possibleValues"
+						v-model="form.fontFamily.value"
 						color="deep-orange"
 						hide-details
 					>
@@ -82,10 +93,10 @@
 					</div>
 					<v-btn-toggle
 						mandatory
-						v-model="model.color.value"
+						v-model="form.color.value"
 					>
 						<v-btn
-							v-for="value in model.color.possibleValues"
+							v-for="value in form.color.possibleValues"
 							:value="value"
 							flat
 							color="deep-orange"
@@ -106,10 +117,10 @@
 					</div>
 					<v-btn-toggle
 						mandatory
-						v-model="model.rotation.value"
+						v-model="form.rotation.value"
 					>
 						<v-btn
-							v-for="item in model.rotation.possibleItems"
+							v-for="item in form.rotation.possibleItems"
 							:value="item.value"
 							flat
 							color="deep-orange"
@@ -137,10 +148,10 @@
 						</v-chip>
 					</div>
 					<v-slider
-						v-model="model.animationDuration.value"
+						v-model="form.animationDuration.value"
 						color="deep-orange"
 						class="px-2 py-0"
-						:max="model.animationDuration.possibleValues.length - 1"
+						:max="form.animationDuration.possibleValues.length - 1"
 						:min="0"
 						hide-details
 					></v-slider>
@@ -159,10 +170,10 @@
 						</v-chip>
 					</div>
 					<v-slider
-						v-model="model.fontSizeRatio.value"
+						v-model="form.fontSizeRatio.value"
 						color="deep-orange"
 						class="px-2 py-0"
-						:max="model.fontSizeRatio.possibleValues.length - 1"
+						:max="form.fontSizeRatio.possibleValues.length - 1"
 						:min="0"
 						hide-details
 					></v-slider>
@@ -181,12 +192,12 @@
 						</v-chip>
 					</div>
 					<v-slider
-						v-model="model.maxFontSize.value"
+						v-model="form.maxFontSize.value"
 						color="deep-orange"
 						class="px-2 py-0"
-						:max="model.maxFontSize.max"
-						:min="model.maxFontSize.min"
-						:step="model.maxFontSize.step"
+						:max="form.maxFontSize.max"
+						:min="form.maxFontSize.min"
+						:step="form.maxFontSize.step"
 						hide-details
 					></v-slider>
 				</div>
