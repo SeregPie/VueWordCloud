@@ -14,31 +14,26 @@ A word cloud generator.
 
 ### npm
 
-```sh
-
+```shell
 npm install vuewordcloud
-
 ```
 
 ### ES module
 
 Register the component globally.
 
-```js
-
+```javascript
 import Vue from 'vue';
 import VueWordCloud from 'vuewordcloud';
 
 Vue.component(VueWordCloud.name, VueWordCloud);
-
 ```
 
 *or*
 
 Register the component in the scope of another instance.
 
-```js
-
+```javascript
 import VueWordCloud from 'vuewordcloud';
 
 export default {
@@ -47,38 +42,33 @@ export default {
     [VueWordCloud.name]: VueWordCloud,
   },
 };
-
 ```
 
 ### browser
 
 ```html
-
 <script src="https://unpkg.com/vue"></script>
 <script src="https://unpkg.com/vuewordcloud"></script>
-
 ```
 
 If Vue is detected, the component will be registered automatically.
 
+---
+
 Include [polyfills](https://polyfill.io/) to support older browsers.
 
 ```html
-
 <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Object.entries,Object.values"></script>
-
 ```
 
 ## usage
 
 ```html
-
 <vue-word-cloud
   :words="[['romance', 19], ['horror', 3], ['fantasy', 7], ['adventure', 3]]"
   :color="([, weight]) => weight > 10 ? 'DeepPink' : weight > 5 ? 'RoyalBlue' : 'Indigo'"
   font-family="Roboto"
 ></vue-word-cloud>
-
 ```
 
 ---
@@ -86,7 +76,6 @@ Include [polyfills](https://polyfill.io/) to support older browsers.
 Pass custom renderer for the words.
 
 ```html
-
 <vue-word-cloud :words="words">
   <template slot-scope="{text, weight, originalWord}">
     <div style="cursor: pointer;" :title="weight" @click="onWordClick(originalWord)">
@@ -94,7 +83,6 @@ Pass custom renderer for the words.
     </div>
   </template>
 </vue-word-cloud>
-
 ```
 
 ## properties
