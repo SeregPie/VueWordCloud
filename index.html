@@ -44,163 +44,165 @@
 				v-model="drawer"
 				app
 			>
-				<div
-					v-if="false"
-					class="ma-3"
-				>
-					<v-switch
-						label="active"
-						v-model="active"
-						color="deep-orange"
-						hide-details
-					></v-switch>
-				</div>
-				<div class="ma-3">
-					<v-text-field
-						label="words &amp; weights"
-						v-model="form.words.value"
-						color="deep-orange"
-						multi-line
-						:rows="9"
-						hide-details
-					></v-text-field>
-					<v-btn
-						block
-						color="deep-orange"
-						dark
-						@click="randomizeText"
+				<div style="display: flex; flex-direction: column;">
+					<div
+						v-if="false"
+						style="padding: 8px;"
 					>
-						randomize
-					</v-btn>
-				</div>
-				<div class="ma-3">
-					<v-select
-						label="font family"
-						:items="form.fontFamily.possibleValues"
-						v-model="form.fontFamily.value"
-						color="deep-orange"
-						hide-details
-					>
-						<template slot="item" slot-scope="data">
-							<span :style="{fontFamily: data.item}">
-								{{ data.item }}
-							</span>
-						</template>
-					</v-select>
-				</div>
-				<div class="ma-3">
-					<div class="subheading grey--text text--darken-1">
-						color
-					</div>
-					<v-btn-toggle
-						mandatory
-						v-model="form.color.value"
-					>
-						<v-btn
-							v-for="value in form.color.possibleValues"
-							:value="value"
-							flat
+						<v-switch
+							label="active"
+							v-model="active"
 							color="deep-orange"
+							hide-details
+						></v-switch>
+					</div>
+					<div style="padding: 8px;">
+						<v-text-field
+							label="words &amp; weights"
+							v-model="form.words.value"
+							color="deep-orange"
+							multi-line
+							:rows="9"
+							hide-details
+						></v-text-field>
+						<v-btn
+							block
+							color="deep-orange"
+							class="white--text"
+							@click="randomizeText"
 						>
-							<div style="display: flex; margin: 2px; width: 24px; height: 24px;">
-								<div
-									v-for="color in value"
-									style="flex: 1;"
-									:style="{backgroundColor: color}"
-								></div>
+							randomize
+						</v-btn>
+					</div>
+					<div style="padding: 8px;">
+						<v-select
+							label="font family"
+							:items="form.fontFamily.possibleValues"
+							v-model="form.fontFamily.value"
+							color="deep-orange"
+							hide-details
+						>
+							<template slot="item" slot-scope="data">
+								<span :style="{fontFamily: data.item}">
+									{{ data.item }}
+								</span>
+							</template>
+						</v-select>
+					</div>
+					<div style="padding: 8px;">
+						<div class="subheading grey--text text--darken-1">
+							color
+						</div>
+						<v-btn-toggle
+							mandatory
+							v-model="form.color.value"
+						>
+							<v-btn
+								v-for="value in form.color.possibleValues"
+								:value="value"
+								flat
+								color="deep-orange"
+							>
+								<div style="display: flex; margin: 2px; width: 24px; height: 24px;">
+									<div
+										v-for="color in value"
+										style="flex: 1;"
+										:style="{backgroundColor: color}"
+									></div>
+								</div>
+							</v-btn>
+						</v-btn-toggle>
+					</div>
+					<div style="padding: 8px;">
+						<div class="subheading grey--text text--darken-1">
+							rotation
+						</div>
+						<v-btn-toggle
+							mandatory
+							v-model="form.rotation.value"
+						>
+							<v-btn
+								v-for="item in form.rotation.possibleItems"
+								:value="item.value"
+								flat
+								color="deep-orange"
+							>
+								<template v-if="item.icon">
+									<v-icon>{{ item.icon }}</v-icon>
+								</template>
+								<template v-else>
+									{{ item.text }}
+								</template>
+							</v-btn>
+						</v-btn-toggle>
+					</div>
+					<div style="padding: 8px;">
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<div class="subheading grey--text text--darken-1">
+								animation duration
 							</div>
-						</v-btn>
-					</v-btn-toggle>
-				</div>
-				<div class="ma-3">
-					<div class="subheading grey--text text--darken-1">
-						rotation
-					</div>
-					<v-btn-toggle
-						mandatory
-						v-model="form.rotation.value"
-					>
-						<v-btn
-							v-for="item in form.rotation.possibleItems"
-							:value="item.value"
-							flat
-							color="deep-orange"
-						>
-							<template v-if="item.icon">
-								<v-icon>{{ item.icon }}</v-icon>
-							</template>
-							<template v-else>
-								{{ item.text }}
-							</template>
-						</v-btn>
-					</v-btn-toggle>
-				</div>
-				<div class="ma-3">
-					<div style="display: flex; justify-content: space-between; align-items: center;">
-						<div class="subheading grey--text text--darken-1">
-							animation duration
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.animationDuration.value"
 							color="deep-orange"
-							text-color="white"
-						>
-							{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
-						</v-chip>
+							class="px-2 py-0"
+							:max="form.animationDuration.possibleValues.length - 1"
+							:min="0"
+							hide-details
+						></v-slider>
 					</div>
-					<v-slider
-						v-model="form.animationDuration.value"
-						color="deep-orange"
-						class="px-2 py-0"
-						:max="form.animationDuration.possibleValues.length - 1"
-						:min="0"
-						hide-details
-					></v-slider>
-				</div>
-				<div class="ma-3">
-					<div style="display: flex; justify-content: space-between; align-items: center;">
-						<div class="subheading grey--text text--darken-1">
-							font size ratio
+					<div style="padding: 8px;">
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<div class="subheading grey--text text--darken-1">
+								font size ratio
+							</div>
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.fontSizeRatio.value"
 							color="deep-orange"
-							text-color="white"
-						>
-							{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
-						</v-chip>
+							class="px-2 py-0"
+							:max="form.fontSizeRatio.possibleValues.length - 1"
+							:min="0"
+							hide-details
+						></v-slider>
 					</div>
-					<v-slider
-						v-model="form.fontSizeRatio.value"
-						color="deep-orange"
-						class="px-2 py-0"
-						:max="form.fontSizeRatio.possibleValues.length - 1"
-						:min="0"
-						hide-details
-					></v-slider>
-				</div>
-				<div class="ma-3">
-					<div style="display: flex; justify-content: space-between; align-items: center;">
-						<div class="subheading grey--text text--darken-1">
-							max font size
+					<div style="padding: 8px;">
+						<div style="display: flex; justify-content: space-between; align-items: center;">
+							<div class="subheading grey--text text--darken-1">
+								max font size
+							</div>
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.maxFontSize.value"
 							color="deep-orange"
-							text-color="white"
-						>
-							{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
-						</v-chip>
+							class="px-2 py-0"
+							:max="form.maxFontSize.max"
+							:min="form.maxFontSize.min"
+							:step="form.maxFontSize.step"
+							hide-details
+						></v-slider>
 					</div>
-					<v-slider
-						v-model="form.maxFontSize.value"
-						color="deep-orange"
-						class="px-2 py-0"
-						:max="form.maxFontSize.max"
-						:min="form.maxFontSize.min"
-						:step="form.maxFontSize.step"
-						hide-details
-					></v-slider>
 				</div>
 			</v-navigation-drawer>
 			<v-toolbar
