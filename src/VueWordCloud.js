@@ -194,19 +194,6 @@ let VueWordCloud = {
 			let transitionDuration = this.transitionDuration;
 			return wordsCount > 1 ? (animationDuration - transitionDuration) / (wordsCount - 1) : 0;
 		},
-
-		startToUpdateContainerSize() {
-			return function() {
-				if (!this._isDestroyed) {
-					setTimeout(() => {
-						requestAnimationFrame(() => {
-							this.startToUpdateContainerSize();
-						});
-					}, this.intervalBetweenUpdateContainerSize);
-					this.updateContainerSize();
-				}
-			};
-		},
 	},
 
 	beforeCreate() {
@@ -249,6 +236,17 @@ let VueWordCloud = {
 	},
 
 	methods: {
+		startToUpdateContainerSize() {
+			if (!this._isDestroyed) {
+				setTimeout(() => {
+					requestAnimationFrame(() => {
+						this.startToUpdateContainerSize();
+					});
+				}, this.intervalBetweenUpdateContainerSize);
+				this.updateContainerSize();
+			}
+		},
+
 		updateContainerSize() {
 			let {width, height} = this.$el.getBoundingClientRect();
 			this.containerWidth = width;
