@@ -1,19 +1,28 @@
+import Function_constant2 from '../helpers/Function/constant2';
 import Object_hasOwn from '../helpers/Object/hasOwn';
 import Object_isObject from '../helpers/Object/isObject';
 import String_isString from '../helpers/String/isString';
 
 export default function(
 	originalWords,
-	getText,
-	getWeight,
-	getRotation,
-	getFontFamily,
-	getFontStyle,
-	getFontVariant,
-	getFontWeight,
-	getColor,
+	defaultText,
+	defaultWeight,
+	defaultRotation,
+	defaultFontFamily,
+	defaultFontStyle,
+	defaultFontVariant,
+	defaultFontWeight,
+	defaultColor,
 ) {
-	let returns = {};
+	defaultText = Function_constant2(defaultText);
+	defaultWeight = Function_constant2(defaultWeight);
+	defaultRotation = Function_constant2(defaultRotation);
+	defaultFontFamily = Function_constant2(defaultFontFamily);
+	defaultFontStyle = Function_constant2(defaultFontStyle);
+	defaultFontVariant = Function_constant2(defaultFontVariant);
+	defaultFontWeight = Function_constant2(defaultFontWeight);
+	defaultColor = Function_constant2(defaultColor);
+	let keyedPopulatedWords = {};
 	originalWords.forEach(originalWord => {
 		let text;
 		let weight;
@@ -47,28 +56,28 @@ export default function(
 			}
 		}
 		if (text === undefined) {
-			text = getText(originalWord);
+			text = defaultText(originalWord);
 		}
 		if (weight === undefined) {
-			weight = getWeight(originalWord);
+			weight = defaultWeight(originalWord);
 		}
 		if (rotation === undefined) {
-			rotation = getRotation(originalWord);
+			rotation = defaultRotation(originalWord);
 		}
 		if (fontFamily === undefined) {
-			fontFamily = getFontFamily(originalWord);
+			fontFamily = defaultFontFamily(originalWord);
 		}
 		if (fontStyle === undefined) {
-			fontStyle = getFontStyle(originalWord);
+			fontStyle = defaultFontStyle(originalWord);
 		}
 		if (fontVariant === undefined) {
-			fontVariant = getFontVariant(originalWord);
+			fontVariant = defaultFontVariant(originalWord);
 		}
 		if (fontWeight === undefined) {
-			fontWeight = getFontWeight(originalWord);
+			fontWeight = defaultFontWeight(originalWord);
 		}
 		if (color === undefined) {
-			color = getColor(originalWord);
+			color = defaultColor(originalWord);
 		}
 		let key = JSON.stringify([
 			text,
@@ -77,10 +86,10 @@ export default function(
 			fontVariant,
 			fontWeight,
 		]);
-		while (Object_hasOwn(returns, key)) {
+		while (Object_hasOwn(keyedPopulatedWords, key)) {
 			key += '!';
 		}
-		returns[key] = {
+		keyedPopulatedWords[key] = {
 			originalWord,
 			key,
 			text,
@@ -93,5 +102,5 @@ export default function(
 			color,
 		};
 	});
-	return returns;
+	return keyedPopulatedWords;
 }

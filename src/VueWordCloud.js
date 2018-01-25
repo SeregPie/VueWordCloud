@@ -1,5 +1,4 @@
 import Array_sample from './helpers/Array/sample';
-import Function_constant from './helpers/Function/constant';
 import Function_isFunction from './helpers/Function/isFunction';
 import Function_noop from './helpers/Function/noop';
 import Function_stubArray from './helpers/Function/stubArray';
@@ -156,57 +155,17 @@ let VueWordCloud = {
 	},
 
 	computed: {
-		getText() {
-			let value = this.text;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getWeight() {
-			let value = this.weight;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getRotation() {
-			let value = this.rotation;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getFontFamily() {
-			let value = this.fontFamily;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getFontStyle() {
-			let value = this.fontStyle;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getFontVariant() {
-			let value = this.fontVariant;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getFontWeight() {
-			let value = this.fontWeight;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
-		getColor() {
-			let value = this.color;
-			return Function_isFunction(value) ? value : Function_constant(value);
-		},
-
 		keyedPopulatedWords() {
 			return getKeyedPopulatedWords(
 				this.words,
-				this.getText,
-				this.getWeight,
-				this.getRotation,
-				this.getFontFamily,
-				this.getFontStyle,
-				this.getFontVariant,
-				this.getFontWeight,
-				this.getColor,
+				this.text,
+				this.weight,
+				this.rotation,
+				this.fontFamily,
+				this.fontStyle,
+				this.fontVariant,
+				this.fontWeight,
+				this.color,
 			);
 		},
 
