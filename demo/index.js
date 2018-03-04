@@ -198,7 +198,7 @@
 					.join('\n');
 			},
 
-			loadFontFamily: function(fontFamily, fontStyle, fontWeight, text) {
+			loadFont: function(fontFamily, fontStyle, fontWeight, text) {
 				return (new FontFaceObserver(fontFamily, {
 					style: fontStyle,
 					weight: fontWeight,
