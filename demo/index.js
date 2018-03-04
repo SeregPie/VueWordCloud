@@ -5,15 +5,33 @@
 
 		data: function() {
 			return {
-				active: true,
-
 				form: {
 					words: {
 						value: '',
 					},
 
+					rotation: (function() {
+						var values = [
+							0,
+							7/8,
+							function() {
+								return chance.pickone([0, 3/4]);
+							},
+							function() {
+								return chance.pickone([0, 1/8, 3/4, 7/8]);
+							},
+							function() {
+								return Math.random();
+							},
+						];
+						return {
+							values: values,
+							value: chance.pickone(values),
+						};
+					})(),
+
 					fontFamily: (function() {
-						var possibleValues = [
+						var values = [
 							'Abril Fatface',
 							'Annie Use Your Telescope',
 							'Anton',
@@ -37,91 +55,46 @@
 							'Shadows Into Light',
 						];
 						return {
-							possibleValues: possibleValues,
-							value: chance.pickone(possibleValues),
+							values: values,
+							value: chance.pickone(values),
 						};
 					})(),
 
 					color: (function() {
-						var possibleValues = [
+						var values = [
 							['#d99cd1', '#c99cd1', '#b99cd1', '#a99cd1'],
 							['#403030', '#f97a7a'],
 							['#31a50d', '#d1b022', '#74482a'],
 							['#ffd077', '#3bc4c7', '#3a9eea', '#ff4e69', '#461e47'],
 						];
 						return {
-							possibleValues: possibleValues,
-							value: chance.pickone(possibleValues),
+							values: values,
+							value: chance.pickone(values),
 						};
 					})(),
 
-					rotation: (function() {
-						var possibleItems = [
-							{
-								value: function() {
-									return 0;
-								},
-								text: '0',
-							},
-							{
-								value: function() {
-									return 7/8;
-								},
-								text: '315',
-							},
-							{
-								value: (function() {
-									var possibleValues = [0, 3/4];
-									return function(word) {
-										var text = word[0];
-										return possibleValues[text.length % possibleValues.length];
-									};
-								})(),
-								text: '0|270',
-							},
-							{
-								value: (function() {
-									var possibleValues = [0, 1/8, 3/4, 7/8];
-									return function(word) {
-										var text = word[0];
-										return possibleValues[text.length % possibleValues.length];
-									};
-								})(),
-								text: '0|45|270|315',
-							},
-							{
-								value: function() {
-									return Math.random();
-								},
-								icon: 'shuffle',
-							},
-						];
-						return {
-							possibleItems: possibleItems,
-							value: chance.pickone(possibleItems).value,
-						};
-					})(),
-
-					animationDuration: {
-						possibleValues: [0, 1, 2, 3, 4, 5, 10],
-						value: 3,
+					spacing: {
+						values: [0, 1/4, 1/2, 1, 2],
+						valueIndex: 1,
 					},
 
 					fontSizeRatio: {
-						possibleValues: [0, 1, 2, 3, 4, 5, 10, 20, 30],
-						value: 0,
+						values: [0, 1, 2, 5, 20],
+						valueIndex: 0,
 					},
 
-					maxFontSize: (function() {
-						var min = 10;
-						return {
-							value: 0,
-							min: min,
-							max: 100 + min,
-							step: 10,
-						};
-					})(),
+					maxFontSize: {
+						values: [Infinity, 100, 50, 10],
+						valueIndex: 0,
+					},
+
+					animationDuration: {
+						values: [0, 1, 5, 10],
+						valueIndex: 2,
+					},
 				},
+
+				progress: undefined,
 
 				drawer: true,
 			};
@@ -129,7 +102,9 @@
 
 		computed: {
 			words: function() {
-				return this.form.words.value
+				var value = this.form.words.value;
+
+				return value
 					.split(/[\r\n]+/)
 					.map(function(line) {
 						return /^(.+)\s+(-?\d+)$/.exec(line);
@@ -139,75 +114,95 @@
 					})
 					.map(function(matched) {
 						var text = matched[1];
-						var size = Number.parseInt(matched[2]);
-						return [text, size];
+						var weight = Number.parseInt(matched[2]);
+						return [text, weight];
 					});
 			},
 
+			rotation: function() {
+				var value = this.form.rotation.value;
+
+				return value;
+			},
+
 			fontFamily: function() {
-				return this.form.fontFamily.value;
+				var value = this.form.fontFamily.value;
+
+				return value;
 			},
 
 			color: function() {
-				var possibleValues = this.form.color.value;
-				return function(word) {
-					var text = word[0];
-					return possibleValues[text.length % possibleValues.length];
+				var colors = this.form.color.value;
+
+				return function() {
+					return chance.pickone(colors);
 				};
 			},
 
-			rotation: function() {
-				return this.form.rotation.value;
-			},
+			spacing: function() {
+				var values = this.form.spacing.values;
+				var valueIndex = this.form.spacing.valueIndex;
+				var value = values[valueIndex];
 
-			animationDuration: function() {
-				var possibleValues = this.form.animationDuration.possibleValues;
-				var valueIndex = this.form.animationDuration.value;
-				var value = possibleValues[valueIndex];
-
-				return value * 1000;
+				return value;
 			},
 
 			fontSizeRatio: function() {
-				var possibleValues = this.form.fontSizeRatio.possibleValues;
-				var valueIndex = this.form.fontSizeRatio.value;
-				var value = possibleValues[valueIndex];
+				var values = this.form.fontSizeRatio.values;
+				var valueIndex = this.form.fontSizeRatio.valueIndex;
+				var value = values[valueIndex];
 
 				return value;
 			},
 
 			maxFontSize: function() {
-				var value = this.form.maxFontSize.value;
-				var min = this.form.maxFontSize.min;
-				var max = this.form.maxFontSize.max;
+				var values = this.form.maxFontSize.values;
+				var valueIndex = this.form.maxFontSize.valueIndex;
+				var value = values[valueIndex];
 
-				return (value > min) ? min + max - value : Infinity;
+				return value;
+			},
+
+			animationDuration: function() {
+				var values = this.form.animationDuration.values;
+				var valueIndex = this.form.animationDuration.valueIndex;
+				var value = values[valueIndex];
+
+				return value * 1000;
 			},
 		},
 
 		created: function() {
-			this.randomizeText();
+			this.generateFormWordsValue();
 		},
 
 		methods: {
-			randomizeText: function() {
+			generateFormWordsValue: function() {
 				this.form.words.value = [
 					[9, 1, 3],
 					[4, 5, 15],
 					[2, 5, 15],
-					[1, 25, 100],
+					[1, 25, 150],
 				]
 					.reduce(function(returns, item) {
-						var weigh = item[0];
-						var min = item[1];
-						var max = item[2];
-						chance.n(chance.word, chance.integer({min: min, max: max}))
-							.forEach(function(word) {
-								returns.push(word + ' ' + weigh);
-							});
+						var weight = item[0];
+						var minCount = item[1];
+						var maxCount = item[2];
+						var count = chance.integer({min: minCount, max: maxCount});
+						var words = chance.n(chance.word, count);
+						words.forEach(function(word) {
+							returns.push(word + ' ' + weight);
+						});
 						return returns;
 					}, [])
 					.join('\n');
+			},
+
+			loadFontFamily: function(fontFamily, fontStyle, fontWeight, text) {
+				return (new FontFaceObserver(fontFamily, {
+					style: fontStyle,
+					weight: fontWeight,
+				})).load(text);
 			},
 		},
 	});

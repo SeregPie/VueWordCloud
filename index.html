@@ -17,7 +17,7 @@
 		<script src="VueWordCloud.js"></script>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+			href="https://use.fontawesome.com/releases/v5.0.6/css/all.css"
 		/>
 		<link
 			rel="stylesheet"
@@ -25,14 +25,24 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-beta.4/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.4/vuetify.min.css"
 		/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.0-beta.4/vuetify.min.js"></script>
+		<style>
+			.progress-circular__overlay {
+				transition-duration: 0s;
+			}
+		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.4/vuetify.min.js"></script>
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
 		/>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
+		/>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.13/chance.min.js"></script>
+		<script src="https://unpkg.com/fontfaceobserver"></script>
 	</head>
 	<body>
 		<v-app
@@ -44,162 +54,253 @@
 				v-model="drawer"
 				app
 			>
-				<div style="display: flex; flex-direction: column;">
-					<div style="padding: 8px;">
-						<v-switch
-							label="active"
-							v-model="active"
-							color="deep-orange"
-							hide-details
-						></v-switch>
+				<div style="padding: 8px;">
+					<v-text-field
+						label="words &amp; weights"
+						v-model="form.words.value"
+						color="deep-orange"
+						multi-line
+						:rows="9"
+						hide-details
+					></v-text-field>
+					<v-btn
+						block
+						color="deep-orange"
+						class="white--text"
+						@click="generateFormWordsValue"
+					>
+						generate randomly
+					</v-btn>
+				</div>
+				<div style="padding: 8px;">
+					<v-select
+						label="font family"
+						:items="form.fontFamily.values"
+						v-model="form.fontFamily.value"
+						color="deep-orange"
+						hide-details
+					>
+						<template
+							slot="item"
+							slot-scope="data"
+						>
+							<span :style="{fontFamily: data.item}">
+								{{ data.item }}
+							</span>
+						</template>
+					</v-select>
+				</div>
+				<div style="padding: 8px;">
+					<div class="subheading grey--text text--darken-1">
+						color
 					</div>
-					<div style="padding: 8px;">
-						<v-text-field
-							label="words &amp; weights"
-							v-model="form.words.value"
-							color="deep-orange"
-							multi-line
-							:rows="9"
-							hide-details
-						></v-text-field>
+					<v-btn-toggle
+						mandatory
+						v-model="form.color.value"
+					>
 						<v-btn
-							block
+							v-for="(value, key) in form.color.values"
+							:key="key"
+							:value="value"
+							flat
 							color="deep-orange"
-							class="white--text"
-							@click="randomizeText"
 						>
-							randomize
+							<div
+								style="
+									margin: 2px;
+									width: 24px;
+									height: 24px;
+									display: flex;
+								"
+							>
+								<div
+									v-for="color in value"
+									style="flex: 1;"
+									:style="{backgroundColor: color}"
+								></div>
+							</div>
 						</v-btn>
+					</v-btn-toggle>
+				</div>
+				<div style="padding: 8px;">
+					<div class="subheading grey--text text--darken-1">
+						rotation
 					</div>
-					<div style="padding: 8px;">
-						<v-select
-							label="font family"
-							:items="form.fontFamily.possibleValues"
-							v-model="form.fontFamily.value"
+					<v-btn-toggle
+						mandatory
+						v-model="form.rotation.value"
+					>
+						<v-btn
+							:value="form.rotation.values[0]"
+							flat
 							color="deep-orange"
-							hide-details
 						>
-							<template slot="item" slot-scope="data">
-								<span :style="{fontFamily: data.item}">
-									{{ data.item }}
-								</span>
-							</template>
-						</v-select>
-					</div>
-					<div style="padding: 8px;">
+							<i class="fas fa-minus fa-2x"></i>
+						</v-btn>
+						<v-btn
+							:value="form.rotation.values[1]"
+							flat
+							color="deep-orange"
+						>
+							<i
+								class="fas fa-minus fa-2x"
+								style="transform: rotate(315deg);"
+							></i>
+						</v-btn>
+						<v-btn
+							:value="form.rotation.values[2]"
+							flat
+							color="deep-orange"
+						>
+							<span class="fa-stack">
+								<i class="fas fa-minus fa-stack-2x"></i>
+								<i
+									class="fas fa-minus fa-stack-2x"
+									style="transform: rotate(90deg);"
+								></i>
+							</span>
+						</v-btn>
+						<v-btn
+							:value="form.rotation.values[3]"
+							flat
+							color="deep-orange"
+						>
+							<span class="fa-stack">
+								<i class="fas fa-minus fa-stack-2x"></i>
+								<i
+									class="fas fa-minus fa-stack-2x"
+									style="transform: rotate(45deg);"
+								></i>
+								<i
+									class="fas fa-minus fa-stack-2x"
+									style="transform: rotate(90deg);"
+								></i>
+								<i
+									class="fas fa-minus fa-stack-2x"
+									style="transform: rotate(315deg);"
+								></i>
+							</span>
+						</v-btn>
+						<v-btn
+							:value="form.rotation.values[4]"
+							flat
+							color="deep-orange"
+						>
+							<i class="fas fa-circle fa-2x"></i>
+						</v-btn>
+					</v-btn-toggle>
+				</div>
+				<div style="padding: 8px;">
+					<div
+						style="
+							display: flex;
+							justify-content: space-between;
+							align-items: center;
+						"
+					>
 						<div class="subheading grey--text text--darken-1">
-							color
+							spacing
 						</div>
-						<v-btn-toggle
-							mandatory
-							v-model="form.color.value"
+						<v-chip
+							small
+							color="deep-orange"
+							text-color="white"
 						>
-							<v-btn
-								v-for="value in form.color.possibleValues"
-								:value="value"
-								flat
-								color="deep-orange"
-							>
-								<div style="display: flex; margin: 2px; width: 24px; height: 24px;">
-									<div
-										v-for="color in value"
-										style="flex: 1;"
-										:style="{backgroundColor: color}"
-									></div>
-								</div>
-							</v-btn>
-						</v-btn-toggle>
+							{{ (spacing > 0) ? (Math.round(spacing * 100) + ' ' + '%') : 'none' }}
+						</v-chip>
 					</div>
-					<div style="padding: 8px;">
+					<v-slider
+						v-model="form.spacing.valueIndex"
+						color="deep-orange"
+						class="px-2 py-0"
+						:min="0"
+						:max="form.spacing.values.length - 1"
+						hide-details
+					></v-slider>
+				</div>
+				<div style="padding: 8px;">
+					<div
+						style="
+							display: flex;
+							justify-content: space-between;
+							align-items: center;
+						"
+					>
 						<div class="subheading grey--text text--darken-1">
-							rotation
+							animation duration
 						</div>
-						<v-btn-toggle
-							mandatory
-							v-model="form.rotation.value"
+						<v-chip
+							small
+							color="deep-orange"
+							text-color="white"
 						>
-							<v-btn
-								v-for="item in form.rotation.possibleItems"
-								:value="item.value"
-								flat
-								color="deep-orange"
-							>
-								<template v-if="item.icon">
-									<v-icon>{{ item.icon }}</v-icon>
-								</template>
-								<template v-else>
-									{{ item.text }}
-								</template>
-							</v-btn>
-						</v-btn-toggle>
+							{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
+						</v-chip>
 					</div>
-					<div style="padding: 8px;">
-						<div style="display: flex; justify-content: space-between; align-items: center;">
-							<div class="subheading grey--text text--darken-1">
-								animation duration
-							</div>
-							<v-chip
-								small
-								color="deep-orange"
-								text-color="white"
-							>
-								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
-							</v-chip>
+					<v-slider
+						v-model="form.animationDuration.valueIndex"
+						color="deep-orange"
+						class="px-2 py-0"
+						:min="0"
+						:max="form.animationDuration.values.length - 1"
+						hide-details
+					></v-slider>
+				</div>
+				<div style="padding: 8px;">
+					<div
+						style="
+							display: flex;
+							justify-content: space-between;
+							align-items: center;
+						"
+					>
+						<div class="subheading grey--text text--darken-1">
+							font size ratio
 						</div>
-						<v-slider
-							v-model="form.animationDuration.value"
+						<v-chip
+							small
 							color="deep-orange"
-							class="px-2 py-0"
-							:max="form.animationDuration.possibleValues.length - 1"
-							:min="0"
-							hide-details
-						></v-slider>
+							text-color="white"
+						>
+							{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
+						</v-chip>
 					</div>
-					<div style="padding: 8px;">
-						<div style="display: flex; justify-content: space-between; align-items: center;">
-							<div class="subheading grey--text text--darken-1">
-								font size ratio
-							</div>
-							<v-chip
-								small
-								color="deep-orange"
-								text-color="white"
-							>
-								{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
-							</v-chip>
+					<v-slider
+						v-model="form.fontSizeRatio.valueIndex"
+						color="deep-orange"
+						class="px-2 py-0"
+						:min="0"
+						:max="form.fontSizeRatio.values.length - 1"
+						hide-details
+					></v-slider>
+				</div>
+				<div v-if="false" style="padding: 8px;">
+					<div
+						style="
+							display: flex;
+							justify-content: space-between;
+							align-items: center;
+						"
+					>
+						<div class="subheading grey--text text--darken-1">
+							max font size
 						</div>
-						<v-slider
-							v-model="form.fontSizeRatio.value"
+						<v-chip
+							small
 							color="deep-orange"
-							class="px-2 py-0"
-							:max="form.fontSizeRatio.possibleValues.length - 1"
-							:min="0"
-							hide-details
-						></v-slider>
+							text-color="white"
+						>
+							{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
+						</v-chip>
 					</div>
-					<div style="padding: 8px;">
-						<div style="display: flex; justify-content: space-between; align-items: center;">
-							<div class="subheading grey--text text--darken-1">
-								max font size
-							</div>
-							<v-chip
-								small
-								color="deep-orange"
-								text-color="white"
-							>
-								{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
-							</v-chip>
-						</div>
-						<v-slider
-							v-model="form.maxFontSize.value"
-							color="deep-orange"
-							class="px-2 py-0"
-							:max="form.maxFontSize.max"
-							:min="form.maxFontSize.min"
-							:step="form.maxFontSize.step"
-							hide-details
-						></v-slider>
-					</div>
+					<v-slider
+						v-model="form.maxFontSize.valueIndex"
+						color="deep-orange"
+						class="px-2 py-0"
+						:min="0"
+						:max="form.maxFontSize.values.length - 1"
+						hide-details
+					></v-slider>
 				</div>
 			</v-navigation-drawer>
 			<v-toolbar
@@ -216,35 +317,85 @@
 					href="https://github.com/SeregPie/VueWordCloud"
 					target="_blank"
 				>
-					<v-icon>fa-github</v-icon>
+					<v-icon>fab fa-github</v-icon>
 				</v-btn>
 			</v-toolbar>
 			<v-content>
 				<v-container
+					style="
+						position: relative;
+						overflow: hidden;
+					"
 					fluid
 					fill-height
 				>
-					<vue-word-cloud
-						v-if="active"
-						:words="words"
-						:color="color"
-						:font-family="fontFamily"
-						:rotation="rotation"
-						:font-size-ratio="fontSizeRatio"
-						:max-font-size="maxFontSize"
-						:animation-duration="animationDuration"
+					<div
+						style="
+							position: relative;
+							overflow: hidden;
+							width: 100%;
+							height: 100%;
+						"
 					>
-						<template slot-scope="word">
-							<v-tooltip top>
-								<div slot="activator">
-									{{ word.text }}
-								</div>
-								<div class="text-xs-center">
-									{{ word.text }}<br/>({{ word.weight }})
-								</div>
-							</v-tooltip>
-						</template>
-					</vue-word-cloud>
+						<div
+							style="
+								position: absolute;
+								top: 0;
+								right: 0;
+								bottom: 0;
+								left: 0;
+								transition-duration: 1s;
+							"
+							:style="progress ? {pointerEvents: 'none', opacity:  0.3, transform: 'scale(0.7, 0.7)', filter: 'blur(8px)'} : {}"
+						>
+							<vue-word-cloud
+								:words="words"
+								:rotation="rotation"
+								:font-family="fontFamily"
+								:color="color"
+								:spacing="spacing"
+								:font-size-ratio="fontSizeRatio"
+								:max-font-size="maxFontSize"
+								:animation-duration="animationDuration"
+								:load-font-family="loadFontFamily"
+								:progress.sync="progress"
+							>
+								<template slot-scope="word">
+									<v-tooltip top>
+										<div slot="activator">
+											{{ word.text }}
+										</div>
+										<div style="text-align: center;">
+											{{ word.text }}<br/>({{ word.weight }})
+										</div>
+									</v-tooltip>
+								</template>
+							</vue-word-cloud>
+						</div>
+						<transition
+							enter-active-class="animated zoomIn"
+							leave-active-class="animated zoomOut"
+						>
+							<v-progress-circular
+								v-if="progress"
+								style="
+									position: absolute;
+									top: 0;
+									right: 0;
+									bottom: 0;
+									left: 0;
+									margin: auto;
+								"
+								:size="200"
+								:width="20"
+								:rotate="-90"
+								:value="(progress.completedWords / progress.totalWords) * 100"
+								color="deep-orange"
+							>
+								{{ progress.completedWords }} of {{ progress.totalWords }}
+							</v-progress-circular>
+						</transition>
+					</div>
 				</v-container>
 			</v-content>
 		</v-app>
