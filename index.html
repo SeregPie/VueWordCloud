@@ -33,6 +33,7 @@
 			}
 		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.4/vuetify.min.js"></script>
+		<script src="https://unpkg.com/@seregpie/vueflex"></script>
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
@@ -54,254 +55,260 @@
 				v-model="drawer"
 				app
 			>
-				<div style="padding: 8px;">
-					<v-text-field
-						label="words &amp; weights"
-						v-model="form.words.value"
-						color="deep-orange"
-						multi-line
-						:rows="9"
-						hide-details
-					></v-text-field>
-					<v-btn
-						block
-						color="deep-orange"
-						class="white--text"
-						@click="generateFormWordsValue"
-					>
-						generate randomly
-					</v-btn>
-				</div>
-				<div style="padding: 8px;">
-					<v-select
-						label="font family"
-						:items="form.fontFamily.values"
-						v-model="form.fontFamily.value"
-						color="deep-orange"
-						hide-details
-					>
-						<template
-							slot="item"
-							slot-scope="data"
-						>
-							<span :style="{fontFamily: data.item}">
-								{{ data.item }}
-							</span>
-						</template>
-					</v-select>
-				</div>
-				<div style="padding: 8px;">
-					<div class="subheading grey--text text--darken-1">
-						color
-					</div>
-					<v-btn-toggle
-						mandatory
-						v-model="form.color.value"
-					>
-						<v-btn
-							v-for="(value, key) in form.color.values"
-							:key="key"
-							:value="value"
-							flat
+				<vue-flex-box
+					style="padding: 2px;"
+					direction-column
+					:spacing="16"
+				>
+					<vue-flex-item>
+						<v-text-field
+							label="words &amp; weights"
+							v-model="form.words.value"
 							color="deep-orange"
+							multi-line
+							:rows="9"
+							hide-details
+						></v-text-field>
+						<v-btn
+							block
+							color="deep-orange"
+							class="white--text"
+							@click="generateFormWordsValue"
 						>
-							<div
-								style="
-									margin: 2px;
-									width: 24px;
-									height: 24px;
-									display: flex;
-								"
+							generate randomly
+						</v-btn>
+					</vue-flex-item>
+					<vue-flex-item>
+						<v-select
+							label="font family"
+							:items="form.fontFamily.values"
+							v-model="form.fontFamily.value"
+							color="deep-orange"
+							hide-details
+						>
+							<template
+								slot="item"
+								slot-scope="data"
+							>
+								<span :style="{fontFamily: data.item}">
+									{{ data.item }}
+								</span>
+							</template>
+						</v-select>
+					</vue-flex-item>
+					<vue-flex-item>
+						<div class="subheading grey--text text--darken-1">
+							color
+						</div>
+						<v-btn-toggle
+							mandatory
+							v-model="form.color.value"
+						>
+							<v-btn
+								v-for="(value, key) in form.color.values"
+								:key="key"
+								:value="value"
+								flat
+								color="deep-orange"
 							>
 								<div
-									v-for="color in value"
-									style="flex: 1;"
-									:style="{backgroundColor: color}"
-								></div>
-							</div>
-						</v-btn>
-					</v-btn-toggle>
-				</div>
-				<div style="padding: 8px;">
-					<div class="subheading grey--text text--darken-1">
-						rotation
-					</div>
-					<v-btn-toggle
-						mandatory
-						v-model="form.rotation.value"
-					>
-						<v-btn
-							:value="form.rotation.values[0]"
-							flat
-							color="deep-orange"
+									style="
+										margin: 2px;
+										width: 24px;
+										height: 24px;
+										display: flex;
+									"
+								>
+									<div
+										v-for="color in value"
+										style="flex: 1;"
+										:style="{backgroundColor: color}"
+									></div>
+								</div>
+							</v-btn>
+						</v-btn-toggle>
+					</vue-flex-item>
+					<vue-flex-item>
+						<div class="subheading grey--text text--darken-1">
+							rotation
+						</div>
+						<v-btn-toggle
+							mandatory
+							v-model="form.rotation.value"
 						>
-							<i class="fas fa-minus fa-2x"></i>
-						</v-btn>
-						<v-btn
-							:value="form.rotation.values[1]"
-							flat
-							color="deep-orange"
-						>
-							<i
-								class="fas fa-minus fa-2x"
-								style="transform: rotate(315deg);"
-							></i>
-						</v-btn>
-						<v-btn
-							:value="form.rotation.values[2]"
-							flat
-							color="deep-orange"
-						>
-							<span class="fa-stack">
-								<i class="fas fa-minus fa-stack-2x"></i>
+							<v-btn
+								:value="form.rotation.values[0]"
+								flat
+								color="deep-orange"
+							>
+								<i class="fas fa-minus fa-2x"></i>
+							</v-btn>
+							<v-btn
+								:value="form.rotation.values[1]"
+								flat
+								color="deep-orange"
+							>
 								<i
-									class="fas fa-minus fa-stack-2x"
-									style="transform: rotate(90deg);"
-								></i>
-							</span>
-						</v-btn>
-						<v-btn
-							:value="form.rotation.values[3]"
-							flat
-							color="deep-orange"
-						>
-							<span class="fa-stack">
-								<i class="fas fa-minus fa-stack-2x"></i>
-								<i
-									class="fas fa-minus fa-stack-2x"
-									style="transform: rotate(45deg);"
-								></i>
-								<i
-									class="fas fa-minus fa-stack-2x"
-									style="transform: rotate(90deg);"
-								></i>
-								<i
-									class="fas fa-minus fa-stack-2x"
+									class="fas fa-minus fa-2x"
 									style="transform: rotate(315deg);"
 								></i>
-							</span>
-						</v-btn>
-						<v-btn
-							:value="form.rotation.values[4]"
-							flat
-							color="deep-orange"
+							</v-btn>
+							<v-btn
+								:value="form.rotation.values[2]"
+								flat
+								color="deep-orange"
+							>
+								<span class="fa-stack">
+									<i class="fas fa-minus fa-stack-2x"></i>
+									<i
+										class="fas fa-minus fa-stack-2x"
+										style="transform: rotate(90deg);"
+									></i>
+								</span>
+							</v-btn>
+							<v-btn
+								:value="form.rotation.values[3]"
+								flat
+								color="deep-orange"
+							>
+								<span class="fa-stack">
+									<i class="fas fa-minus fa-stack-2x"></i>
+									<i
+										class="fas fa-minus fa-stack-2x"
+										style="transform: rotate(45deg);"
+									></i>
+									<i
+										class="fas fa-minus fa-stack-2x"
+										style="transform: rotate(90deg);"
+									></i>
+									<i
+										class="fas fa-minus fa-stack-2x"
+										style="transform: rotate(315deg);"
+									></i>
+								</span>
+							</v-btn>
+							<v-btn
+								:value="form.rotation.values[4]"
+								flat
+								color="deep-orange"
+							>
+								<i class="fas fa-circle fa-2x"></i>
+							</v-btn>
+						</v-btn-toggle>
+					</vue-flex-item>
+					<vue-flex-item>
+						<div
+							style="
+								display: flex;
+								justify-content: space-between;
+								align-items: center;
+							"
 						>
-							<i class="fas fa-circle fa-2x"></i>
-						</v-btn>
-					</v-btn-toggle>
-				</div>
-				<div style="padding: 8px;">
-					<div
-						style="
-							display: flex;
-							justify-content: space-between;
-							align-items: center;
-						"
-					>
-						<div class="subheading grey--text text--darken-1">
-							spacing
+							<div class="subheading grey--text text--darken-1">
+								spacing
+							</div>
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ (spacing > 0) ? (Math.round(spacing * 100) + ' ' + '%') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.spacing.valueIndex"
 							color="deep-orange"
-							text-color="white"
+							class="px-2 py-0"
+							:min="0"
+							:max="form.spacing.values.length - 1"
+							hide-details
+						></v-slider>
+					</vue-flex-item>
+					<vue-flex-item>
+						<div
+							style="
+								display: flex;
+								justify-content: space-between;
+								align-items: center;
+							"
 						>
-							{{ (spacing > 0) ? (Math.round(spacing * 100) + ' ' + '%') : 'none' }}
-						</v-chip>
-					</div>
-					<v-slider
-						v-model="form.spacing.valueIndex"
-						color="deep-orange"
-						class="px-2 py-0"
-						:min="0"
-						:max="form.spacing.values.length - 1"
-						hide-details
-					></v-slider>
-				</div>
-				<div style="padding: 8px;">
-					<div
-						style="
-							display: flex;
-							justify-content: space-between;
-							align-items: center;
-						"
-					>
-						<div class="subheading grey--text text--darken-1">
-							animation duration
+							<div class="subheading grey--text text--darken-1">
+								animation duration
+							</div>
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.animationDuration.valueIndex"
 							color="deep-orange"
-							text-color="white"
+							class="px-2 py-0"
+							:min="0"
+							:max="form.animationDuration.values.length - 1"
+							hide-details
+						></v-slider>
+					</vue-flex-item>
+					<vue-flex-item>
+						<div
+							style="
+								display: flex;
+								justify-content: space-between;
+								align-items: center;
+							"
 						>
-							{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
-						</v-chip>
-					</div>
-					<v-slider
-						v-model="form.animationDuration.valueIndex"
-						color="deep-orange"
-						class="px-2 py-0"
-						:min="0"
-						:max="form.animationDuration.values.length - 1"
-						hide-details
-					></v-slider>
-				</div>
-				<div style="padding: 8px;">
-					<div
-						style="
-							display: flex;
-							justify-content: space-between;
-							align-items: center;
-						"
-					>
-						<div class="subheading grey--text text--darken-1">
-							font size ratio
+							<div class="subheading grey--text text--darken-1">
+								font size ratio
+							</div>
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.fontSizeRatio.valueIndex"
 							color="deep-orange"
-							text-color="white"
+							class="px-2 py-0"
+							:min="0"
+							:max="form.fontSizeRatio.values.length - 1"
+							hide-details
+						></v-slider>
+					</vue-flex-item>
+					<vue-flex-item v-if="false">
+						<div
+							style="
+								display: flex;
+								justify-content: space-between;
+								align-items: center;
+							"
 						>
-							{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
-						</v-chip>
-					</div>
-					<v-slider
-						v-model="form.fontSizeRatio.valueIndex"
-						color="deep-orange"
-						class="px-2 py-0"
-						:min="0"
-						:max="form.fontSizeRatio.values.length - 1"
-						hide-details
-					></v-slider>
-				</div>
-				<div v-if="false" style="padding: 8px;">
-					<div
-						style="
-							display: flex;
-							justify-content: space-between;
-							align-items: center;
-						"
-					>
-						<div class="subheading grey--text text--darken-1">
-							max font size
+							<div class="subheading grey--text text--darken-1">
+								max font size
+							</div>
+							<v-chip
+								small
+								color="deep-orange"
+								text-color="white"
+							>
+								{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
+							</v-chip>
 						</div>
-						<v-chip
-							small
+						<v-slider
+							v-model="form.maxFontSize.valueIndex"
 							color="deep-orange"
-							text-color="white"
-						>
-							{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
-						</v-chip>
-					</div>
-					<v-slider
-						v-model="form.maxFontSize.valueIndex"
-						color="deep-orange"
-						class="px-2 py-0"
-						:min="0"
-						:max="form.maxFontSize.values.length - 1"
-						hide-details
-					></v-slider>
-				</div>
+							class="px-2 py-0"
+							:min="0"
+							:max="form.maxFontSize.values.length - 1"
+							hide-details
+						></v-slider>
+					</vue-flex-item>
+				</vue-flex-box>
 			</v-navigation-drawer>
 			<v-toolbar
 				color="deep-orange darken-3"
@@ -322,17 +329,12 @@
 			</v-toolbar>
 			<v-content>
 				<v-container
-					style="
-						position: relative;
-						overflow: hidden;
-					"
-					fluid
 					fill-height
+					hide-overflow
 				>
 					<div
 						style="
 							position: relative;
-							overflow: hidden;
 							width: 100%;
 							height: 100%;
 						"
