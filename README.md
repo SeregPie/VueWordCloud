@@ -94,6 +94,7 @@ Pass custom renderer for the words.
 | `spacing` | `Number` | `0` | The spacing between the words. The value is relative to the font size. |
 | `fontSizeRatio` | `Number` | `0` | The font size ratio between the words. For example, if the value is `5`, then the largest word will be 5 times larger than the smallest one. The value `5` has the same effect as the value `1/5`. |
 | `animationDuration` | `Number` | `5000` | The duration of the animation. |
+| `animationEasing` | `String` | `'ease'` | The timing function of the animation. |
 
 ## events
 

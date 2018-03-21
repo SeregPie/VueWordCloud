@@ -269,6 +269,15 @@
 						></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
+						<v-select
+							label="animation easing"
+							:items="form.animationEasing.values"
+							v-model="form.animationEasing.value"
+							color="deep-orange"
+							hide-details
+						></v-select>
+					</vue-flex-item>
+					<vue-flex-item>
 						<div
 							style="
 								display: flex;
@@ -379,6 +388,7 @@
 								:font-size-ratio="fontSizeRatio"
 								:max-font-size="maxFontSize"
 								:animation-duration="animationDuration"
+								:animation-easing="animationEasing"
 								:load-font="loadFont"
 								:progress.sync="progress"
 							>

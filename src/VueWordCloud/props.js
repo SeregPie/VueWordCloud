@@ -81,6 +81,11 @@ export default {
 		default: 5000,
 	},
 
+	animationEasing: {
+		type: String,
+		default: 'ease',
+	},
+
 	createCanvas: {
 		type: Function,
 		default() {

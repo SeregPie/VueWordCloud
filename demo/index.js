@@ -92,6 +92,21 @@
 						values: [0, 1, 5, 10],
 						valueIndex: 2,
 					},
+
+					animationEasing: (function() {
+						var values = [
+							'ease',
+							'linear',
+							'ease-in',
+							'ease-out',
+							'ease-in-out',
+							'cubic-bezier(0.1, 0.7, 1.0, 0.1)',
+						];
+						return {
+							values: values,
+							value: chance.pickone(values),
+						};
+					})(),
 				},
 
 				showProgress: false,
@@ -170,6 +185,12 @@
 				var value = values[valueIndex];
 
 				return value * 1000;
+			},
+
+			animationEasing: function() {
+				var value = this.form.animationEasing.value;
+
+				return value;
 			},
 
 			progressedWordCloudStyle: function() {
