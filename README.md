@@ -142,6 +142,8 @@ let createWorker = function(code) {
 ## todo
 
 - An option to toggle one-by-one animation.
+- An option to customize the animation order of the cloud words by weight, font size and distance from center.
+- An option to privide an array of colors to colorize the cloud words by weight, font size and distance from center.
 - Prevent the recomputing of cloud words when changing color only.
 - An option to switch between canvas and dom renderer.
 - Speed up the computing of cloud words and improve the placing by reducing the image pixels.
