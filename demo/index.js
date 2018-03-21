@@ -203,6 +203,14 @@
 			},
 		},
 
+		watch: {
+			progress: function(newProgress, oldProgress) {
+				if (oldProgress) {
+					this.showProgress = false;
+				}
+			},
+		},
+
 		created: function() {
 			this.generateFormWordsValue();
 		},
