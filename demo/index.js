@@ -109,7 +109,7 @@
 					})(),
 				},
 
-				showProgress: false,
+				showProgress: true,
 				progress: undefined,
 
 				drawer: true,
