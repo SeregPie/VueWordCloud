@@ -94,6 +94,7 @@
 					},
 				},
 
+				showProgress: false,
 				progress: undefined,
 
 				drawer: true,
@@ -169,6 +170,15 @@
 				var value = values[valueIndex];
 
 				return value * 1000;
+			},
+
+			progressedWordCloudStyle: function() {
+				return {
+					pointerEvents: 'none',
+					opacity:  0.3,
+					transform: 'scale(0.7, 0.7)',
+					filter: 'blur(8px)',
+				};
 			},
 		},
 

@@ -61,6 +61,14 @@
 					:spacing="16"
 				>
 					<vue-flex-item>
+						<v-switch
+							label="show progress"
+							v-model="showProgress"
+							color="deep-orange"
+							hide-details
+						></v-switch>
+					</vue-flex-item>
+					<vue-flex-item>
 						<v-text-field
 							label="words &amp; weights"
 							v-model="form.words.value"
@@ -360,7 +368,7 @@
 								left: 0;
 								transition-duration: 1s;
 							"
-							:style="progress ? {pointerEvents: 'none', opacity:  0.3, transform: 'scale(0.7, 0.7)', filter: 'blur(8px)'} : {}"
+							:style="showProgress && progress ? progressedWordCloudStyle : {}"
 						>
 							<vue-word-cloud
 								:words="words"
@@ -391,7 +399,7 @@
 							leave-active-class="animated zoomOut"
 						>
 							<v-progress-circular
-								v-if="progress"
+								v-if="showProgress && progress"
 								style="
 									position: absolute;
 									top: 0;
