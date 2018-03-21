@@ -99,4 +99,5 @@ Pass custom renderer for the words.
 ## events
 
 | event | type | description |
+| ---: | :--- | :--- | :--- |
 | `update:progress` | `Object` | The current progress of the cloud words computation. |
