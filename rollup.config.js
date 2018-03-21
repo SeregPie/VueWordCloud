@@ -15,7 +15,9 @@ export default {
 	plugins: [
 		stringify(),
 		nodeResolve(),
-		buble(),
+		buble({
+			objectAssign: 'Object.assign',
+		}),
 		uglify({
 			mangle: {
 				properties: {

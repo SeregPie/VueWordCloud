@@ -36,6 +36,15 @@ let construct = function(event) {
 		return _maxTopHeight - _minTop;
 	};
 
+	let getBounds = function() {
+		return {
+			left: getLeft(),
+			top: getTop(),
+			width: getWidth(),
+			height: getHeight(),
+		};
+	};
+
 	let put = function(pixels, pixelsLeft, pixelsTop) {
 		pixels.forEach(([pixelLeft, pixelTop]) => {
 			let left = pixelsLeft + pixelLeft;
@@ -65,10 +74,7 @@ let construct = function(event) {
 	self.postMessage({});
 	self.addEventListener('message', function(event) {
 		self.postMessage({
-			getLeft,
-			getTop,
-			getWidth,
-			getHeight,
+			getBounds,
 			put,
 			//canFit,
 			findFit,

@@ -1,17 +1,18 @@
 import VueAsyncComputed from 'x.vue/src/mixins/AsyncComputed';
-import VueWatchElementSize from 'x.vue/src/mixins/WatchElementSize';
+import VueScheduled from 'x.vue/src/mixins/Scheduled';
 
 import props from './props';
 import data from './data';
 import asyncComputed from './asyncComputed';
 import watch from './watch';
+import scheduled from './scheduled';
 import render from './render';
 
 export default {
 	name: 'VueWordCloud',
 	mixins: [
 		VueAsyncComputed(asyncComputed),
-		VueWatchElementSize(),
+		VueScheduled(scheduled),
 	],
 	props,
 	data,

@@ -1,9 +1,10 @@
 export default function(createElement) {
 	let words = this.cloudWords;
 	let animationDuration = this.animationDuration;
-	let scopedSlots = Object.assign({
+	let scopedSlots = {
 		default: ({text}) => text,
-	}, this.$scopedSlots);
+		...this.$scopedSlots,
+	};
 
 	let transitionDuration = (
 		words.length > 0

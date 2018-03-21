@@ -28,12 +28,12 @@
 	},
 	"homepage": "https://github.com/SeregPie/VueWordCloud#readme",
 	"dependencies": {
-		"vue": "^2.5.13"
+		"vue": "^2.5.16"
 	},
 	"devDependencies": {
-		"rollup": "^0.56.3",
+		"rollup": "^0.57.1",
 		"rollup-plugin-buble": "^0.19.2",
-		"rollup-plugin-node-resolve": "^3.0.3",
+		"rollup-plugin-node-resolve": "^3.3.0",
 		"rollup-plugin-stringify": "^18.2.15",
 		"rollup-plugin-uglify": "^3.0.0",
 		"x": "github:SeregPie/MyJavaScriptHelpers",

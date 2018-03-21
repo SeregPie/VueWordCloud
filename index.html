@@ -8,7 +8,7 @@
 		/>
 		<title>VueWordCloud</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.13/vue.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
@@ -17,7 +17,7 @@
 		<script src="VueWordCloud.js"></script>
 		<link
 			rel="stylesheet"
-			href="https://use.fontawesome.com/releases/v5.0.6/css/all.css"
+			href="https://use.fontawesome.com/releases/v5.0.8/css/all.css"
 		/>
 		<link
 			rel="stylesheet"
@@ -25,15 +25,15 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.4/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.8/vuetify.min.css"
 		/>
 		<style>
 			.progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.4/vuetify.min.js"></script>
-		<script src="https://unpkg.com/@seregpie/vueflex"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.8/vuetify.min.js"></script>
+		<script src="https://unpkg.com/@seregpie/vueflex@18.3.5"></script>
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
@@ -43,7 +43,7 @@
 			href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
 		/>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.13/chance.min.js"></script>
-		<script src="https://unpkg.com/fontfaceobserver"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.0.13/fontfaceobserver.standalone.js"></script>
 	</head>
 	<body>
 		<v-app
@@ -97,8 +97,10 @@
 						</v-select>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div class="subheading grey--text text--darken-1">
-							color
+						<div class="input-group pa-0">
+							<label>
+								color
+							</label>
 						</div>
 						<v-btn-toggle
 							mandatory
@@ -129,8 +131,10 @@
 						</v-btn-toggle>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div class="subheading grey--text text--darken-1">
-							rotation
+						<div class="input-group pa-0">
+							<label>
+								rotation
+							</label>
 						</div>
 						<v-btn-toggle
 							mandatory
@@ -204,8 +208,10 @@
 								align-items: center;
 							"
 						>
-							<div class="subheading grey--text text--darken-1">
-								spacing
+							<div class="input-group pa-0">
+								<label>
+									spacing
+								</label>
 							</div>
 							<v-chip
 								small
@@ -232,8 +238,10 @@
 								align-items: center;
 							"
 						>
-							<div class="subheading grey--text text--darken-1">
-								animation duration
+							<div class="input-group pa-0">
+								<label>
+									animation duration
+								</label>
 							</div>
 							<v-chip
 								small
@@ -260,8 +268,10 @@
 								align-items: center;
 							"
 						>
-							<div class="subheading grey--text text--darken-1">
-								font size ratio
+							<div class="input-group pa-0">
+								<label>
+									font size ratio
+								</label>
 							</div>
 							<v-chip
 								small
@@ -288,8 +298,10 @@
 								align-items: center;
 							"
 						>
-							<div class="subheading grey--text text--darken-1">
-								max font size
+							<div class="input-group pa-0">
+								<label>
+									max font size
+								</label>
 							</div>
 							<v-chip
 								small
