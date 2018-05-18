@@ -147,4 +147,3 @@ let createWorker = function(code) {
 - Prevent the recomputing of cloud words when changing color only.
 - An option to switch between canvas and dom renderer.
 - Speed up the computing of cloud words and improve the placing by reducing the image pixels.
-- Refactor the render function.
