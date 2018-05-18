@@ -16,6 +16,9 @@ import getNormalizedAspect from './getNormalizedAspect';
 import BoundingWord from './BoundingWord';
 import PixelGridWorker from 'stringify!./PixelGridWorker/index.js';
 
+const renderingFontSizeInterval = 2;
+const renderingFontSizeBase = 4;
+
 export default {
 	get(context) {
 
@@ -34,8 +37,6 @@ export default {
 			color,
 			spacing,
 			fontSizeRatio,
-			renderingFontSizeInterval,
-			renderingFontSizeBase,
 			createCanvas,
 			loadFont,
 			createWorker,
@@ -243,7 +244,7 @@ export default {
 											});
 										})
 										.then(() => {
-											currentWord.ǂrelativePadding = spacing;
+											currentWord.ǂpadding = spacing;
 											return Worker_postMessage(gridWorker, {
 												name: 'findFit',
 												args: [currentWord.ǂimagePixels, currentWord.ǂimageLeft, currentWord.ǂimageTop],
@@ -255,7 +256,7 @@ export default {
 
 											currentWord.ǂimageLeft = imageLeft;
 											currentWord.ǂimageTop = imageTop;
-											currentWord.ǂrelativePadding = 0;
+											currentWord.ǂpadding = 0;
 										});
 									return currentWord;
 								});

@@ -1,6 +1,45 @@
-export default function(text, font, lineWidth, rotation, canvasWidth, canvasHeight, createCanvas) {
+import Math_ceilDivisible from 'x/src/Math/ceilDivisible';
+
+import getBoundingBoxHeight from './getBoundingBoxHeight';
+import getBoundingBoxWidth from './getBoundingBoxWidth';
+import getFont from './getFont';
+import getTextWidth from './getTextWidth';
+
+const pixelSize = 4;
+
+export default function(
+	text,
+	fontStyle,
+	fontVariant,
+	fontWeight,
+	fontSize,
+	fontFamily,
+	padding,
+	rotation,
+	createCanvas,
+) {
+	fontSize *= pixelSize;
+	let font = getFont(
+		fontStyle,
+		fontVariant,
+		fontWeight,
+		fontSize,
+		fontFamily,
+	);
+	let textWidth = getTextWidth(text, font, createCanvas);
+	let lineWidth = padding * fontSize * 2;
 	let canvas = createCanvas();
 	let ctx = canvas.getContext('2d');
+	let canvasWidth = Math_ceilDivisible(getBoundingBoxWidth(
+		lineWidth + fontSize * 2 + textWidth,
+		lineWidth + fontSize * 3,
+		rotation,
+	), pixelSize);
+	let canvasHeight = Math_ceilDivisible(getBoundingBoxHeight(
+		lineWidth + fontSize * 2 + textWidth,
+		lineWidth + fontSize * 3,
+		rotation,
+	), pixelSize);
 	canvas.width = canvasWidth;
 	canvas.height = canvasHeight;
 	ctx.translate(canvasWidth / 2, canvasHeight / 2);
@@ -20,25 +59,35 @@ export default function(text, font, lineWidth, rotation, canvasWidth, canvasHeig
 	let maxPixelLeftWidth = 0;
 	let minPixelTop = Infinity;
 	let maxPixelTopHeight = 0;
-	for (let pixelLeft = 0; pixelLeft < canvasWidth; ++pixelLeft) {
-		for (let pixelTop = 0; pixelTop < canvasHeight; ++pixelTop) {
-			if (image[(canvasWidth * pixelTop + pixelLeft) * 4 + 3]) {
-				imagePixels.push([pixelLeft, pixelTop]);
-				minPixelLeft = Math.min(pixelLeft, minPixelLeft);
-				maxPixelLeftWidth = Math.max(pixelLeft + 1, maxPixelLeftWidth);
-				minPixelTop = Math.min(pixelTop, minPixelTop);
-				maxPixelTopHeight = Math.max(pixelTop + 1, maxPixelTopHeight);
+	let pixelLeftWidth = canvasWidth / pixelSize;
+	let pixelTopHeight = canvasHeight / pixelSize;
+	for (let pixelLeft = 0; pixelLeft < pixelLeftWidth; ++pixelLeft) {
+		for (let pixelTop = 0; pixelTop < pixelTopHeight; ++pixelTop) {
+			offsetLoop:
+			for (let offsetLeft = 0; offsetLeft < pixelSize; ++offsetLeft) {
+				for (let offsetTop = 0; offsetTop < pixelSize; ++offsetTop) {
+					let canvasLeft = pixelLeft * pixelSize + offsetLeft;
+					let canvasTop = pixelTop * pixelSize + offsetTop;
+					if (image[(canvasWidth * canvasTop + canvasLeft) * 4 + 3]) {
+						imagePixels.push([pixelLeft, pixelTop]);
+						minPixelLeft = Math.min(pixelLeft, minPixelLeft);
+						maxPixelLeftWidth = Math.max(pixelLeft + 1, maxPixelLeftWidth);
+						minPixelTop = Math.min(pixelTop, minPixelTop);
+						maxPixelTopHeight = Math.max(pixelTop + 1, maxPixelTopHeight);
+						break offsetLoop;
+					}
+				}
 			}
 		}
 	}
-	if (imagePixels.length < 1) {
-		return [imagePixels, 0, 0, 0, 0];
+	if (imagePixels.length > 0) {
+		return [
+			imagePixels.map(([pixelLeft, pixelTop]) => [pixelLeft - minPixelLeft, pixelTop - minPixelTop]),
+			maxPixelLeftWidth - minPixelLeft,
+			maxPixelTopHeight - minPixelTop,
+			Math.ceil(pixelLeftWidth / 2) - minPixelLeft,
+			Math.ceil(pixelTopHeight / 2) - minPixelTop,
+		];
 	}
-	return [
-		imagePixels.map(([pixelLeft, pixelTop]) => [pixelLeft - minPixelLeft, pixelTop - minPixelTop]),
-		maxPixelLeftWidth - minPixelLeft,
-		maxPixelTopHeight - minPixelTop,
-		Math.ceil(canvasWidth / 2) - minPixelLeft,
-		Math.ceil(canvasHeight / 2) - minPixelTop,
-	];
+	return [imagePixels, 0, 0, 0, 0];
 }

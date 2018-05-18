@@ -66,16 +66,6 @@ export default {
 		default: Infinity,
 	},
 
-	renderingFontSizeInterval: {
-		type: Number,
-		default: 2,
-	},
-
-	renderingFontSizeBase: {
-		type: Number,
-		default: 4,
-	},
-
 	animationDuration: {
 		type: Number,
 		default: 5000,
