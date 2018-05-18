@@ -5,7 +5,7 @@
 
 		data: function() {
 			return {
-				form: {
+				input: {
 					words: {
 						value: '',
 					},
@@ -118,7 +118,7 @@
 
 		computed: {
 			words: function() {
-				var value = this.form.words.value;
+				var value = this.input.words.value;
 
 				return value
 					.split(/[\r\n]+/)
@@ -136,19 +136,19 @@
 			},
 
 			rotation: function() {
-				var value = this.form.rotation.value;
+				var value = this.input.rotation.value;
 
 				return value;
 			},
 
 			fontFamily: function() {
-				var value = this.form.fontFamily.value;
+				var value = this.input.fontFamily.value;
 
 				return value;
 			},
 
 			color: function() {
-				var colors = this.form.color.value;
+				var colors = this.input.color.value;
 
 				return function() {
 					return chance.pickone(colors);
@@ -156,39 +156,39 @@
 			},
 
 			spacing: function() {
-				var values = this.form.spacing.values;
-				var valueIndex = this.form.spacing.valueIndex;
+				var values = this.input.spacing.values;
+				var valueIndex = this.input.spacing.valueIndex;
 				var value = values[valueIndex];
 
 				return value;
 			},
 
 			fontSizeRatio: function() {
-				var values = this.form.fontSizeRatio.values;
-				var valueIndex = this.form.fontSizeRatio.valueIndex;
+				var values = this.input.fontSizeRatio.values;
+				var valueIndex = this.input.fontSizeRatio.valueIndex;
 				var value = values[valueIndex];
 
 				return value;
 			},
 
 			maxFontSize: function() {
-				var values = this.form.maxFontSize.values;
-				var valueIndex = this.form.maxFontSize.valueIndex;
+				var values = this.input.maxFontSize.values;
+				var valueIndex = this.input.maxFontSize.valueIndex;
 				var value = values[valueIndex];
 
 				return value;
 			},
 
 			animationDuration: function() {
-				var values = this.form.animationDuration.values;
-				var valueIndex = this.form.animationDuration.valueIndex;
+				var values = this.input.animationDuration.values;
+				var valueIndex = this.input.animationDuration.valueIndex;
 				var value = values[valueIndex];
 
 				return value * 1000;
 			},
 
 			animationEasing: function() {
-				var value = this.form.animationEasing.value;
+				var value = this.input.animationEasing.value;
 
 				return value;
 			},
@@ -217,7 +217,7 @@
 
 		methods: {
 			generateFormWordsValue: function() {
-				this.form.words.value = [
+				this.input.words.value = [
 					[9, 1, 3],
 					[4, 5, 15],
 					[2, 5, 15],

@@ -60,7 +60,7 @@ If Vue is detected, the component will be registered automatically.
   :words="[['romance', 19], ['horror', 3], ['fantasy', 7], ['adventure', 3]]"
   :color="([, weight]) => weight > 10 ? 'DeepPink' : weight > 5 ? 'RoyalBlue' : 'Indigo'"
   font-family="Roboto"
-></vue-word-cloud>
+/>
 ```
 
 ---
@@ -135,9 +135,9 @@ let createWorker = function(code) {
 
 ## events
 
-| event | type | description |
-| ---: | :--- | :--- |
-| `update:progress` | `Object` | The current progress of the cloud words computation. |
+| event | description |
+| ---: | :--- |
+| `update:progress` | The current progress of the cloud words computation. |
 
 ## todo
 

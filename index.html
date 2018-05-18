@@ -7,8 +7,8 @@
 			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 		/>
 		<title>VueWordCloud</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0-beta.47/polyfill.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17-beta.0/vue.min.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
@@ -25,15 +25,15 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.8/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-alpha.6/vuetify.min.css"
 		/>
 		<style>
-			.progress-circular__overlay {
+			.v-progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.0.8/vuetify.min.js"></script>
-		<script src="https://unpkg.com/@seregpie/vueflex@18.3.5"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-alpha.6/vuetify.min.js"></script>
+		<script src="https://unpkg.com/@seregpie/vueflex@18.5.11"></script>
 		<link
 			rel="stylesheet"
 			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
@@ -42,7 +42,7 @@
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
 		/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.13/chance.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.16/chance.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.0.13/fontfaceobserver.standalone.js"></script>
 	</head>
 	<body>
@@ -62,6 +62,7 @@
 				>
 					<vue-flex-item>
 						<v-switch
+							class="ma-0"
 							label="show progress"
 							v-model="showProgress"
 							color="deep-orange"
@@ -69,28 +70,37 @@
 						></v-switch>
 					</vue-flex-item>
 					<vue-flex-item>
-						<v-text-field
-							label="words &amp; weights"
-							v-model="form.words.value"
-							color="deep-orange"
-							multi-line
-							:rows="9"
-							hide-details
-						></v-text-field>
-						<v-btn
-							block
-							color="deep-orange"
-							class="white--text"
-							@click="generateFormWordsValue"
+						<vue-flex-box
+							direction-column
+							:spacing="8"
 						>
-							generate randomly
-						</v-btn>
+							<vue-flex-item>
+								<v-textarea
+									label="words &amp; weights"
+									v-model="input.words.value"
+									color="deep-orange"
+									multi-line
+									:rows="9"
+									hide-details
+								></v-textarea>
+							</vue-flex-item>
+							<vue-flex-item>
+								<v-btn
+									class="white--text ma-0"
+									block
+									color="deep-orange"
+									@click="generateFormWordsValue"
+								>
+									generate randomly
+								</v-btn>
+							</vue-flex-item>
+						</vue-flex-box>
 					</vue-flex-item>
 					<vue-flex-item>
 						<v-select
 							label="font family"
-							:items="form.fontFamily.values"
-							v-model="form.fontFamily.value"
+							:items="input.fontFamily.values"
+							v-model="input.fontFamily.value"
 							color="deep-orange"
 							hide-details
 						>
@@ -105,17 +115,15 @@
 						</v-select>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div class="input-group pa-0">
-							<label>
-								color
-							</label>
+						<div>
+							color
 						</div>
 						<v-btn-toggle
 							mandatory
-							v-model="form.color.value"
+							v-model="input.color.value"
 						>
 							<v-btn
-								v-for="(value, key) in form.color.values"
+								v-for="(value, key) in input.color.values"
 								:key="key"
 								:value="value"
 								flat
@@ -139,24 +147,22 @@
 						</v-btn-toggle>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div class="input-group pa-0">
-							<label>
-								rotation
-							</label>
+						<div>
+							rotation
 						</div>
 						<v-btn-toggle
 							mandatory
-							v-model="form.rotation.value"
+							v-model="input.rotation.value"
 						>
 							<v-btn
-								:value="form.rotation.values[0]"
+								:value="input.rotation.values[0]"
 								flat
 								color="deep-orange"
 							>
 								<i class="fas fa-minus fa-2x"></i>
 							</v-btn>
 							<v-btn
-								:value="form.rotation.values[1]"
+								:value="input.rotation.values[1]"
 								flat
 								color="deep-orange"
 							>
@@ -166,7 +172,7 @@
 								></i>
 							</v-btn>
 							<v-btn
-								:value="form.rotation.values[2]"
+								:value="input.rotation.values[2]"
 								flat
 								color="deep-orange"
 							>
@@ -179,7 +185,7 @@
 								</span>
 							</v-btn>
 							<v-btn
-								:value="form.rotation.values[3]"
+								:value="input.rotation.values[3]"
 								flat
 								color="deep-orange"
 							>
@@ -200,7 +206,7 @@
 								</span>
 							</v-btn>
 							<v-btn
-								:value="form.rotation.values[4]"
+								:value="input.rotation.values[4]"
 								flat
 								color="deep-orange"
 							>
@@ -216,10 +222,8 @@
 								align-items: center;
 							"
 						>
-							<div class="input-group pa-0">
-								<label>
-									spacing
-								</label>
+							<div>
+								spacing
 							</div>
 							<v-chip
 								small
@@ -230,11 +234,11 @@
 							</v-chip>
 						</div>
 						<v-slider
-							v-model="form.spacing.valueIndex"
+							class="px-2"
+							v-model="input.spacing.valueIndex"
 							color="deep-orange"
-							class="px-2 py-0"
 							:min="0"
-							:max="form.spacing.values.length - 1"
+							:max="input.spacing.values.length - 1"
 							hide-details
 						></v-slider>
 					</vue-flex-item>
@@ -246,10 +250,8 @@
 								align-items: center;
 							"
 						>
-							<div class="input-group pa-0">
-								<label>
-									animation duration
-								</label>
+							<div>
+								animation duration
 							</div>
 							<v-chip
 								small
@@ -260,19 +262,19 @@
 							</v-chip>
 						</div>
 						<v-slider
-							v-model="form.animationDuration.valueIndex"
+							class="px-2"
+							v-model="input.animationDuration.valueIndex"
 							color="deep-orange"
-							class="px-2 py-0"
 							:min="0"
-							:max="form.animationDuration.values.length - 1"
+							:max="input.animationDuration.values.length - 1"
 							hide-details
 						></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
 						<v-select
 							label="animation easing"
-							:items="form.animationEasing.values"
-							v-model="form.animationEasing.value"
+							:items="input.animationEasing.values"
+							v-model="input.animationEasing.value"
 							color="deep-orange"
 							hide-details
 						></v-select>
@@ -285,10 +287,8 @@
 								align-items: center;
 							"
 						>
-							<div class="input-group pa-0">
-								<label>
-									font size ratio
-								</label>
+							<div>
+								font size ratio
 							</div>
 							<v-chip
 								small
@@ -299,11 +299,11 @@
 							</v-chip>
 						</div>
 						<v-slider
-							v-model="form.fontSizeRatio.valueIndex"
+							class="px-2"
+							v-model="input.fontSizeRatio.valueIndex"
 							color="deep-orange"
-							class="px-2 py-0"
 							:min="0"
-							:max="form.fontSizeRatio.values.length - 1"
+							:max="input.fontSizeRatio.values.length - 1"
 							hide-details
 						></v-slider>
 					</vue-flex-item>
@@ -315,10 +315,8 @@
 								align-items: center;
 							"
 						>
-							<div class="input-group pa-0">
-								<label>
-									max font size
-								</label>
+							<div>
+								max font size
 							</div>
 							<v-chip
 								small
@@ -329,11 +327,11 @@
 							</v-chip>
 						</div>
 						<v-slider
-							v-model="form.maxFontSize.valueIndex"
+							class="px-2"
+							v-model="input.maxFontSize.valueIndex"
 							color="deep-orange"
-							class="px-2 py-0"
 							:min="0"
-							:max="form.maxFontSize.values.length - 1"
+							:max="input.maxFontSize.values.length - 1"
 							hide-details
 						></v-slider>
 					</vue-flex-item>
@@ -394,7 +392,10 @@
 							>
 								<template slot-scope="word">
 									<v-tooltip top>
-										<div slot="activator">
+										<div
+											slot="activator"
+											style="cursor: default;"
+										>
 											{{ word.text }}
 										</div>
 										<div style="text-align: center;">
