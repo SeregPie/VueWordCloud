@@ -1,4 +1,4 @@
-import VueAsyncComputed from 'x.vue/src/mixins/AsyncComputed';
+import VueAsyncComputed from '/utils/Vue/AsyncComputed';
 
 import props from './props';
 import data from './data';

@@ -3,7 +3,6 @@ const tag = 'div';
 export default function(createElement) {
 	let {
 		$scopedSlots,
-		animationDuration,
 		animationEasing,
 		cloudWords,
 		defaultScopedSlot,
@@ -54,7 +53,7 @@ export default function(createElement) {
 			left: `${left}px`,
 			top: `${top}px`,
 		};
-		if (animationDuration > 0) {
+		if (separateAnimationDuration > 0) {
 			let transition = [
 				'all',
 				`${separateAnimationDuration}ms`,

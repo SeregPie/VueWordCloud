@@ -1,4 +1,4 @@
-import Function_stubArray from 'x/src/Function/stubArray';
+import Function_stubArray from '/utils/Function/stubArray';
 
 export default {
 	words: {
@@ -59,11 +59,6 @@ export default {
 	fontSizeRatio: {
 		type: Number,
 		default: 0,
-	},
-
-	maxFontSize: {
-		type: Number,
-		default: Infinity,
 	},
 
 	animationDuration: {

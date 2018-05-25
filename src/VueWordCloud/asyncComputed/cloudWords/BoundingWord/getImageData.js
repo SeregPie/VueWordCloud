@@ -1,4 +1,4 @@
-import Math_ceilDivisible from 'x/src/Math/ceilDivisible';
+import Math_ceilDivisible from '/utils/Math/ceilDivisible';
 
 import getBoundingBoxHeight from './getBoundingBoxHeight';
 import getBoundingBoxWidth from './getBoundingBoxWidth';

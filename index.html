@@ -17,7 +17,7 @@
 		<script src="VueWordCloud.js"></script>
 		<link
 			rel="stylesheet"
-			href="https://use.fontawesome.com/releases/v5.0.8/css/all.css"
+			href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
 		/>
 		<link
 			rel="stylesheet"
@@ -25,14 +25,14 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-alpha.6/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.0/vuetify.min.css"
 		/>
 		<style>
-			.v-progress-circular__overlay {
+			.v-no-animation .v-progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-alpha.6/vuetify.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.0/vuetify.min.js"></script>
 		<script src="https://unpkg.com/@seregpie/vueflex@18.5.11"></script>
 		<link
 			rel="stylesheet"
@@ -51,8 +51,8 @@
 			id="App"
 		>
 			<v-navigation-drawer
-				clipped
 				v-model="drawer"
+				clipped
 				app
 			>
 				<vue-flex-box
@@ -76,10 +76,9 @@
 						>
 							<vue-flex-item>
 								<v-textarea
-									label="words &amp; weights"
+									label="words & weights"
 									v-model="input.words.value"
 									color="deep-orange"
-									multi-line
 									:rows="9"
 									hide-details
 								></v-textarea>
@@ -87,8 +86,8 @@
 							<vue-flex-item>
 								<v-btn
 									class="white--text ma-0"
-									block
 									color="deep-orange"
+									block
 									@click="generateFormWordsValue"
 								>
 									generate randomly
@@ -99,8 +98,8 @@
 					<vue-flex-item>
 						<v-select
 							label="font family"
-							:items="input.fontFamily.values"
 							v-model="input.fontFamily.value"
+							:items="input.fontFamily.values"
 							color="deep-orange"
 							hide-details
 						>
@@ -119,15 +118,15 @@
 							color
 						</div>
 						<v-btn-toggle
-							mandatory
 							v-model="input.color.value"
+							mandatory
 						>
 							<v-btn
 								v-for="(value, key) in input.color.values"
 								:key="key"
 								:value="value"
-								flat
 								color="deep-orange"
+								flat
 							>
 								<div
 									style="
@@ -151,20 +150,20 @@
 							rotation
 						</div>
 						<v-btn-toggle
-							mandatory
 							v-model="input.rotation.value"
+							mandatory
 						>
 							<v-btn
 								:value="input.rotation.values[0]"
-								flat
 								color="deep-orange"
+								flat
 							>
 								<i class="fas fa-minus fa-2x"></i>
 							</v-btn>
 							<v-btn
 								:value="input.rotation.values[1]"
-								flat
 								color="deep-orange"
+								flat
 							>
 								<i
 									class="fas fa-minus fa-2x"
@@ -173,8 +172,8 @@
 							</v-btn>
 							<v-btn
 								:value="input.rotation.values[2]"
-								flat
 								color="deep-orange"
+								flat
 							>
 								<span class="fa-stack">
 									<i class="fas fa-minus fa-stack-2x"></i>
@@ -186,8 +185,8 @@
 							</v-btn>
 							<v-btn
 								:value="input.rotation.values[3]"
-								flat
 								color="deep-orange"
+								flat
 							>
 								<span class="fa-stack">
 									<i class="fas fa-minus fa-stack-2x"></i>
@@ -207,8 +206,8 @@
 							</v-btn>
 							<v-btn
 								:value="input.rotation.values[4]"
-								flat
 								color="deep-orange"
+								flat
 							>
 								<i class="fas fa-circle fa-2x"></i>
 							</v-btn>
@@ -226,19 +225,20 @@
 								spacing
 							</div>
 							<v-chip
-								small
 								color="deep-orange"
 								text-color="white"
+								small
 							>
 								{{ (spacing > 0) ? (Math.round(spacing * 100) + ' ' + '%') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
-							class="px-2"
+							class="mx-2"
 							v-model="input.spacing.valueIndex"
-							color="deep-orange"
 							:min="0"
 							:max="input.spacing.values.length - 1"
+							color="deep-orange"
+							ticks
 							hide-details
 						></v-slider>
 					</vue-flex-item>
@@ -254,27 +254,28 @@
 								animation duration
 							</div>
 							<v-chip
-								small
 								color="deep-orange"
 								text-color="white"
+								small
 							>
 								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
-							class="px-2"
+							class="mx-2"
 							v-model="input.animationDuration.valueIndex"
-							color="deep-orange"
 							:min="0"
 							:max="input.animationDuration.values.length - 1"
+							color="deep-orange"
+							ticks
 							hide-details
 						></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
 						<v-select
 							label="animation easing"
-							:items="input.animationEasing.values"
 							v-model="input.animationEasing.value"
+							:items="input.animationEasing.values"
 							color="deep-orange"
 							hide-details
 						></v-select>
@@ -291,47 +292,20 @@
 								font size ratio
 							</div>
 							<v-chip
-								small
 								color="deep-orange"
 								text-color="white"
+								small
 							>
 								{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
-							class="px-2"
+							class="mx-2"
 							v-model="input.fontSizeRatio.valueIndex"
-							color="deep-orange"
 							:min="0"
 							:max="input.fontSizeRatio.values.length - 1"
-							hide-details
-						></v-slider>
-					</vue-flex-item>
-					<vue-flex-item v-if="false">
-						<div
-							style="
-								display: flex;
-								justify-content: space-between;
-								align-items: center;
-							"
-						>
-							<div>
-								max font size
-							</div>
-							<v-chip
-								small
-								color="deep-orange"
-								text-color="white"
-							>
-								{{ Number.isFinite(maxFontSize) ? (maxFontSize + ' ' + 'px') : 'none' }}
-							</v-chip>
-						</div>
-						<v-slider
-							class="px-2"
-							v-model="input.maxFontSize.valueIndex"
 							color="deep-orange"
-							:min="0"
-							:max="input.maxFontSize.values.length - 1"
+							ticks
 							hide-details
 						></v-slider>
 					</vue-flex-item>
@@ -344,14 +318,18 @@
 				app
 			>
 				<v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-				<v-toolbar-title>VueWordCloud</v-toolbar-title>
+				<v-toolbar-title>
+					VueWordCloud
+				</v-toolbar-title>
 				<v-spacer></v-spacer>
 				<v-btn
-					icon
 					href="https://github.com/SeregPie/VueWordCloud"
 					target="_blank"
+					icon
 				>
-					<v-icon>fab fa-github</v-icon>
+					<v-icon>
+						fab fa-github
+					</v-icon>
 				</v-btn>
 			</v-toolbar>
 			<v-content>
@@ -411,6 +389,7 @@
 						>
 							<v-progress-circular
 								v-if="showProgress && progress"
+								class="v-no-animation"
 								style="
 									position: absolute;
 									top: 0;
@@ -419,11 +398,11 @@
 									left: 0;
 									margin: auto;
 								"
+								:value="(progress.completedWords / progress.totalWords) * 100"
+								color="deep-orange"
 								:size="200"
 								:width="20"
 								:rotate="-90"
-								:value="(progress.completedWords / progress.totalWords) * 100"
-								color="deep-orange"
 							>
 								{{ progress.completedWords }} of {{ progress.totalWords }}
 							</v-progress-circular>
