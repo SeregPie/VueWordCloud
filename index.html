@@ -7,7 +7,7 @@
 			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
 		/>
 		<title>VueWordCloud</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0-beta.47/polyfill.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17-beta.0/vue.min.js"></script>
 		<style>
 			[v-cloak] {
@@ -25,14 +25,14 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.0/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.1/vuetify.min.css"
 		/>
 		<style>
 			.v-no-animation .v-progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.0/vuetify.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.1/vuetify.min.js"></script>
 		<script src="https://unpkg.com/@seregpie/vueflex@18.5.11"></script>
 		<link
 			rel="stylesheet"
@@ -138,7 +138,7 @@
 								>
 									<div
 										v-for="color in value"
-										style="flex: 1;"
+										style="flex: 1 1 0%;"
 										:style="{backgroundColor: color}"
 									></div>
 								</div>
@@ -272,6 +272,35 @@
 						></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
+						<div
+							style="
+								display: flex;
+								justify-content: space-between;
+								align-items: center;
+							"
+						>
+							<div>
+								animation overlap
+							</div>
+							<v-chip
+								color="deep-orange"
+								text-color="white"
+								small
+							>
+								{{ (animationOverlap > 0) ? (Math.round(animationOverlap * 100) + ' ' + '%') : 'none' }}
+							</v-chip>
+						</div>
+						<v-slider
+							class="mx-2"
+							v-model="input.animationOverlap.valueIndex"
+							:min="0"
+							:max="input.animationOverlap.values.length - 1"
+							color="deep-orange"
+							ticks
+							hide-details
+						></v-slider>
+					</vue-flex-item>
+					<vue-flex-item>
 						<v-select
 							label="animation easing"
 							v-model="input.animationEasing.value"
@@ -296,7 +325,7 @@
 								text-color="white"
 								small
 							>
-								{{ (fontSizeRatio > 0) ? (fontSizeRatio + ' ' + 'x') : 'none' }}
+							{{ (fontSizeRatio > 0) ? (Math.round(fontSizeRatio * 100) + ' ' + '%') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
@@ -364,6 +393,7 @@
 								:font-size-ratio="fontSizeRatio"
 								:max-font-size="maxFontSize"
 								:animation-duration="animationDuration"
+								:animation-overlap="animationOverlap"
 								:animation-easing="animationEasing"
 								:load-font="loadFont"
 								:progress.sync="progress"

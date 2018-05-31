@@ -79,7 +79,7 @@
 					},
 
 					fontSizeRatio: {
-						values: [0, 1, 2, 5, 20],
+						values: [0, 1/20, 1/5, 1/2, 1],
 						valueIndex: 0,
 					},
 
@@ -91,6 +91,11 @@
 					animationDuration: {
 						values: [0, 1, 5, 10],
 						valueIndex: 2,
+					},
+
+					animationOverlap: {
+						values: [0, 1/5, 1/2, 1],
+						valueIndex: 1,
 					},
 
 					animationEasing: (function() {
@@ -185,6 +190,14 @@
 				var value = values[valueIndex];
 
 				return value * 1000;
+			},
+
+			animationOverlap: function() {
+				var values = this.input.animationOverlap.values;
+				var valueIndex = this.input.animationOverlap.valueIndex;
+				var value = values[valueIndex];
+
+				return value;
 			},
 
 			animationEasing: function() {

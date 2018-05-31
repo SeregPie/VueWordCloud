@@ -47,7 +47,7 @@ export default {
 	},
 
 	color: {
-		type: [String, Function, Array],
+		type: [String, Function],
 		default: 'Black',
 	},
 
@@ -63,7 +63,12 @@ export default {
 
 	animationDuration: {
 		type: Number,
-		default: 5000,
+		default: 1000,
+	},
+
+	animationOverlap: {
+		type: Number,
+		default: 1,
 	},
 
 	animationEasing: {
