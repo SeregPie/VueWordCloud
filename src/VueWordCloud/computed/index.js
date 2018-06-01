@@ -1,11 +1,11 @@
+import animationHooks from './animationHooks';
 import normalizedAnimationOverlap from './normalizedAnimationOverlap';
 import separateAnimationDelay from './separateAnimationDelay';
 import separateAnimationDuration from './separateAnimationDuration';
-import transitionHooks from './transitionHooks';
 
 export default {
+	animationHooks,
 	normalizedAnimationOverlap,
 	separateAnimationDelay,
 	separateAnimationDuration,
-	transitionHooks,
 };

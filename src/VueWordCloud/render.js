@@ -4,11 +4,11 @@ export default function(createElement) {
 	let {
 		$scopedSlots,
 		animationEasing,
+		animationHooks,
 		cloudWords,
 		defaultScopedSlot,
 		separateAnimationDelay,
 		separateAnimationDuration,
-		transitionHooks,
 	} = this;
 
 	$scopedSlots = {
@@ -44,7 +44,7 @@ export default function(createElement) {
 			font: font,
 			whiteSpace: 'nowrap',
 			transform: [
-				'translate(-50%, -50%)',
+				'translate(-50%,-50%)',
 				`rotate(${rotation}rad)`,
 			].join(' '),
 		};
@@ -84,7 +84,7 @@ export default function(createElement) {
 				props: {
 					css: false,
 				},
-				on: transitionHooks,
+				on: animationHooks,
 			},
 			[mainElement],
 		);
@@ -97,7 +97,7 @@ export default function(createElement) {
 				position: 'absolute',
 				top: '50%',
 				left: '50%',
-				transform: 'translate(-50%, -50%)',
+				transform: 'translate(-50%,-50%)',
 			},
 		},
 		childElements,
