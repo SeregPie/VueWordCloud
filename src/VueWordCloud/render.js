@@ -4,7 +4,7 @@ export default function(createElement) {
 	let {
 		$scopedSlots,
 		animationEasing,
-		animationHooks,
+		animationOptions,
 		cloudWords,
 		defaultScopedSlot,
 		separateAnimationDelay,
@@ -54,14 +54,19 @@ export default function(createElement) {
 			top: `${top}px`,
 		};
 		if (separateAnimationDuration > 0) {
-			let transition = [
-				'all',
-				`${separateAnimationDuration}ms`,
-				animationEasing,
-				`${separateAnimationDelay * index}ms`,
-			].join(' ');
-			originElementStyle.transition = transition;
-			mainElementStyle.transition = transition;
+			let transitionStyle = {
+				transitionProperty: 'all',
+				transitionDuration: `${separateAnimationDuration}ms`,
+				transitionTimingFunction: animationEasing,
+				transitionDelay: `${separateAnimationDelay * index}ms`,
+			};
+			let animationStyle = {
+				animationDuration: `${separateAnimationDuration}ms`,
+				animationTimingFunction: animationEasing,
+				animationDelay: `${separateAnimationDelay * index}ms`,
+			};
+			Object.assign(originElementStyle, transitionStyle);
+			Object.assign(mainElementStyle, transitionStyle, animationStyle);
 		}
 		let originElement = createElement(
 			tag,
@@ -80,12 +85,7 @@ export default function(createElement) {
 		);
 		let transitionElement = createElement(
 			'transition',
-			{
-				props: {
-					css: false,
-				},
-				on: animationHooks,
-			},
+			{...animationOptions},
 			[mainElement],
 		);
 		return transitionElement;

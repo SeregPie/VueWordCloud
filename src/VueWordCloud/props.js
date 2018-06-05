@@ -1,3 +1,4 @@
+import Function_constant from '/utils/Function/constant';
 import Function_stubArray from '/utils/Function/stubArray';
 
 export default {
@@ -59,6 +60,16 @@ export default {
 	fontSizeRatio: {
 		type: Number,
 		default: 0,
+	},
+
+	enterAnimation: {
+		type: [Object, String],
+		default: Function_constant({opacity: 0}),
+	},
+
+	leaveAnimation: {
+		type: [Object, String],
+		default: Function_constant({opacity: 0}),
 	},
 
 	animationDuration: {

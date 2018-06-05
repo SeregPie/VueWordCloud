@@ -93,12 +93,41 @@ Pass custom renderer for the words.
 | `color` | `[String, Function]` | `'Black'` | The default color for each word. |
 | `spacing` | `Number` | `0` | The spacing between the words. The value is relative to the font size. |
 | `fontSizeRatio` | `Number` | `0` | The font size ratio between the words. For example, if the value is `5`, then the largest word will be 5 times larger than the smallest one. The value `5` has the same effect as the value `1/5`. |
+| `enterAnimation` | `[Object, String]` | * | The enter animation. |
+| `leaveAnimation` | `[Object, String]` | * | The leave animation. |
 | `animationDuration` | `Number` | `1000` | The duration of the animation. |
 | `animationOverlap` | `Number` | `1` | The overlap of the animation. Set the value to `1` to animate words all at once. Set the value to `0` to animate words one by one. The value `5` has the same effect as the value `1/5`. |
 | `animationEasing` | `String` | `'ease'` | The easing of the animation. |
 | `createCanvas` | `Function` | * | Creates a new `Canvas` instance. |
 | `loadFont` | `Function` | * | Loads the font. |
 | `createWorker` | `Function` | * | Creates a new `Worker` instance. |
+
+---
+
+```javascript
+let enterAnimation = {opacity: 0};
+let leaveAnimation = {opacity: 0};
+```
+
+---
+
+Make more complex animations.
+
+```javascript
+let enterAnimation = {
+  opacity: 0,
+  transform: 'scale3d(0.3,0.3,0.3)'
+};
+```
+
+---
+
+Use classes for CSS animations.
+
+```javascript
+let enterAnimation = 'animated bounceIn';
+let leaveAnimation = 'animated hinge';
+```
 
 ---
 
@@ -115,6 +144,8 @@ let loadFont = function(fontFamily, fontStyle, fontWeight, text) {
   return document.fonts.load([fontStyle, fontWeight, '1px', fontFamily].join(' '), text);
 };
 ```
+
+---
 
 Provide custom `loadFont` function to support older browsers.
 

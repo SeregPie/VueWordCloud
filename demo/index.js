@@ -88,6 +88,42 @@
 						valueIndex: 0,
 					},
 
+					animation: (function() {
+						var items = [
+							{
+								text: 'bounce',
+								value: ['bounceIn', 'bounceOut'],
+							},
+							{
+								text: 'fade',
+								value: ['fadeIn', 'fadeOut'],
+							},
+							{
+								text: 'flipX',
+								value: ['flipInX', 'flipOutX'],
+							},
+							{
+								text: 'flipY',
+								value: ['flipInY', 'flipOutY'],
+							},
+							{
+								text: 'rotate',
+								value: ['rotateIn', 'rotateOut'],
+							},
+							{
+								text: 'zoom',
+								value: ['zoomIn', 'zoomOut'],
+							},
+						];
+						return {
+							items: items,
+							texts: items.map(function(item) {
+								return item.text;
+							}),
+							text: chance.pickone(items).text,
+						};
+					})(),
+
 					animationDuration: {
 						values: [0, 1, 5, 10],
 						valueIndex: 2,
@@ -163,40 +199,62 @@
 			spacing: function() {
 				var values = this.input.spacing.values;
 				var valueIndex = this.input.spacing.valueIndex;
-				var value = values[valueIndex];
 
+				var value = values[valueIndex];
 				return value;
 			},
 
 			fontSizeRatio: function() {
 				var values = this.input.fontSizeRatio.values;
 				var valueIndex = this.input.fontSizeRatio.valueIndex;
-				var value = values[valueIndex];
 
+				var value = values[valueIndex];
 				return value;
 			},
 
 			maxFontSize: function() {
 				var values = this.input.maxFontSize.values;
 				var valueIndex = this.input.maxFontSize.valueIndex;
-				var value = values[valueIndex];
 
+				var value = values[valueIndex];
 				return value;
+			},
+
+			enterAnimation: function() {
+				var items = this.input.animation.items;
+				var text = this.input.animation.text;
+
+				var item = items.find(function(item) {
+					return item.text === text;
+				});
+				var value = item.value[0];
+				return ['animated', value].join(' ');
+			},
+
+			leaveAnimation: function() {
+				var items = this.input.animation.items;
+				var text = this.input.animation.text;
+
+				var item = items.find(function(item) {
+					return item.text === text;
+				});
+				var value = item.value[1];
+				return ['animated', value].join(' ');
 			},
 
 			animationDuration: function() {
 				var values = this.input.animationDuration.values;
 				var valueIndex = this.input.animationDuration.valueIndex;
-				var value = values[valueIndex];
 
+				var value = values[valueIndex];
 				return value * 1000;
 			},
 
 			animationOverlap: function() {
 				var values = this.input.animationOverlap.values;
 				var valueIndex = this.input.animationOverlap.valueIndex;
-				var value = values[valueIndex];
 
+				var value = values[valueIndex];
 				return value;
 			},
 

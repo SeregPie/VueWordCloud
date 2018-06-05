@@ -25,14 +25,14 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.1/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.2/vuetify.min.css"
 		/>
 		<style>
 			.v-no-animation .v-progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.1/vuetify.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.2/vuetify.min.js"></script>
 		<script src="https://unpkg.com/@seregpie/vueflex@18.5.11"></script>
 		<link
 			rel="stylesheet"
@@ -243,6 +243,15 @@
 						></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
+						<v-select
+							label="enter/leave animation"
+							v-model="input.animation.text"
+							:items="input.animation.texts"
+							color="deep-orange"
+							hide-details
+						></v-select>
+					</vue-flex-item>
+					<vue-flex-item>
 						<div
 							style="
 								display: flex;
@@ -325,7 +334,7 @@
 								text-color="white"
 								small
 							>
-							{{ (fontSizeRatio > 0) ? (Math.round(fontSizeRatio * 100) + ' ' + '%') : 'none' }}
+								{{ (fontSizeRatio > 0) ? (Math.round(fontSizeRatio * 100) + ' ' + '%') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
@@ -392,6 +401,8 @@
 								:spacing="spacing"
 								:font-size-ratio="fontSizeRatio"
 								:max-font-size="maxFontSize"
+								:enter-animation="enterAnimation"
+								:leave-animation="leaveAnimation"
 								:animation-duration="animationDuration"
 								:animation-overlap="animationOverlap"
 								:animation-easing="animationEasing"
