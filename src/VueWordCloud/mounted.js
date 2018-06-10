@@ -1,3 +1,10 @@
+import setAnimation from '/utils/setAnimation';
+
 export default function() {
-	this.startElementResizeDetector();
+	setAnimation(() => {
+		if (this._isDestroyed) {
+			return false;
+		}
+		this.detectElementResize();
+	}, 1000);
 }
