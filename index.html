@@ -8,7 +8,7 @@
 		/>
 		<title>VueWordCloud</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17-beta.0/vue.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
@@ -25,18 +25,18 @@
 		/>
 		<link
 			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.2/vuetify.min.css"
+			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.3/vuetify.min.css"
 		/>
 		<style>
 			.v-no-animation .v-progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.2/vuetify.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.3/vuetify.min.js"></script>
 		<script src="https://unpkg.com/@seregpie/vueflex@18.5.11"></script>
 		<link
 			rel="stylesheet"
-			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Lora|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
+			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
 		/>
 		<link
 			rel="stylesheet"
@@ -154,62 +154,20 @@
 							mandatory
 						>
 							<v-btn
-								:value="input.rotation.values[0]"
+								v-for="(item, index) in input.rotation.items"
+								:key="index"
+								:value="item.value"
 								color="deep-orange"
 								flat
 							>
-								<i class="fas fa-minus fa-2x"></i>
-							</v-btn>
-							<v-btn
-								:value="input.rotation.values[1]"
-								color="deep-orange"
-								flat
-							>
-								<i
-									class="fas fa-minus fa-2x"
-									style="transform: rotate(315deg);"
-								></i>
-							</v-btn>
-							<v-btn
-								:value="input.rotation.values[2]"
-								color="deep-orange"
-								flat
-							>
-								<span class="fa-stack">
-									<i class="fas fa-minus fa-stack-2x"></i>
-									<i
-										class="fas fa-minus fa-stack-2x"
-										style="transform: rotate(90deg);"
-									></i>
-								</span>
-							</v-btn>
-							<v-btn
-								:value="input.rotation.values[3]"
-								color="deep-orange"
-								flat
-							>
-								<span class="fa-stack">
-									<i class="fas fa-minus fa-stack-2x"></i>
-									<i
-										class="fas fa-minus fa-stack-2x"
-										style="transform: rotate(45deg);"
-									></i>
-									<i
-										class="fas fa-minus fa-stack-2x"
-										style="transform: rotate(90deg);"
-									></i>
-									<i
-										class="fas fa-minus fa-stack-2x"
-										style="transform: rotate(315deg);"
-									></i>
-								</span>
-							</v-btn>
-							<v-btn
-								:value="input.rotation.values[4]"
-								color="deep-orange"
-								flat
-							>
-								<i class="fas fa-circle fa-2x"></i>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="currentColor"
+									width="24"
+									height="24"
+									viewBox="0 0 24 24"
+									v-html="item.svgContent"
+								></svg>
 							</v-btn>
 						</v-btn-toggle>
 					</vue-flex-item>
@@ -229,7 +187,7 @@
 								text-color="white"
 								small
 							>
-								{{ (spacing > 0) ? (Math.round(spacing * 100) + ' ' + '%') : 'none' }}
+								{{ (spacing > 0) ? (Math.round(spacing * 100) + '%') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
@@ -245,8 +203,8 @@
 					<vue-flex-item>
 						<v-select
 							label="enter/leave animation"
-							v-model="input.animation.text"
-							:items="input.animation.texts"
+							v-model="input.animation.value"
+							:items="input.animation.items"
 							color="deep-orange"
 							hide-details
 						></v-select>
@@ -267,7 +225,7 @@
 								text-color="white"
 								small
 							>
-								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + ' ' + 's') : 'none' }}
+								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + 's') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
@@ -296,7 +254,7 @@
 								text-color="white"
 								small
 							>
-								{{ (animationOverlap > 0) ? (Math.round(animationOverlap * 100) + ' ' + '%') : 'none' }}
+								{{ (animationOverlap > 0) ? (Math.round(animationOverlap * 100) + '%') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
@@ -334,7 +292,7 @@
 								text-color="white"
 								small
 							>
-								{{ (fontSizeRatio > 0) ? (Math.round(fontSizeRatio * 100) + ' ' + '%') : 'none' }}
+								{{ (fontSizeRatio > 0) ? (Math.round(fontSizeRatio * 100) + '%') : 'none' }}
 							</v-chip>
 						</div>
 						<v-slider
@@ -355,7 +313,7 @@
 				clipped-left
 				app
 			>
-				<v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+				<v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
 				<v-toolbar-title>
 					VueWordCloud
 				</v-toolbar-title>
@@ -413,7 +371,8 @@
 									<v-tooltip top>
 										<div
 											slot="activator"
-											style="cursor: default;"
+											style="cursor: pointer;"
+											@click="onWordClick(word)"
 										>
 											{{ word.text }}
 										</div>
@@ -451,6 +410,20 @@
 					</div>
 				</v-container>
 			</v-content>
+			<v-snackbar
+				v-model="snackbar.value"
+				:timeout="2000"
+				bottom
+			>
+				{{ snackbar.text }}
+				<v-btn
+					color="deep-orange"
+					flat
+					@click="snackbar.value = false"
+				>
+					close
+				</v-btn>
+			</v-snackbar>
 		</v-app>
 		<script src="demo/index.js"></script>
 	</body>

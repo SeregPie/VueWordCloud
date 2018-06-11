@@ -1,5 +1,7 @@
 (function() {
 
+	var svgNS = 'http://www.w3.org/2000/svg';
+
 	new Vue({
 		el: '#App',
 
@@ -11,22 +13,98 @@
 					},
 
 					rotation: (function() {
-						var values = [
-							0,
-							7/8,
-							function() {
-								return chance.pickone([0, 3/4]);
+
+						var items = [
+							{
+								value: 0,
+								svgContent: (function() {
+									var path = document.createElementNS(svgNS, 'path');
+									path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+									return path.outerHTML;
+								})(),
 							},
-							function() {
-								return chance.pickone([0, 1/8, 3/4, 7/8]);
+							{
+								value: 7/8,
+								svgContent: (function() {
+									var path = document.createElementNS(svgNS, 'path');
+									path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+									path.setAttribute('transform-origin', 'center center');
+									path.setAttribute('transform', 'rotate(315)');
+									return path.outerHTML;
+								})(),
 							},
-							function() {
-								return Math.random();
+							{
+								value: function() {
+									return chance.pickone([0, 3/4]);
+								},
+								svgContent: (function() {
+									return [
+										(function() {
+											var path = document.createElementNS(svgNS, 'path');
+											path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+											return path.outerHTML;
+										})(),
+										(function() {
+											var path = document.createElementNS(svgNS, 'path');
+											path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+											path.setAttribute('transform-origin', 'center center');
+											path.setAttribute('transform', 'rotate(90)');
+											return path.outerHTML;
+										})(),
+									].join('');
+								})(),
+							},
+							{
+								value: function() {
+									return chance.pickone([0, 1/8, 3/4, 7/8]);
+								},
+								svgContent: (function() {
+									return [
+										(function() {
+											var path = document.createElementNS(svgNS, 'path');
+											path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+											return path.outerHTML;
+										})(),
+										(function() {
+											var path = document.createElementNS(svgNS, 'path');
+											path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+											path.setAttribute('transform-origin', 'center center');
+											path.setAttribute('transform', 'rotate(45)');
+											return path.outerHTML;
+										})(),
+										(function() {
+											var path = document.createElementNS(svgNS, 'path');
+											path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+											path.setAttribute('transform-origin', 'center center');
+											path.setAttribute('transform', 'rotate(90)');
+											return path.outerHTML;
+										})(),
+										(function() {
+											var path = document.createElementNS(svgNS, 'path');
+											path.setAttribute('d', 'M0 14 L0 10 L24 10 L24 14 Z');
+											path.setAttribute('transform-origin', 'center center');
+											path.setAttribute('transform', 'rotate(315)');
+											return path.outerHTML;
+										})(),
+									].join('');
+								})(),
+							},
+							{
+								value: function() {
+									return Math.random();
+								},
+								svgContent: (function() {
+									var circle = document.createElementNS(svgNS, 'circle');
+									circle.setAttribute('cx', 12);
+									circle.setAttribute('cy', 12);
+									circle.setAttribute('r', 12);
+									return circle.outerHTML;
+								})(),
 							},
 						];
 						return {
-							values: values,
-							value: chance.pickone(values),
+							items: items,
+							value: chance.pickone(items).value,
 						};
 					})(),
 
@@ -44,7 +122,6 @@
 							'Indie Flower',
 							'Life Savers',
 							'Londrina Sketch',
-							'Lora',
 							'Love Ya Like A Sister',
 							'Merienda',
 							'Nothing You Could Do',
@@ -117,10 +194,7 @@
 						];
 						return {
 							items: items,
-							texts: items.map(function(item) {
-								return item.text;
-							}),
-							text: chance.pickone(items).text,
+							value: chance.pickone(items).value,
 						};
 					})(),
 
@@ -154,14 +228,19 @@
 				progress: undefined,
 
 				drawer: true,
+				snackbar: {
+					value: false,
+					text: '',
+				},
 			};
 		},
 
 		computed: {
 			words: function() {
-				var value = this.input.words.value;
+				var input = this.input;
 
-				return value
+				var value = input.words.value;
+				var words = value
 					.split(/[\r\n]+/)
 					.map(function(line) {
 						return /^(.+)\s+(-?\d+)$/.exec(line);
@@ -174,94 +253,100 @@
 						var weight = Number.parseInt(matched[2]);
 						return [text, weight];
 					});
+				return words;
 			},
 
 			rotation: function() {
-				var value = this.input.rotation.value;
+				var input = this.input;
 
-				return value;
+				var rotation = input.rotation.value;
+				return rotation;
 			},
 
 			fontFamily: function() {
-				var value = this.input.fontFamily.value;
+				var input = this.input;
 
-				return value;
+				var fontFamily = input.fontFamily.value;
+				return fontFamily;
 			},
 
 			color: function() {
-				var colors = this.input.color.value;
+				var input = this.input;
 
-				return function() {
+				var colors = input.color.value;
+				var color = function() {
 					return chance.pickone(colors);
 				};
+				return color;
 			},
 
 			spacing: function() {
-				var values = this.input.spacing.values;
-				var valueIndex = this.input.spacing.valueIndex;
+				var input = this.input;
 
-				var value = values[valueIndex];
-				return value;
+				var values = input.spacing.values;
+				var valueIndex = input.spacing.valueIndex;
+				var spacing = values[valueIndex];
+				return spacing;
 			},
 
 			fontSizeRatio: function() {
-				var values = this.input.fontSizeRatio.values;
-				var valueIndex = this.input.fontSizeRatio.valueIndex;
+				var input = this.input;
 
-				var value = values[valueIndex];
-				return value;
+				var values = input.fontSizeRatio.values;
+				var valueIndex = input.fontSizeRatio.valueIndex;
+				var fontSizeRatio = values[valueIndex];
+				return fontSizeRatio;
 			},
 
 			maxFontSize: function() {
-				var values = this.input.maxFontSize.values;
-				var valueIndex = this.input.maxFontSize.valueIndex;
+				var input = this.input;
 
-				var value = values[valueIndex];
-				return value;
+				var values = input.maxFontSize.values;
+				var valueIndex = input.maxFontSize.valueIndex;
+				var maxFontSize = values[valueIndex];
+				return maxFontSize;
 			},
 
 			enterAnimation: function() {
-				var items = this.input.animation.items;
-				var text = this.input.animation.text;
+				var input = this.input;
 
-				var item = items.find(function(item) {
-					return item.text === text;
-				});
-				var value = item.value[0];
-				return ['animated', value].join(' ');
+				var value = input.animation.value[0];
+				var animation = ['animated', value].join(' ');
+				return animation;
 			},
 
 			leaveAnimation: function() {
-				var items = this.input.animation.items;
-				var text = this.input.animation.text;
+				var input = this.input;
 
-				var item = items.find(function(item) {
-					return item.text === text;
-				});
-				var value = item.value[1];
-				return ['animated', value].join(' ');
+				var value = input.animation.value[1];
+				var animation = ['animated', value].join(' ');
+				return animation;
 			},
 
 			animationDuration: function() {
-				var values = this.input.animationDuration.values;
-				var valueIndex = this.input.animationDuration.valueIndex;
+				var input = this.input;
 
+				var values = input.animationDuration.values;
+				var valueIndex = input.animationDuration.valueIndex;
 				var value = values[valueIndex];
-				return value * 1000;
+				var duation = value * 1000;
+				return duation;
 			},
 
 			animationOverlap: function() {
-				var values = this.input.animationOverlap.values;
-				var valueIndex = this.input.animationOverlap.valueIndex;
+				var input = this.input;
 
-				var value = values[valueIndex];
-				return value;
+				var values = input.animationOverlap.values;
+				var valueIndex = input.animationOverlap.valueIndex;
+				var overlap = values[valueIndex];
+				return overlap;
 			},
 
 			animationEasing: function() {
-				var value = this.input.animationEasing.value;
+				var input = this.input;
 
-				return value;
+				var easing = input.animationEasing.value;
+				return easing;
 			},
 
 			progressedWordCloudStyle: function() {
@@ -275,8 +360,8 @@
 		},
 
 		watch: {
-			progress: function(newProgress, oldProgress) {
-				if (oldProgress) {
+			progress: function(currentProgress, previousProgress) {
+				if (previousProgress) {
 					this.showProgress = false;
 				}
 			},
@@ -288,7 +373,7 @@
 
 		methods: {
 			generateFormWordsValue: function() {
-				this.input.words.value = [
+				var value = [
 					[9, 1, 3],
 					[4, 5, 15],
 					[2, 5, 15],
@@ -306,6 +391,7 @@
 						return returns;
 					}, [])
 					.join('\n');
+				this.input.words.value = value;
 			},
 
 			loadFont: function(fontFamily, fontStyle, fontWeight, text) {
@@ -313,6 +399,11 @@
 					style: fontStyle,
 					weight: fontWeight,
 				})).load(text);
+			},
+
+			onWordClick: function(word) {
+				this.snackbar.value = true;
+				this.snackbar.text = word.text;
 			},
 		},
 	});
