@@ -1,4 +1,6 @@
-const tag = 'div';
+import Function_identity from '/utils/Function/identity';
+
+let tag = 'div';
 
 export default function(createElement) {
 	let {
@@ -6,13 +8,12 @@ export default function(createElement) {
 		animationEasing,
 		animationOptions,
 		cloudWords,
-		defaultScopedSlot,
 		separateAnimationDelay,
 		separateAnimationDuration,
 	} = this;
 
 	$scopedSlots = {
-		default: defaultScopedSlot,
+		default: Function_identity,
 		...$scopedSlots,
 	};
 
