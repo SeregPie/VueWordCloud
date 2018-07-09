@@ -42,8 +42,7 @@
 								svg.appendChild((function() {
 									var path = document.createElementNS(svgNS, 'path');
 									path.setAttribute('d', 'M0 7 L0 5 L12 5 L12 7 Z');
-									path.setAttribute('transform-origin', 'center center');
-									path.setAttribute('transform', 'rotate(315)');
+									path.setAttribute('transform', 'rotate(315 6 6)');
 									return path;
 								})());
 								return svg;
@@ -68,8 +67,7 @@
 								svg.appendChild((function() {
 									var path = document.createElementNS(svgNS, 'path');
 									path.setAttribute('d', 'M0 7 L0 5 L12 5 L12 7 Z');
-									path.setAttribute('transform-origin', 'center center');
-									path.setAttribute('transform', 'rotate(90)');
+									path.setAttribute('transform', 'rotate(90 6 6)');
 									return path;
 								})());
 								return svg;
@@ -94,22 +92,19 @@
 								svg.appendChild((function() {
 									var path = document.createElementNS(svgNS, 'path');
 									path.setAttribute('d', 'M0 7 L0 5 L12 5 L12 7 Z');
-									path.setAttribute('transform-origin', 'center center');
-									path.setAttribute('transform', 'rotate(45)');
+									path.setAttribute('transform', 'rotate(45 6 6)');
 									return path;
 								})());
 								svg.appendChild((function() {
 									var path = document.createElementNS(svgNS, 'path');
 									path.setAttribute('d', 'M0 7 L0 5 L12 5 L12 7 Z');
-									path.setAttribute('transform-origin', 'center center');
-									path.setAttribute('transform', 'rotate(90)');
+									path.setAttribute('transform', 'rotate(90 6 6)');
 									return path;
 								})());
 								svg.appendChild((function() {
 									var path = document.createElementNS(svgNS, 'path');
 									path.setAttribute('d', 'M0 7 L0 5 L12 5 L12 7 Z');
-									path.setAttribute('transform-origin', 'center center');
-									path.setAttribute('transform', 'rotate(315)');
+									path.setAttribute('transform', 'rotate(315 6 6)');
 									return path;
 								})());
 								return svg;
