@@ -2,13 +2,9 @@
 <html>
 	<head>
 		<meta charset="utf-8"/>
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 		<title>VueWordCloud</title>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
-		<script src="https://unpkg.com/innersvg-polyfill@0.0.2"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
 		<style>
 			[v-cloak] {
@@ -16,415 +12,126 @@
 			}
 		</style>
 		<script src="VueWordCloud.js"></script>
-		<link
-			rel="stylesheet"
-			href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.3/vuetify.min.css"
-		/>
+		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css"/>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.1/vuetify.min.css"/>
 		<style>
 			.v-no-animation .v-progress-circular__overlay {
 				transition-duration: 0s;
 			}
 		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.0-beta.3/vuetify.min.js"></script>
-		<script src="https://unpkg.com/@seregpie/vueflex@18.5.11"></script>
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
-		/>
-		<link
-			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
-		/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.1.1/vuetify.min.js"></script>
+		<script src="https://unpkg.com/@seregpie/vueflex@18.7.4"></script>
+		<script src="https://unpkg.com/@seregpie/vuesvg@18.6.29"></script>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"/>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.16/chance.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.0.13/fontfaceobserver.standalone.js"></script>
 	</head>
 	<body>
-		<v-app
-			v-cloak
-			id="App"
-		>
-			<v-navigation-drawer
-				v-model="drawer"
-				clipped
-				app
-			>
-				<vue-flex-box
-					style="padding: 8px;"
-					direction-column
-					:spacing="16"
-				>
+		<v-app v-cloak id="app">
+			<v-navigation-drawer v-model="drawer" clipped app>
+				<vue-flex-box style="margin: 8px;" direction-column spacing="16px">
 					<vue-flex-item>
-						<v-switch
-							class="ma-0"
-							label="show progress"
-							v-model="showProgress"
-							color="deep-orange"
-							hide-details
-						></v-switch>
+						<v-switch class="ma-0" label="show progress" v-model="progressVisible" hide-details></v-switch>
 					</vue-flex-item>
 					<vue-flex-item>
-						<vue-flex-box
-							direction-column
-							:spacing="8"
-						>
+						<vue-flex-box direction-column spacing="4px">
 							<vue-flex-item>
-								<v-textarea
-									label="words & weights"
-									v-model="input.words.value"
-									color="deep-orange"
-									:rows="9"
-									hide-details
-								></v-textarea>
+								<v-textarea label="words & weights" v-model="wordsText" :rows="9" hide-details></v-textarea>
 							</vue-flex-item>
 							<vue-flex-item>
-								<v-btn
-									class="white--text ma-0"
-									color="deep-orange"
-									block
-									@click="generateFormWordsValue"
-								>
-									generate randomly
-								</v-btn>
+								<v-btn class="ma-0" color="primary" block @click="generateWordsText">generate randomly</v-btn>
 							</vue-flex-item>
 						</vue-flex-box>
 					</vue-flex-item>
 					<vue-flex-item>
-						<v-select
-							label="font family"
-							v-model="input.fontFamily.value"
-							:items="input.fontFamily.values"
-							color="deep-orange"
-							hide-details
-						>
-							<template
-								slot="item"
-								slot-scope="data"
-							>
-								<span :style="{fontFamily: data.item}">
-									{{ data.item }}
-								</span>
-							</template>
+						<v-select label="font family" v-model="fontFamily" :items="fontFamilyValues" hide-details>
+							<span slot="item" slot-scope="props" :style="{fontFamily: props.item}">{{ props.item }}</span>
 						</v-select>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div>
-							color
-						</div>
-						<v-btn-toggle
-							v-model="input.color.value"
-							mandatory
-						>
-							<v-btn
-								v-for="(value, key) in input.color.values"
-								:key="key"
-								:value="value"
-								color="deep-orange"
-								flat
-							>
-								<div
-									style="
-										margin: 2px;
-										width: 24px;
-										height: 24px;
-										display: flex;
-									"
-								>
-									<div
-										v-for="color in value"
-										style="flex: 1 1 0%;"
-										:style="{backgroundColor: color}"
-									></div>
+						<div>color</div>
+						<v-btn-toggle v-model="colorItemIndex" mandatory>
+							<v-btn v-for="(item, itemIndex) in colorItems" :key="itemIndex" :value="itemIndex" flat>
+								<div style="display: flex; margin: 2px; width: 24px; height: 24px;">
+									<div v-for="color in item" style="flex: 1 1 0%;" :style="{backgroundColor: color}"></div>
 								</div>
 							</v-btn>
 						</v-btn-toggle>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div>
-							rotation
-						</div>
-						<v-btn-toggle
-							v-model="input.rotation.value"
-							mandatory
-						>
-							<v-btn
-								v-for="(item, index) in input.rotation.items"
-								:key="index"
-								:value="item.value"
-								color="deep-orange"
-								flat
-							>
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									fill="currentColor"
-									width="24"
-									height="24"
-									viewBox="0 0 24 24"
-									v-html="item.svgContent"
-								></svg>
+						<div>rotation</div>
+						<v-btn-toggle v-model="rotationItemIndex" mandatory>
+							<v-btn v-for="(item, itemIndex) in rotationItems" :key="itemIndex" :value="itemIndex" flat>
+								<vue-svg width="24" height="24" fill="currentColor" :src="item.svg"></vue-svg>
 							</v-btn>
 						</v-btn-toggle>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div
-							style="
-								display: flex;
-								justify-content: space-between;
-								align-items: center;
-							"
-						>
-							<div>
-								spacing
-							</div>
-							<v-chip
-								color="deep-orange"
-								text-color="white"
-								small
-							>
-								{{ (spacing > 0) ? (Math.round(spacing * 100) + '%') : 'none' }}
-							</v-chip>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<div>spacing</div>
+							<v-chip small>{{ Math.round(spacing * 100) }}%</v-chip>
 						</div>
-						<v-slider
-							class="mx-2"
-							v-model="input.spacing.valueIndex"
-							:min="0"
-							:max="input.spacing.values.length - 1"
-							color="deep-orange"
-							ticks
-							hide-details
-						></v-slider>
+						<v-slider class="mx-2" v-model="spacingValueIndex" :min="0" :max="spacingValues.length - 1" ticks hide-details></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
-						<v-select
-							label="enter/leave animation"
-							v-model="input.animation.value"
-							:items="input.animation.items"
-							color="deep-orange"
-							hide-details
-						></v-select>
+						<v-select label="enter/leave animation" v-model="animation" :items="animationItems" hide-details></v-select>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div
-							style="
-								display: flex;
-								justify-content: space-between;
-								align-items: center;
-							"
-						>
-							<div>
-								animation duration
-							</div>
-							<v-chip
-								color="deep-orange"
-								text-color="white"
-								small
-							>
-								{{ (animationDuration > 0) ? (Math.round(animationDuration / 1000) + 's') : 'none' }}
-							</v-chip>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<div>animation duration</div>
+							<v-chip small>{{ Math.round(animationDuration / 1000) }}s</v-chip>
 						</div>
-						<v-slider
-							class="mx-2"
-							v-model="input.animationDuration.valueIndex"
-							:min="0"
-							:max="input.animationDuration.values.length - 1"
-							color="deep-orange"
-							ticks
-							hide-details
-						></v-slider>
+						<v-slider class="mx-2" v-model="animationDurationValueIndex" :min="0" :max="animationDurationValues.length - 1" ticks hide-details></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div
-							style="
-								display: flex;
-								justify-content: space-between;
-								align-items: center;
-							"
-						>
-							<div>
-								animation overlap
-							</div>
-							<v-chip
-								color="deep-orange"
-								text-color="white"
-								small
-							>
-								{{ (animationOverlap > 0) ? (Math.round(animationOverlap * 100) + '%') : 'none' }}
-							</v-chip>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<div>animation overlap</div>
+							<v-chip small>{{ Math.round(animationOverlap * 100) }}%</v-chip>
 						</div>
-						<v-slider
-							class="mx-2"
-							v-model="input.animationOverlap.valueIndex"
-							:min="0"
-							:max="input.animationOverlap.values.length - 1"
-							color="deep-orange"
-							ticks
-							hide-details
-						></v-slider>
+						<v-slider class="mx-2" v-model="animationOverlapValueIndex" :min="0" :max="animationOverlapValues.length - 1" ticks hide-details></v-slider>
 					</vue-flex-item>
 					<vue-flex-item>
-						<v-select
-							label="animation easing"
-							v-model="input.animationEasing.value"
-							:items="input.animationEasing.values"
-							color="deep-orange"
-							hide-details
-						></v-select>
+						<v-select label="animation easing" v-model="animationEasing" :items="animationEasingValues" hide-details></v-select>
 					</vue-flex-item>
 					<vue-flex-item>
-						<div
-							style="
-								display: flex;
-								justify-content: space-between;
-								align-items: center;
-							"
-						>
-							<div>
-								font size ratio
-							</div>
-							<v-chip
-								color="deep-orange"
-								text-color="white"
-								small
-							>
-								{{ (fontSizeRatio > 0) ? (Math.round(fontSizeRatio * 100) + '%') : 'none' }}
-							</v-chip>
+						<div style="display: flex; align-items: center; justify-content: space-between;">
+							<div>font size ratio</div>
+							<v-chip small>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
 						</div>
-						<v-slider
-							class="mx-2"
-							v-model="input.fontSizeRatio.valueIndex"
-							:min="0"
-							:max="input.fontSizeRatio.values.length - 1"
-							color="deep-orange"
-							ticks
-							hide-details
-						></v-slider>
+						<v-slider class="mx-2" v-model="fontSizeRatioValueIndex" :min="0" :max="fontSizeRatioValues.length - 1" ticks hide-details></v-slider>
 					</vue-flex-item>
 				</vue-flex-box>
 			</v-navigation-drawer>
-			<v-toolbar
-				color="deep-orange darken-3"
-				dark
-				clipped-left
-				app
-			>
+			<v-toolbar dark dense clipped-left app>
 				<v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
-				<v-toolbar-title>
-					VueWordCloud
-				</v-toolbar-title>
+				<v-toolbar-title>VueWordCloud</v-toolbar-title>
 				<v-spacer></v-spacer>
-				<v-btn
-					href="https://github.com/SeregPie/VueWordCloud"
-					target="_blank"
-					icon
-				>
-					<v-icon>
-						fab fa-github
-					</v-icon>
+				<v-btn href="https://github.com/SeregPie/VueWordCloud" target="_blank" icon>
+					<v-icon>fab fa-github</v-icon>
 				</v-btn>
 			</v-toolbar>
 			<v-content>
-				<v-container
-					fill-height
-					hide-overflow
-				>
-					<div
-						style="
-							position: relative;
-							width: 100%;
-							height: 100%;
-						"
-					>
-						<div
-							style="
-								position: absolute;
-								top: 0;
-								right: 0;
-								bottom: 0;
-								left: 0;
-								transition-duration: 1s;
-							"
-							:style="showProgress && progress ? progressedWordCloudStyle : {}"
-						>
-							<vue-word-cloud
-								:words="words"
-								:rotation="rotation"
-								:font-family="fontFamily"
-								:color="color"
-								:spacing="spacing"
-								:font-size-ratio="fontSizeRatio"
-								:max-font-size="maxFontSize"
-								:enter-animation="enterAnimation"
-								:leave-animation="leaveAnimation"
-								:animation-duration="animationDuration"
-								:animation-overlap="animationOverlap"
-								:animation-easing="animationEasing"
-								:load-font="loadFont"
-								:progress.sync="progress"
-							>
-								<template slot-scope="word">
+				<v-container fill-height hide-overflow>
+					<div style="position: relative; width: 100%; height: 100%;">
+						<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; transition-duration: 1s;" :style="(progressVisible && progress) ? {transform: 'scale(0.7,0.7)', opacity: 0.3, filter: 'blur(8px)', pointerEvents: 'none'} : {}">
+							<vue-word-cloud :words="words" :rotation="rotation" :font-family="fontFamily" :color="color" :spacing="spacing" :font-size-ratio="fontSizeRatio" :enter-animation="enterAnimation" :leave-animation="leaveAnimation" :animation-duration="animationDuration" :animation-overlap="animationOverlap" :animation-easing="animationEasing" :load-font="loadFont" :progress.sync="progress">
+								<template slot-scope="props">
 									<v-tooltip top>
-										<div
-											slot="activator"
-											style="cursor: pointer;"
-											@click="onWordClick(word)"
-										>
-											{{ word.text }}
-										</div>
-										<div style="text-align: center;">
-											{{ word.text }}<br/>({{ word.weight }})
-										</div>
+										<div slot="activator" style="cursor: pointer;" @click="onWordClick(props.word)">{{ props.text }}</div>
+										<div style="text-align: center;">{{ props.text }}<br/>({{ props.weight }})</div>
 									</v-tooltip>
 								</template>
 							</vue-word-cloud>
 						</div>
-						<transition
-							enter-active-class="animated zoomIn"
-							leave-active-class="animated zoomOut"
-						>
-							<v-progress-circular
-								v-if="showProgress && progress"
-								class="v-no-animation"
-								style="
-									position: absolute;
-									top: 0;
-									right: 0;
-									bottom: 0;
-									left: 0;
-									margin: auto;
-								"
-								:value="(progress.completedWords / progress.totalWords) * 100"
-								color="deep-orange"
-								:size="200"
-								:width="20"
-								:rotate="-90"
-							>
-								{{ progress.completedWords }} of {{ progress.totalWords }}
-							</v-progress-circular>
+						<transition enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
+							<v-progress-circular v-if="progressVisible && progress" class="v-no-animation" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; margin: auto;" :value="(progress.completedWords / progress.totalWords) * 100" color="primary" :size="200" :width="20" :rotate="-90">{{ progress.completedWords }} of {{ progress.totalWords }}</v-progress-circular>
 						</transition>
 					</div>
 				</v-container>
 			</v-content>
-			<v-snackbar
-				v-model="snackbar.value"
-				:timeout="2000"
-				bottom
-			>
-				{{ snackbar.text }}
-				<v-btn
-					color="deep-orange"
-					flat
-					@click="snackbar.value = false"
-				>
-					close
-				</v-btn>
-			</v-snackbar>
+			<v-snackbar v-model="snackbarVisible" :timeout="2000" bottom>{{ snackbarText }}</v-snackbar>
 		</v-app>
 		<script src="demo/index.js"></script>
 	</body>

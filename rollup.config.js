@@ -1,8 +1,8 @@
+import {uglify} from 'rollup-plugin-uglify';
 import buble from 'rollup-plugin-buble';
 import path from 'path';
 import resolve from '@seregpie/rollup-plugin-resolve';
 import stringify from 'rollup-plugin-stringify';
-import {uglify} from 'rollup-plugin-uglify';
 
 import {main} from './package.json';
 

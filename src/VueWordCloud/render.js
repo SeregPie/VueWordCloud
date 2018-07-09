@@ -1,5 +1,3 @@
-import Function_identity from '/utils/Function/identity';
-
 let tag = 'div';
 
 export default function(createElement) {
@@ -11,12 +9,12 @@ export default function(createElement) {
 		separateAnimationDelay,
 		separateAnimationDuration,
 	} = this;
-
 	$scopedSlots = {
-		default: Function_identity,
+		default({text}) {
+			return text;
+		},
 		...$scopedSlots,
 	};
-
 	let childElements = cloudWords.map(({
 		word,
 		key,

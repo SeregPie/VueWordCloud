@@ -9,17 +9,17 @@ export default class {
 		text,
 		rotation,
 		fontFamily,
-		fontStyle,
-		fontVariant,
 		fontWeight,
+		fontVariant,
+		fontStyle,
 		createCanvas,
 	) {
 		this.ǂtext = text;
 		this.ǂrotation = rotation;
 		this.ǂfontFamily = fontFamily;
-		this.ǂfontStyle = fontStyle;
-		this.ǂfontVariant = fontVariant;
 		this.ǂfontWeight = fontWeight;
+		this.ǂfontVariant = fontVariant;
+		this.ǂfontStyle = fontStyle;
 		this.ǂcreateCanvas = createCanvas;
 		this.ǂ_fontSize = 1;
 		this.ǂ_padding = 0;

@@ -1,10 +1,10 @@
-import setAnimation from '/utils/setAnimation';
+import startAnimationLoop from '/utils/startAnimationLoop';
 
 export default function() {
-	setAnimation(() => {
+	startAnimationLoop(() => {
 		if (this._isDestroyed) {
 			return false;
 		}
-		this.detectElementResize();
+		this.updateElementSize();
 	}, 1000);
 }

@@ -1,10 +1,10 @@
 export default function(callback, delay) {
-	let run = function() {
+	let run = (() => {
 		requestAnimationFrame(() => {
 			if (callback() !== false) {
 				setTimeout(run, delay);
 			}
 		});
-	};
+	});
 	run();
 }

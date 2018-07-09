@@ -31,9 +31,9 @@ export default {
 			rotation,
 			rotationUnit,
 			fontFamily,
-			fontStyle,
-			fontVariant,
 			fontWeight,
+			fontVariant,
+			fontStyle,
 			color,
 			spacing,
 			fontSizeRatio,
@@ -53,9 +53,9 @@ export default {
 			let getDefaultRotation = Function_cast(rotation);
 			let getDefaultRotationUnit = Function_cast(rotationUnit);
 			let getDefaultFontFamily = Function_cast(fontFamily);
-			let getDefaultFontStyle = Function_cast(fontStyle);
-			let getDefaultFontVariant = Function_cast(fontVariant);
 			let getDefaultFontWeight = Function_cast(fontWeight);
+			let getDefaultFontVariant = Function_cast(fontVariant);
+			let getDefaultFontStyle = Function_cast(fontStyle);
 			let getDefaultColor = Function_cast(color);
 
 			words = words.map((word, index) => {
@@ -64,9 +64,9 @@ export default {
 				let rotation;
 				let rotationUnit;
 				let fontFamily;
-				let fontStyle;
-				let fontVariant;
 				let fontWeight;
+				let fontVariant;
+				let fontStyle;
 				let color;
 				if (word) {
 					if (String_isString(word)) {
@@ -82,9 +82,9 @@ export default {
 							rotation,
 							rotationUnit,
 							fontFamily,
-							fontStyle,
-							fontVariant,
 							fontWeight,
+							fontVariant,
+							fontStyle,
 							color,
 						} = word);
 					}
@@ -104,14 +104,14 @@ export default {
 				if (Lang_isUndefined(fontFamily)) {
 					fontFamily = getDefaultFontFamily(word, index, words);
 				}
-				if (Lang_isUndefined(fontStyle)) {
-					fontStyle = getDefaultFontStyle(word, index, words);
+				if (Lang_isUndefined(fontWeight)) {
+					fontWeight = getDefaultFontWeight(word, index, words);
 				}
 				if (Lang_isUndefined(fontVariant)) {
 					fontVariant = getDefaultFontVariant(word, index, words);
 				}
-				if (Lang_isUndefined(fontWeight)) {
-					fontWeight = getDefaultFontWeight(word, index, words);
+				if (Lang_isUndefined(fontStyle)) {
+					fontStyle = getDefaultFontStyle(word, index, words);
 				}
 				if (Lang_isUndefined(color)) {
 					color = getDefaultColor(word, index, words);
@@ -128,9 +128,9 @@ export default {
 						return rotation;
 					})(),
 					fontFamily,
-					fontStyle,
-					fontVariant,
 					fontWeight,
+					fontVariant,
+					fontStyle,
 					createCanvas,
 				);
 				Object.assign(boundingWord, {
@@ -292,13 +292,7 @@ export default {
 									ǂtop: top,
 									ǂcolor: color,
 								}) => {
-									let key = JSON.stringify([
-										text,
-										fontFamily,
-										fontStyle,
-										fontVariant,
-										fontWeight,
-									]);
+									let key = JSON.stringify([text, font]);
 									while (keys.has(key)) {
 										key += '!';
 									}

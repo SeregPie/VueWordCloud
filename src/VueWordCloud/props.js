@@ -32,7 +32,7 @@ export default {
 		default: 'serif',
 	},
 
-	fontStyle: {
+	fontWeight: {
 		type: [String, Function],
 		default: 'normal',
 	},
@@ -42,7 +42,7 @@ export default {
 		default: 'normal',
 	},
 
-	fontWeight: {
+	fontStyle: {
 		type: [String, Function],
 		default: 'normal',
 	},

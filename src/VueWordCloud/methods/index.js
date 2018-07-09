@@ -1,5 +1,5 @@
-import detectElementResize from './detectElementResize';
+import updateElementSize from './updateElementSize';
 
 export default {
-	detectElementResize,
+	updateElementSize,
 };
