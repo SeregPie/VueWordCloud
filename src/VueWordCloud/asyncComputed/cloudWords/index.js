@@ -287,12 +287,22 @@ export default {
 									ǂtext: text,
 									ǂweight: weight,
 									ǂrotation: rotation,
+									ǂfontFamily: fontFamily,
+									ǂfontWeight: fontWeight,
+									ǂfontVariant: fontVariant,
+									ǂfontStyle: fontStyle,
 									ǂfont: font,
 									ǂleft: left,
 									ǂtop: top,
 									ǂcolor: color,
 								}) => {
-									let key = JSON.stringify([text, font]);
+									let key = JSON.stringify([
+										text,
+										fontFamily,
+										fontWeight,
+										fontVariant,
+										fontStyle,
+									]);
 									while (keys.has(key)) {
 										key += '!';
 									}
