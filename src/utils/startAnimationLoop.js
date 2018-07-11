@@ -1,10 +1,11 @@
+import Function_recursive from './Function/recursive';
+
 export default function(callback, delay) {
-	let run = (() => {
+	Function_recursive(run => {
 		requestAnimationFrame(() => {
 			if (callback() !== false) {
 				setTimeout(run, delay);
 			}
 		});
-	});
-	run();
+	})();
 }

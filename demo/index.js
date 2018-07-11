@@ -51,7 +51,8 @@
 						})(),
 					},
 					{
-						value: function() {
+						value: function(word) {
+							var chance = new Chance(word[0]);
 							return chance.pickone([0, 3/4]);
 						},
 						svg: (function() {
@@ -76,7 +77,8 @@
 						})(),
 					},
 					{
-						value: function() {
+						value: function(word) {
+							var chance = new Chance(word[0]);
 							return chance.pickone([0, 1/8, 3/4, 7/8]);
 						},
 						svg: (function() {
@@ -113,8 +115,9 @@
 						})(),
 					},
 					{
-						value: function() {
-							return Math.random();
+						value: function(word) {
+							var chance = new Chance(word[0]);
+							return chance.random();
 						},
 						svg: (function() {
 							var div = document.createElement('div');
