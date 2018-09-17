@@ -7,12 +7,81 @@
 
 		data: function() {
 			return {
+				animation: undefined,
+				animationDurationValueIndex: 2,
+				animationDurationValues: [0, 1000, 5000, 10000],
+				animationEasing: undefined,
+				animationEasingValues: [
+					'ease',
+					'linear',
+					'ease-in',
+					'ease-out',
+					'ease-in-out',
+					'cubic-bezier(0.1, 0.7, 1.0, 0.1)',
+				],
+				animationItems: [
+					{
+						text: 'bounce',
+						value: ['bounceIn', 'bounceOut'],
+					},
+					{
+						text: 'fade',
+						value: ['fadeIn', 'fadeOut'],
+					},
+					{
+						text: 'flipX',
+						value: ['flipInX', 'flipOutX'],
+					},
+					{
+						text: 'flipY',
+						value: ['flipInY', 'flipOutY'],
+					},
+					{
+						text: 'rotate',
+						value: ['rotateIn', 'rotateOut'],
+					},
+					{
+						text: 'zoom',
+						value: ['zoomIn', 'zoomOut'],
+					},
+				],
+				animationOverlapValueIndex: 1,
+				animationOverlapValues: [0, 1/5, 1/2, 1],
+				colorItemIndex: undefined,
+				colorItems: [
+					['#d99cd1', '#c99cd1', '#b99cd1', '#a99cd1'],
+					['#403030', '#f97a7a'],
+					['#31a50d', '#d1b022', '#74482a'],
+					['#ffd077', '#3bc4c7', '#3a9eea', '#ff4e69', '#461e47'],
+				],
 				drawer: true,
-				progressVisible: true,
+				fontFamily: undefined,
+				fontFamilyValues: [
+					'Abril Fatface',
+					'Annie Use Your Telescope',
+					'Anton',
+					'Bahiana',
+					'Baloo Bhaijaan',
+					'Barrio',
+					'Finger Paint',
+					'Fredericka the Great',
+					'Gloria Hallelujah',
+					'Indie Flower',
+					'Life Savers',
+					'Londrina Sketch',
+					'Love Ya Like A Sister',
+					'Merienda',
+					'Nothing You Could Do',
+					'Pacifico',
+					'Quicksand',
+					'Righteous',
+					'Sacramento',
+					'Shadows Into Light',
+				],
+				fontSizeRatioValueIndex: 0,
+				fontSizeRatioValues: [0, 1/20, 1/5, 1/2, 1],
 				progress: undefined,
-				snackbarVisible: false,
-				snackbarText: '',
-				wordsText: undefined,
+				progressVisible: true,
 				rotationItemIndex: undefined,
 				rotationItems: [
 					{
@@ -137,84 +206,51 @@
 						})(),
 					}
 				],
-				fontFamily: undefined,
-				fontFamilyValues: [
-					'Abril Fatface',
-					'Annie Use Your Telescope',
-					'Anton',
-					'Bahiana',
-					'Baloo Bhaijaan',
-					'Barrio',
-					'Finger Paint',
-					'Fredericka the Great',
-					'Gloria Hallelujah',
-					'Indie Flower',
-					'Life Savers',
-					'Londrina Sketch',
-					'Love Ya Like A Sister',
-					'Merienda',
-					'Nothing You Could Do',
-					'Pacifico',
-					'Quicksand',
-					'Righteous',
-					'Sacramento',
-					'Shadows Into Light',
-				],
-				colorItemIndex: undefined,
-				colorItems: [
-					['#d99cd1', '#c99cd1', '#b99cd1', '#a99cd1'],
-					['#403030', '#f97a7a'],
-					['#31a50d', '#d1b022', '#74482a'],
-					['#ffd077', '#3bc4c7', '#3a9eea', '#ff4e69', '#461e47'],
-				],
+				snackbarText: '',
+				snackbarVisible: false,
 				spacingValueIndex: 1,
 				spacingValues: [0, 1/4, 1/2, 1, 2],
-				fontSizeRatioValueIndex: 0,
-				fontSizeRatioValues: [0, 1/20, 1/5, 1/2, 1],
-				animation: undefined,
-				animationItems: [
-					{
-						text: 'bounce',
-						value: ['bounceIn', 'bounceOut'],
-					},
-					{
-						text: 'fade',
-						value: ['fadeIn', 'fadeOut'],
-					},
-					{
-						text: 'flipX',
-						value: ['flipInX', 'flipOutX'],
-					},
-					{
-						text: 'flipY',
-						value: ['flipInY', 'flipOutY'],
-					},
-					{
-						text: 'rotate',
-						value: ['rotateIn', 'rotateOut'],
-					},
-					{
-						text: 'zoom',
-						value: ['zoomIn', 'zoomOut'],
-					},
-				],
-				animationDurationValueIndex: 2,
-				animationDurationValues: [0, 1000, 5000, 10000],
-				animationOverlapValueIndex: 1,
-				animationOverlapValues: [0, 1/5, 1/2, 1],
-				animationEasing: undefined,
-				animationEasingValues: [
-					'ease',
-					'linear',
-					'ease-in',
-					'ease-out',
-					'ease-in-out',
-					'cubic-bezier(0.1, 0.7, 1.0, 0.1)',
-				],
+				wordsText: undefined,
 			};
 		},
 
 		computed: {
+			animationDuration: function() {
+				return this.animationDurationValues[this.animationDurationValueIndex];
+			},
+
+			animationOverlap: function() {
+				return this.animationOverlapValues[this.animationOverlapValueIndex];
+			},
+
+			color: function() {
+				var colors = this.colorItems[this.colorItemIndex];
+				return function() {
+					return chance.pickone(colors);
+				};
+			},
+
+			enterAnimation: function() {
+				return ['animated', this.animation[0]].join(' ');
+			},
+
+			fontSizeRatio: function() {
+				return this.fontSizeRatioValues[this.fontSizeRatioValueIndex];
+			},
+
+			leaveAnimation: function() {
+				return ['animated', this.animation[1]].join(' ');
+			},
+
+			rotation: function() {
+				var item = this.rotationItems[this.rotationItemIndex];
+				return item.value;
+			},
+
+			spacing: function() {
+				return this.spacingValues[this.spacingValueIndex];
+			},
+
 			words: function() {
 				return this.wordsText
 					.split(/[\r\n]+/)
@@ -230,42 +266,6 @@
 						return [text, weight];
 					});
 			},
-
-			rotation: function() {
-				var item = this.rotationItems[this.rotationItemIndex];
-				return item.value;
-			},
-
-			color: function() {
-				var colors = this.colorItems[this.colorItemIndex];
-				return function() {
-					return chance.pickone(colors);
-				};
-			},
-
-			spacing: function() {
-				return this.spacingValues[this.spacingValueIndex];
-			},
-
-			fontSizeRatio: function() {
-				return this.fontSizeRatioValues[this.fontSizeRatioValueIndex];
-			},
-
-			enterAnimation: function() {
-				return ['animated', this.animation[0]].join(' ');
-			},
-
-			leaveAnimation: function() {
-				return ['animated', this.animation[1]].join(' ');
-			},
-
-			animationDuration: function() {
-				return this.animationDurationValues[this.animationDurationValueIndex];
-			},
-
-			animationOverlap: function() {
-				return this.animationOverlapValues[this.animationOverlapValueIndex];
-			},
 		},
 
 		watch: {
@@ -278,11 +278,11 @@
 
 		created: function() {
 			this.generateWordsText();
-			this.rotationItemIndex = chance.integer({min: 0, max: this.rotationItems.length - 1});
-			this.fontFamily = chance.pickone(this.fontFamilyValues);
-			this.colorItemIndex = chance.integer({min: 0, max: this.colorItems.length - 1});
 			this.animation = chance.pickone(this.animationItems).value;
 			this.animationEasing = chance.pickone(this.animationEasingValues);
+			this.colorItemIndex = chance.integer({min: 0, max: this.colorItems.length - 1});
+			this.fontFamily = chance.pickone(this.fontFamilyValues);
+			this.rotationItemIndex = chance.integer({min: 0, max: this.rotationItems.length - 1});
 		},
 
 		methods: {
