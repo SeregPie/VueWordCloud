@@ -2,19 +2,80 @@ import Function_constant from '/utils/Function/constant';
 import Function_stubArray from '/utils/Function/stubArray';
 
 export default {
-	words: {
-		type: Array,
-		default: Function_stubArray,
+	animationDuration: {
+		type: Number,
+		default: 1000,
 	},
 
-	text: {
-		type: [String, Function],
-		default: '',
+	animationEasing: {
+		type: String,
+		default: 'ease',
 	},
 
-	weight: {
-		type: [Number, Function],
+	animationOverlap: {
+		type: Number,
 		default: 1,
+	},
+
+	color: {
+		type: [String, Function],
+		default: 'Black',
+	},
+
+	createCanvas: {
+		type: Function,
+		default() {
+			return document.createElement('canvas');
+		},
+	},
+
+	createWorker: {
+		type: Function,
+		default(code) {
+			return new Worker(URL.createObjectURL(new Blob([code])));
+		},
+	},
+
+	enterAnimation: {
+		type: [Object, String],
+		default: Function_constant({opacity: 0}),
+	},
+
+	fontFamily: {
+		type: [String, Function],
+		default: 'serif',
+	},
+
+	fontSizeRatio: {
+		type: Number,
+		default: 0,
+	},
+
+	fontStyle: {
+		type: [String, Function],
+		default: 'normal',
+	},
+
+	fontVariant: {
+		type: [String, Function],
+		default: 'normal',
+	},
+
+	fontWeight: {
+		type: [String, Function],
+		default: 'normal',
+	},
+
+	leaveAnimation: {
+		type: [Object, String],
+		default: Function_constant({opacity: 0}),
+	},
+
+	loadFont: {
+		type: Function,
+		default(fontFamily, fontStyle, fontWeight, text) {
+			return document.fonts.load([fontStyle, fontWeight, '1px', fontFamily].join(' '), text);
+		},
 	},
 
 	rotation: {
@@ -27,84 +88,23 @@ export default {
 		default: 'turn',
 	},
 
-	fontFamily: {
-		type: [String, Function],
-		default: 'serif',
-	},
-
-	fontWeight: {
-		type: [String, Function],
-		default: 'normal',
-	},
-
-	fontVariant: {
-		type: [String, Function],
-		default: 'normal',
-	},
-
-	fontStyle: {
-		type: [String, Function],
-		default: 'normal',
-	},
-
-	color: {
-		type: [String, Function],
-		default: 'Black',
-	},
-
 	spacing: {
 		type: Number,
 		default: 0,
 	},
 
-	fontSizeRatio: {
-		type: Number,
-		default: 0,
+	text: {
+		type: [String, Function],
+		default: '',
 	},
 
-	enterAnimation: {
-		type: [Object, String],
-		default: Function_constant({opacity: 0}),
-	},
-
-	leaveAnimation: {
-		type: [Object, String],
-		default: Function_constant({opacity: 0}),
-	},
-
-	animationDuration: {
-		type: Number,
-		default: 1000,
-	},
-
-	animationOverlap: {
-		type: Number,
+	weight: {
+		type: [Number, Function],
 		default: 1,
 	},
 
-	animationEasing: {
-		type: String,
-		default: 'ease',
-	},
-
-	createCanvas: {
-		type: Function,
-		default() {
-			return document.createElement('canvas');
-		},
-	},
-
-	loadFont: {
-		type: Function,
-		default(fontFamily, fontStyle, fontWeight, text) {
-			return document.fonts.load([fontStyle, fontWeight, '1px', fontFamily].join(' '), text);
-		},
-	},
-
-	createWorker: {
-		type: Function,
-		default(code) {
-			return new Worker(URL.createObjectURL(new Blob([code])));
-		},
+	words: {
+		type: Array,
+		default: Function_stubArray,
 	},
 };

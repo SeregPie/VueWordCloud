@@ -69,8 +69,8 @@ Pass custom renderer for the words.
 
 ```html
 <vue-word-cloud :words="words">
-  <template slot-scope="{word, text, weight}">
-    <div style="cursor: pointer;" :title="weight" @click="onWordClick(word)">
+  <template slot-scope="{text, weight, word}">
+    <div :title="weight" style="cursor: pointer;" @click="onWordClick(word)">
       {{ text }}
     </div>
   </template>
@@ -81,26 +81,26 @@ Pass custom renderer for the words.
 
 | property | type | default | description |
 | ---: | :--- | :--- | :--- |
-| `words` | `Array` | `[]` | The words to place into the cloud. A value of the array could be either an object, an array or a string.<br/>If the value is an object, it will be resolved to `{text, weight, rotation, rotationUnit, fontFamily, fontStyle, fontVariant, fontWeight, color}`.<br/>If the value is an array, it will be resolved to `[text, weight]`.<br/>If the value is a string, it will be resolved to `text`. |
+| `animation-duration` | `Number` | `1000` | The duration of the animation. |
+| `animation-easing` | `String` | `'ease'` | The easing of the animation. |
+| `animation-overlap` | `Number` | `1` | The overlap of the animation. Set the value to `1` to animate words all at once. Set the value to `0` to animate words one by one. The value `5` has the same effect as the value `1/5`. |
+| `color` | `[String, Function]` | `'Black'` | The default color for each word. |
+| `create-canvas` | `Function` | * | Creates a new `Canvas` instance. |
+| `create-worker` | `Function` | * | Creates a new `Worker` instance. |
+| `enter-animation` | `[Object, String]` | * | The enter animation. |
+| `font-family` | `[String, Function]` | `'serif'` | The default font family for each word. |
+| `font-size-ratio` | `Number` | `0` | The font size ratio between the words. For example, if the value is `5`, then the largest word will be 5 times larger than the smallest one. The value `5` has the same effect as the value `1/5`. |
+| `font-style` | `[String, Function]` | `'normal'` | The default font style for each word. |
+| `font-variant` | `[String, Function]` | `'normal'` | The default font variant for each word. |
+| `font-weight` | `[String, Function]` | `'normal'` | The default font weight for each word. |
+| `leave-animation` | `[Object, String]` | * | The leave animation. |
+| `load-font` | `Function` | * | Loads the font. |
+| `rotation-unit` | `[String, Function]` | `'turn'` | The default rotation unit for each word. Possible values are `'turn'`, `'deg'` and `'rad'`. |
+| `rotation` | `[Number, Function]` | `0` | The default rotation for each word. |
+| `spacing` | `Number` | `0` | The spacing between the words. The value is relative to the font size. |
 | `text` | `[String, Function]` | `''` | The default text for each word. |
 | `weight` | `[Number, Function]` | `1` | The default weight for each word. |
-| `rotation` | `[Number, Function]` | `0` | The default rotation for each word. |
-| `rotation-unit` | `[String, Function]` | `'turn'` | The default rotation unit for each word. Possible values are `'turn'`, `'deg'` and `'rad'`. |
-| `font-family` | `[String, Function]` | `'serif'` | The default font family for each word. |
-| `font-weight` | `[String, Function]` | `'normal'` | The default font weight for each word. |
-| `font-variant` | `[String, Function]` | `'normal'` | The default font variant for each word. |
-| `font-style` | `[String, Function]` | `'normal'` | The default font style for each word. |
-| `color` | `[String, Function]` | `'Black'` | The default color for each word. |
-| `spacing` | `Number` | `0` | The spacing between the words. The value is relative to the font size. |
-| `font-size-ratio` | `Number` | `0` | The font size ratio between the words. For example, if the value is `5`, then the largest word will be 5 times larger than the smallest one. The value `5` has the same effect as the value `1/5`. |
-| `enter-animation` | `[Object, String]` | * | The enter animation. |
-| `leave-animation` | `[Object, String]` | * | The leave animation. |
-| `animation-duration` | `Number` | `1000` | The duration of the animation. |
-| `animation-overlap` | `Number` | `1` | The overlap of the animation. Set the value to `1` to animate words all at once. Set the value to `0` to animate words one by one. The value `5` has the same effect as the value `1/5`. |
-| `animation-easing` | `String` | `'ease'` | The easing of the animation. |
-| `create-canvas` | `Function` | * | Creates a new `Canvas` instance. |
-| `load-font` | `Function` | * | Loads the font. |
-| `create-worker` | `Function` | * | Creates a new `Worker` instance. |
+| `words` | `Array` | `[]` | The words to place into the cloud. A value of the array could be either an object, an array or a string.<br/>If the value is an object, it will be resolved to `{text, weight, rotation, rotationUnit, fontFamily, fontStyle, fontVariant, fontWeight, color}`.<br/>If the value is an array, it will be resolved to `[text, weight]`.<br/>If the value is a string, it will be resolved to `text`. |
 
 ---
 
