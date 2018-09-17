@@ -1,6 +1,6 @@
 # VueWordCloud
 
-A word cloud generator.
+Generates a cloud out of the words.
 
 ## demo
 
@@ -31,16 +31,16 @@ Vue.component(VueWordCloud.name, VueWordCloud);
 
 *or*
 
-Register the component in the scope of another instance.
+Register the component in the scope of another component.
 
 ```javascript
 import VueWordCloud from 'vuewordcloud';
 
 export default {
-  // ...
   components: {
     [VueWordCloud.name]: VueWordCloud,
   },
+  // ...
 };
 ```
 
