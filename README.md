@@ -85,22 +85,22 @@ Pass custom renderer for the words.
 | `text` | `[String, Function]` | `''` | The default text for each word. |
 | `weight` | `[Number, Function]` | `1` | The default weight for each word. |
 | `rotation` | `[Number, Function]` | `0` | The default rotation for each word. |
-| `rotationUnit` | `[String, Function]` | `'turn'` | The default rotation unit for each word. Possible values are `'turn'`, `'deg'` and `'rad'`. |
-| `fontFamily` | `[String, Function]` | `'serif'` | The default font family for each word. |
-| `fontWeight` | `[String, Function]` | `'normal'` | The default font weight for each word. |
-| `fontVariant` | `[String, Function]` | `'normal'` | The default font variant for each word. |
-| `fontStyle` | `[String, Function]` | `'normal'` | The default font style for each word. |
+| `rotation-unit` | `[String, Function]` | `'turn'` | The default rotation unit for each word. Possible values are `'turn'`, `'deg'` and `'rad'`. |
+| `font-family` | `[String, Function]` | `'serif'` | The default font family for each word. |
+| `font-weight` | `[String, Function]` | `'normal'` | The default font weight for each word. |
+| `font-variant` | `[String, Function]` | `'normal'` | The default font variant for each word. |
+| `font-style` | `[String, Function]` | `'normal'` | The default font style for each word. |
 | `color` | `[String, Function]` | `'Black'` | The default color for each word. |
 | `spacing` | `Number` | `0` | The spacing between the words. The value is relative to the font size. |
-| `fontSizeRatio` | `Number` | `0` | The font size ratio between the words. For example, if the value is `5`, then the largest word will be 5 times larger than the smallest one. The value `5` has the same effect as the value `1/5`. |
-| `enterAnimation` | `[Object, String]` | * | The enter animation. |
-| `leaveAnimation` | `[Object, String]` | * | The leave animation. |
-| `animationDuration` | `Number` | `1000` | The duration of the animation. |
-| `animationOverlap` | `Number` | `1` | The overlap of the animation. Set the value to `1` to animate words all at once. Set the value to `0` to animate words one by one. The value `5` has the same effect as the value `1/5`. |
-| `animationEasing` | `String` | `'ease'` | The easing of the animation. |
-| `createCanvas` | `Function` | * | Creates a new `Canvas` instance. |
-| `loadFont` | `Function` | * | Loads the font. |
-| `createWorker` | `Function` | * | Creates a new `Worker` instance. |
+| `font-size-ratio` | `Number` | `0` | The font size ratio between the words. For example, if the value is `5`, then the largest word will be 5 times larger than the smallest one. The value `5` has the same effect as the value `1/5`. |
+| `enter-animation` | `[Object, String]` | * | The enter animation. |
+| `leave-animation` | `[Object, String]` | * | The leave animation. |
+| `animation-duration` | `Number` | `1000` | The duration of the animation. |
+| `animation-overlap` | `Number` | `1` | The overlap of the animation. Set the value to `1` to animate words all at once. Set the value to `0` to animate words one by one. The value `5` has the same effect as the value `1/5`. |
+| `animation-easing` | `String` | `'ease'` | The easing of the animation. |
+| `create-canvas` | `Function` | * | Creates a new `Canvas` instance. |
+| `load-font` | `Function` | * | Loads the font. |
+| `create-worker` | `Function` | * | Creates a new `Worker` instance. |
 
 ---
 
