@@ -20,7 +20,7 @@
 	],
 	"author": "Sergej Sintschilin <seregpie@gmail.com>",
 	"license": "MIT",
-	"dependencies": {
+	"peerDependencies": {
 		"vue": "^2.5.17"
 	},
 	"devDependencies": {
