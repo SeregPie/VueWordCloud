@@ -1,13 +1,11 @@
 export default function() {
-	let {
-		animationDuration,
-		cloudWords,
-		separateAnimationDuration,
-	} = this;
-
-	return (
-		cloudWords.length > 1
-			? (animationDuration - separateAnimationDuration) / (cloudWords.length - 1)
-			: 0
-	);
+	let {cloudWords} = this;
+	if (cloudWords.length > 1) {
+		let {
+			animationDuration,
+			separateAnimationDuration,
+		} = this;
+		return (animationDuration - separateAnimationDuration) / (cloudWords.length - 1);
+	}
+	return 0;
 }

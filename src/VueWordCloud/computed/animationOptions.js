@@ -5,11 +5,10 @@ import String_isString from '/utils/String/isString';
 
 export default function() {
 	let {
+		animationDuration,
 		enterAnimation,
 		leaveAnimation,
-		animationDuration,
 	} = this;
-
 	if (Object_isObject(enterAnimation) && Object_isObject(leaveAnimation)) {
 		let remainAnimation = Object_mapValues({
 			...enterAnimation,

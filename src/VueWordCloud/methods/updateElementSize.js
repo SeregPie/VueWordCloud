@@ -1,4 +1,7 @@
 export default function() {
-	this.elementWidth = this.$el.offsetWidth;
-	this.elementHeight = this.$el.offsetHeight;
+	let {$el} = this;
+	if ($el) {
+		this.elementWidth = $el.offsetWidth;
+		this.elementHeight = $el.offsetHeight;
+	}
 }
