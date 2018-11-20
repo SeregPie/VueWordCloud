@@ -37,7 +37,7 @@ export default function($createElement) {
 				font,
 				left,
 				rotation,
-				rotationUnit,
+				//rotationUnit,
 				text,
 				top,
 				weight,
@@ -82,7 +82,8 @@ export default function($createElement) {
 								top: '50%',
 								transform: [
 									'translate(-50%,-50%)',
-									`rotate(${rotation}${rotationUnit})`,
+									//`rotate(${rotation}${rotationUnit})`,
+									`rotate(${rotation}rad)`,
 								].join(' '),
 								whiteSpace: 'nowrap',
 								...((separateAnimationDuration > 0)
