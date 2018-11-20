@@ -34,8 +34,8 @@ export default function() {
 				css: false,
 			},
 			on: {
-				beforeAppear,
 				appear,
+				beforeAppear,
 				beforeEnter,
 				enter,
 				leave,
@@ -45,9 +45,9 @@ export default function() {
 	if (String_isString(enterAnimation) && String_isString(leaveAnimation)) {
 		return {
 			props: {
-				duration: animationDuration,
 				appear: true,
 				appearActiveClass: enterAnimation,
+				duration: animationDuration,
 				enterActiveClass: enterAnimation,
 				leaveActiveClass: leaveAnimation,
 			},

@@ -1,13 +1,13 @@
 import VueAsyncComputed from '/utils/Vue/AsyncComputed';
 
-import props from './props';
-import data from './data';
-import computed from './computed';
 import asyncComputed from './asyncComputed';
-import watch from './watch';
-import mounted from './mounted';
+import computed from './computed';
+import data from './data';
 import methods from './methods';
+import mounted from './mounted';
+import props from './props';
 import render from './render';
+import watch from './watch';
 
 export default {
 	name: 'VueWordCloud',

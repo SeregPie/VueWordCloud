@@ -1,3 +1,5 @@
+import Array_lastIndex from './lastIndex';
+
 export default function(array) {
-	return array[array.length - 1];
+	return array[Array_lastIndex(array)];
 }

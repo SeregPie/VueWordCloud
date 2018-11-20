@@ -1,4 +1,3 @@
-import Array_first from '/utils/Array/first';
 import Array_last from '/utils/Array/last';
 import Function_cast from '/utils/Function/cast';
 import Function_noop from '/utils/Function/noop';
@@ -157,7 +156,7 @@ export default {
 
 					if (words.length > 0) {
 
-						let firstWord = Array_first(words);
+						let firstWord = words[0];
 						let lastWord = Array_last(words);
 
 						let maxWeight = firstWord.ǂweight;
