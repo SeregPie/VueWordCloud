@@ -84,7 +84,7 @@
 									block
 									class="ma-0"
 									color="primary"
-									@click="generateWordsText"
+									@click="regenerateWordsText"
 								>generate randomly</v-btn>
 							</div>
 						</v-flex>
@@ -109,7 +109,7 @@
 								hide-details
 							></v-input>
 							<v-btn-toggle
-								v-model="colorItemIndex"
+								v-model="colorIndex"
 								mandatory
 							>
 								<v-btn
@@ -141,7 +141,7 @@
 								hide-details
 							></v-input>
 							<v-btn-toggle
-								v-model="rotationItemIndex"
+								v-model="rotationIndex"
 								mandatory
 							>
 								<v-btn
@@ -171,10 +171,12 @@
 									label="spacing"
 									hide-details
 								></v-input>
-								<v-chip small>{{ Math.round(spacing * 100) }}%</v-chip>
+								<v-chip
+									small
+								>{{ Math.round(spacing * 100) }}%</v-chip>
 							</div>
 							<v-slider
-								v-model="spacingValueIndex"
+								v-model="spacingIndex"
 								:max="spacingValues.length - 1"
 								:min="0"
 								class="mx-2 my-0"
@@ -184,11 +186,12 @@
 						</v-flex>
 						<v-flex>
 							<v-select
-								v-model="animation"
+								v-model="animationItem"
 								:items="animationItems"
 								box
 								hide-details
 								label="enter/leave animation"
+								return-object
 							></v-select>
 						</v-flex>
 						<v-flex>
@@ -203,10 +206,12 @@
 									label="animation duration"
 									hide-details
 								></v-input>
-								<v-chip small>{{ Math.round(animationDuration / 1000) }}s</v-chip>
+								<v-chip
+									small
+								>{{ Math.round(animationDuration / 1000) }}s</v-chip>
 							</div>
 							<v-slider
-								v-model="animationDurationValueIndex"
+								v-model="animationDurationIndex"
 								:max="animationDurationValues.length - 1"
 								:min="0"
 								class="mx-2 my-0"
@@ -226,10 +231,12 @@
 									label="animation overlap"
 									hide-details
 								></v-input>
-								<v-chip small>{{ Math.round(animationOverlap * 100) }}%</v-chip>
+								<v-chip
+									small
+								>{{ Math.round(animationOverlap * 100) }}%</v-chip>
 							</div>
 							<v-slider
-								v-model="animationOverlapValueIndex"
+								v-model="animationOverlapIndex"
 								:max="animationOverlapValues.length - 1"
 								:min="0"
 								class="mx-2 my-0"
@@ -258,10 +265,12 @@
 									label="font size ratio"
 									hide-details
 								></v-input>
-								<v-chip small>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
+								<v-chip
+									small
+								>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
 							</div>
 							<v-slider
-								v-model="fontSizeRatioValueIndex"
+								v-model="fontSizeRatioIndex"
 								:max="fontSizeRatioValues.length - 1"
 								:min="0"
 								class="mx-2 my-0"
@@ -336,18 +345,19 @@
 								:spacing="spacing"
 								:words="words"
 							>
-								<template slot-scope="props">
-									<v-tooltip top>
-										<div
-											slot="activator"
-											style="cursor: pointer;"
-											@click="onWordClick(props.word)"
-										>{{ props.text }}</div>
-										<div
-											style="text-align: center;"
-										>{{ props.text }}<br/>({{ props.weight }})</div>
-									</v-tooltip>
-								</template>
+								<v-tooltip
+									slot-scope="props"
+									top
+								>
+									<div
+										slot="activator"
+										style="cursor: pointer;"
+										@click="onWordClick(props.word)"
+									>{{ props.text }}</div>
+									<div
+										style="text-align: center;"
+									>{{ props.text }}<br/>({{ props.weight }})</div>
+								</v-tooltip>
 							</vue-word-cloud>
 						</div>
 						<v-scale-transition>
