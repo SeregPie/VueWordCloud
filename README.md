@@ -6,10 +6,6 @@ Generates a cloud out of the words.
 
 [Try it out!](https://seregpie.github.io/VueWordCloud/)
 
-## dependencies
-
-- [Vue](https://github.com/vuejs/vue)
-
 ## setup
 
 ### npm
@@ -40,7 +36,7 @@ export default {
   components: {
     [VueWordCloud.name]: VueWordCloud,
   },
-  // ...
+  /*...*/
 };
 ```
 
@@ -69,11 +65,12 @@ Pass custom renderer for the words.
 
 ```html
 <vue-word-cloud :words="words">
-  <template slot-scope="{text, weight, word}">
-    <div :title="weight" style="cursor: pointer;" @click="onWordClick(word)">
-      {{ text }}
-    </div>
-  </template>
+  <div
+    slot-scope="{text, weight, word}"
+    :title="weight"
+    style="cursor: pointer;"
+    @click="onWordClick(word)"
+   >{{ text }}</div>
 </vue-word-cloud>
 ```
 
