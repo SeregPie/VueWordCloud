@@ -1,17 +1,11 @@
 import Array_last from '/utils/Array/last';
-import Function_cast from '/utils/Function/cast';
 import Function_noop from '/utils/Function/noop';
 import Function_stubArray from '/utils/Function/stubArray';
-import Lang_isUndefined from '/utils/Lang/isUndefined';
 import Math_degToRad from '/utils/Math/degToRad';
 import Math_mapLinear from '/utils/Math/mapLinear';
 import Math_turnToRad from '/utils/Math/turnToRad';
-import Object_isObject from '/utils/Object/isObject';
-import String_isString from '/utils/String/isString';
 import Worker_postMessage from '/utils/Worker/postMessage';
 
-import getNormalizedFontSizeRatio from './getNormalizedFontSizeRatio';
-import getNormalizedAspect from './getNormalizedAspect';
 import BoundingWord from './BoundingWord';
 import PixelGridWorker from 'stringify!./PixelGridWorker/index.js';
 
@@ -22,99 +16,37 @@ export default {
 	get(context) {
 
 		let {
-			elementWidth,
-			elementHeight,
-			words,
-			text,
-			weight,
-			rotation,
-			rotationUnit,
-			fontFamily,
-			fontWeight,
-			fontVariant,
-			fontStyle,
-			color,
-			spacing,
-			fontSizeRatio,
+			colorValues,
 			createCanvas,
-			loadFont,
 			createWorker,
+			elementHeight,
+			elementWidth,
+			fontFamilyValues,
+			fontStyleValues,
+			fontVariantValues,
+			fontWeightValues,
+			loadFont,
+			normalizedFontSizeRatio: fontSizeRatio,
+			rotationUnitValues,
+			rotationValues,
+			spacing,
+			textValues,
+			weightValues,
+			words,
 		} = this;
-
-		fontSizeRatio = getNormalizedFontSizeRatio(fontSizeRatio);
-
-		let elementAspect = getNormalizedAspect([elementWidth, elementHeight]);
 
 		if (elementWidth > 0 && elementHeight > 0) {
 
-			let getDefaultText = Function_cast(text);
-			let getDefaultWeight = Function_cast(weight);
-			let getDefaultRotation = Function_cast(rotation);
-			let getDefaultRotationUnit = Function_cast(rotationUnit);
-			let getDefaultFontFamily = Function_cast(fontFamily);
-			let getDefaultFontWeight = Function_cast(fontWeight);
-			let getDefaultFontVariant = Function_cast(fontVariant);
-			let getDefaultFontStyle = Function_cast(fontStyle);
-			let getDefaultColor = Function_cast(color);
-
 			words = words.map((word, index) => {
-				let text;
-				let weight;
-				let rotation;
-				let rotationUnit;
-				let fontFamily;
-				let fontWeight;
-				let fontVariant;
-				let fontStyle;
-				let color;
-				if (word) {
-					if (String_isString(word)) {
-						text = word;
-					} else
-					if (Array.isArray(word)) {
-						[text, weight] = word;
-					} else
-					if (Object_isObject(word)) {
-						({
-							text,
-							weight,
-							rotation,
-							rotationUnit,
-							fontFamily,
-							fontWeight,
-							fontVariant,
-							fontStyle,
-							color,
-						} = word);
-					}
-				}
-				if (Lang_isUndefined(text)) {
-					text = getDefaultText(word, index, words);
-				}
-				if (Lang_isUndefined(weight)) {
-					weight = getDefaultWeight(word, index, words);
-				}
-				if (Lang_isUndefined(rotation)) {
-					rotation = getDefaultRotation(word, index, words);
-				}
-				if (Lang_isUndefined(rotationUnit)) {
-					rotationUnit = getDefaultRotationUnit(word, index, words);
-				}
-				if (Lang_isUndefined(fontFamily)) {
-					fontFamily = getDefaultFontFamily(word, index, words);
-				}
-				if (Lang_isUndefined(fontWeight)) {
-					fontWeight = getDefaultFontWeight(word, index, words);
-				}
-				if (Lang_isUndefined(fontVariant)) {
-					fontVariant = getDefaultFontVariant(word, index, words);
-				}
-				if (Lang_isUndefined(fontStyle)) {
-					fontStyle = getDefaultFontStyle(word, index, words);
-				}
-				if (Lang_isUndefined(color)) {
-					color = getDefaultColor(word, index, words);
-				}
+				let color = colorValues[index];
+				let fontFamily = fontFamilyValues[index];
+				let fontStyle = fontStyleValues[index];
+				let fontVariant = fontVariantValues[index];
+				let fontWeight = fontWeightValues[index];
+				let rotation = rotationValues[index];
+				let rotationUnit = rotationUnitValues[index];
+				let text = textValues[index];
+				let weight = weightValues[index];
 				let boundingWord = new BoundingWord(
 					text,
 					(() => {
@@ -206,7 +138,7 @@ export default {
 								context.throwIfInterrupted();
 								this.progress = process;
 
-								return Worker_postMessage(gridWorker, elementAspect);
+								return Worker_postMessage(gridWorker, [elementWidth, elementHeight]);
 							})
 							.then(() => {
 								context.throwIfInterrupted();

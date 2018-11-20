@@ -35,9 +35,9 @@ export default function($createElement) {
 			cloudWords.map(({
 				color,
 				font,
+				key,
 				left,
 				rotation,
-				//rotationUnit,
 				text,
 				top,
 				weight,
@@ -48,18 +48,16 @@ export default function($createElement) {
 				[$createElement(
 					'div',
 					{
-						key: index,
+						key: key,
 						style: {
 							left: `${left}px`,
 							position: 'absolute',
 							top: `${top}px`,
 							...((separateAnimationDuration > 0)
 								? {
-									animation: [
-										`${separateAnimationDuration}ms`,
-										animationEasing,
-										`${separateAnimationDelay * index}ms`,
-									].join(' '),
+									animationDelay: `${separateAnimationDelay * index}ms`,
+									animationDuration: `${separateAnimationDuration}ms`,
+									animationTimingFunction: animationEasing,
 									transition: [
 										'all',
 										`${separateAnimationDuration}ms`,
