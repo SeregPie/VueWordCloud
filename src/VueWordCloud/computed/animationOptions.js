@@ -1,7 +1,7 @@
-import Function_stubNull from '/utils/Function/stubNull';
-import Object_isObject from '/utils/Object/isObject';
-import Object_mapValues from '/utils/Object/mapValues';
-import String_isString from '/utils/String/isString';
+import Function_stubNull from '../../core/Function/stubNull';
+import Object_is from '../../core/Object/is';
+import Object_mapValues from '../../core/Object/mapValues';
+import String_is from '../../core/String/is';
 
 export default function() {
 	let {
@@ -9,7 +9,7 @@ export default function() {
 		enterAnimation,
 		leaveAnimation,
 	} = this;
-	if (Object_isObject(enterAnimation) && Object_isObject(leaveAnimation)) {
+	if (Object_is(enterAnimation) && Object_is(leaveAnimation)) {
 		let remainAnimation = Object_mapValues({
 			...enterAnimation,
 			...leaveAnimation,
@@ -42,7 +42,7 @@ export default function() {
 			},
 		};
 	}
-	if (String_isString(enterAnimation) && String_isString(leaveAnimation)) {
+	if (String_is(enterAnimation) && String_is(leaveAnimation)) {
 		return {
 			props: {
 				duration: animationDuration,

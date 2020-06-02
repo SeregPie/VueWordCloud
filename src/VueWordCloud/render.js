@@ -1,4 +1,4 @@
-export default function($createElement) {
+export default function(h) {
 	let {
 		$scopedSlots,
 		animationEasing,
@@ -13,7 +13,7 @@ export default function($createElement) {
 		},
 		...$scopedSlots,
 	};
-	return $createElement(
+	return h(
 		'div',
 		{
 			style: {
@@ -22,14 +22,14 @@ export default function($createElement) {
 				width: '100%',
 			},
 		},
-		[$createElement(
+		[h(
 			'div',
 			{
 				style: {
-					left: '50%',
+					bottom: '50%',
 					position: 'absolute',
-					top: '50%',
-					transform: 'translate(-50%,-50%)',
+					right: '50%',
+					transform: 'translate(50%,50%)',
 				},
 			},
 			cloudWords.map(({
@@ -37,15 +37,14 @@ export default function($createElement) {
 				font,
 				left,
 				rotation,
-				rotationUnit,
 				text,
 				top,
 				weight,
 				word,
-			}, index) => $createElement(
+			}, index) => h(
 				'transition',
 				{...animationOptions},
-				[$createElement(
+				[h(
 					'div',
 					{
 						key: index,
@@ -71,18 +70,18 @@ export default function($createElement) {
 							),
 						},
 					},
-					[$createElement(
+					[h(
 						'div',
 						{
 							style: {
+								bottom: '50%',
 								color: color,
 								font: font,
-								left: '50%',
 								position: 'absolute',
-								top: '50%',
+								right: '50%',
 								transform: [
-									'translate(-50%,-50%)',
-									`rotate(${rotation}${rotationUnit})`,
+									'translate(50%,50%)',
+									`rotate(${rotation}rad)`,
 								].join(' '),
 								whiteSpace: 'nowrap',
 								...((separateAnimationDuration > 0)

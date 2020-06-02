@@ -1,4 +1,4 @@
-import Math_ceilDivisible from '/utils/Math/ceilDivisible';
+import Math_ceilDivisible from '../../../../core/Math/ceilDivisible';
 
 import getBoundingBoxHeight from './getBoundingBoxHeight';
 import getBoundingBoxWidth from './getBoundingBoxWidth';
@@ -27,17 +27,20 @@ export default function(
 		fontFamily,
 	);
 	let textWidth = getTextWidth(text, font, createCanvas);
+	let textHeight = fontSize;
 	let lineWidth = padding * fontSize * 2;
+	let boxWidth = lineWidth + textWidth;
+	let boxHeight = lineWidth + textHeight;
 	let canvas = createCanvas();
 	let ctx = canvas.getContext('2d');
 	let canvasWidth = Math_ceilDivisible(getBoundingBoxWidth(
-		lineWidth + fontSize * 2 + textWidth,
-		lineWidth + fontSize * 3,
+		boxWidth,
+		boxHeight,
 		rotation,
 	), pixelSize);
 	let canvasHeight = Math_ceilDivisible(getBoundingBoxHeight(
-		lineWidth + fontSize * 2 + textWidth,
-		lineWidth + fontSize * 3,
+		boxWidth,
+		boxHeight,
 		rotation,
 	), pixelSize);
 	canvas.width = canvasWidth;

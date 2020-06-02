@@ -1,20 +1,20 @@
-import Array_first from '/utils/Array/first';
-import Array_last from '/utils/Array/last';
-import Function_cast from '/utils/Function/cast';
-import Function_noop from '/utils/Function/noop';
-import Function_stubArray from '/utils/Function/stubArray';
-import Lang_isUndefined from '/utils/Lang/isUndefined';
-import Math_degToRad from '/utils/Math/degToRad';
-import Math_mapLinear from '/utils/Math/mapLinear';
-import Math_turnToRad from '/utils/Math/turnToRad';
-import Object_isObject from '/utils/Object/isObject';
-import String_isString from '/utils/String/isString';
-import Worker_postMessage from '/utils/Worker/postMessage';
+import Array_is from '../../../core/Array/is';
+import Array_prototype_last from '../../../core/Array/prototype/last';
+import Function_cast from '../../../core/Function/cast';
+import Function_noop from '../../../core/Function/noop';
+import Function_stubArray from '../../../core/Function/stubArray';
+import Math_degreesToRadians from '../../../core/Math/degreesToRadians';
+import Math_map from '../../../core/Math/map';
+import Math_turnsToRadians from '../../../core/Math/turnsToRadians';
+import Object_is from '../../../core/Object/is';
+import Object_isUndefined from '../../../core/Object/isUndefined';
+import String_is from '../../../core/String/is';
+import Worker_postMessage from '../../../core/Worker/postMessage';
 
 import getNormalizedFontSizeRatio from './getNormalizedFontSizeRatio';
 import getNormalizedAspect from './getNormalizedAspect';
 import BoundingWord from './BoundingWord';
-import PixelGridWorker from 'stringify!./PixelGridWorker/index.js';
+import PixelGridWorker from 'stringify!./PixelGridWorker';
 
 const renderingFontSizeInterval = 2;
 const renderingFontSizeBase = 4;
@@ -69,13 +69,13 @@ export default {
 				let fontStyle;
 				let color;
 				if (word) {
-					if (String_isString(word)) {
+					if (String_is(word)) {
 						text = word;
 					} else
-					if (Array.isArray(word)) {
+					if (Array_is(word)) {
 						[text, weight] = word;
 					} else
-					if (Object_isObject(word)) {
+					if (Object_is(word)) {
 						({
 							text,
 							weight,
@@ -89,31 +89,31 @@ export default {
 						} = word);
 					}
 				}
-				if (Lang_isUndefined(text)) {
+				if (Object_isUndefined(text)) {
 					text = getDefaultText(word, index, words);
 				}
-				if (Lang_isUndefined(weight)) {
+				if (Object_isUndefined(weight)) {
 					weight = getDefaultWeight(word, index, words);
 				}
-				if (Lang_isUndefined(rotation)) {
+				if (Object_isUndefined(rotation)) {
 					rotation = getDefaultRotation(word, index, words);
 				}
-				if (Lang_isUndefined(rotationUnit)) {
+				if (Object_isUndefined(rotationUnit)) {
 					rotationUnit = getDefaultRotationUnit(word, index, words);
 				}
-				if (Lang_isUndefined(fontFamily)) {
+				if (Object_isUndefined(fontFamily)) {
 					fontFamily = getDefaultFontFamily(word, index, words);
 				}
-				if (Lang_isUndefined(fontWeight)) {
+				if (Object_isUndefined(fontWeight)) {
 					fontWeight = getDefaultFontWeight(word, index, words);
 				}
-				if (Lang_isUndefined(fontVariant)) {
+				if (Object_isUndefined(fontVariant)) {
 					fontVariant = getDefaultFontVariant(word, index, words);
 				}
-				if (Lang_isUndefined(fontStyle)) {
+				if (Object_isUndefined(fontStyle)) {
 					fontStyle = getDefaultFontStyle(word, index, words);
 				}
-				if (Lang_isUndefined(color)) {
+				if (Object_isUndefined(color)) {
 					color = getDefaultColor(word, index, words);
 				}
 				let boundingWord = new BoundingWord(
@@ -121,9 +121,9 @@ export default {
 					(() => {
 						switch (rotationUnit) {
 							case 'turn':
-								return Math_turnToRad(rotation);
+								return Math_turnsToRadians(rotation);
 							case 'deg':
-								return Math_degToRad(rotation);
+								return Math_degreesToRadians(rotation);
 						}
 						return rotation;
 					})(),
@@ -157,8 +157,8 @@ export default {
 
 					if (words.length > 0) {
 
-						let firstWord = Array_first(words);
-						let lastWord = Array_last(words);
+						let firstWord = words[0];
+						let lastWord = Array_prototype_last(words);
 
 						let maxWeight = firstWord.ǂweight;
 						let minWeight = lastWord.ǂweight;
@@ -176,7 +176,7 @@ export default {
 								return 1 + maxWeight - minWeight;
 							})();
 							words.forEach(word => {
-								word.ǂfontSize = Math_mapLinear(word.ǂweight, minWeight, maxWeight, 1, fontSizeRange);
+								word.ǂfontSize = Math_map(word.ǂweight, minWeight, maxWeight, 1, fontSizeRange);
 							});
 						}
 

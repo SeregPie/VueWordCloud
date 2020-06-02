@@ -1,4 +1,4 @@
-import Function_isFunction from '../../Function/isFunction';
+import Function_is from '../../Function/is';
 import Function_noop from '../../Function/noop';
 
 import Context from './Context';
@@ -43,7 +43,7 @@ export default function(asyncComputed) {
 					}
 					if (firstCall) {
 						firstCall = false;
-						if (Function_isFunction(currentValue)) {
+						if (Function_is(currentValue)) {
 							currentValue = currentValue.call(this);
 						}
 					}

@@ -1,4 +1,4 @@
-import VueAsyncComputed from '/utils/Vue/AsyncComputed';
+import VueAsyncComputed from '../core/Vue/AsyncComputed';
 
 import props from './props';
 import data from './data';

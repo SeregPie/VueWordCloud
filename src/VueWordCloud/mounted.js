@@ -1,4 +1,4 @@
-import startAnimationLoop from '/utils/startAnimationLoop';
+import startAnimationLoop from '../core/startAnimationLoop';
 
 export default function() {
 	startAnimationLoop(() => {

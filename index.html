@@ -3,283 +3,275 @@
 	<head>
 		<meta charset="utf-8"/>
 		<meta
-			content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+			content="width=device-width,initial-scale=1"
 			name="viewport"
 		/>
 		<title>VueWordCloud</title>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.26.0/polyfill.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.17/vue.min.js"></script>
 		<style>
 			[v-cloak] {
 				display: none;
 			}
 		</style>
-		<script src="VueWordCloud.js"></script>
 		<link
-			href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Roboto:100,300,400,500,700,900|Sacramento|Shadows+Into+Light"
 			rel="stylesheet"
 		/>
 		<link
-			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons"
+			href="https://unpkg.com/@mdi/font@5.3.45/css/materialdesignicons.min.css"
 			rel="stylesheet"
 		/>
 		<link
-			href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.2.3/vuetify.min.css"
-			rel="stylesheet"
-		/>
-		<style>
-			.v-no-animation .v-progress-circular__overlay {
-				transition-duration: 0s;
-			}
-		</style>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/1.2.3/vuetify.min.js"></script>
-		<script src="https://unpkg.com/@seregpie/vuesvg@18.7.9"></script>
-		<link
-			href="https://fonts.googleapis.com/css?family=Abril+Fatface|Annie+Use+Your+Telescope|Anton|Bahiana|Baloo+Bhaijaan|Barrio|Finger+Paint|Fredericka+the+Great|Gloria+Hallelujah|Indie+Flower|Life+Savers|Londrina+Sketch|Love+Ya+Like+A+Sister|Merienda|Nothing+You+Could+Do|Pacifico|Quicksand|Righteous|Sacramento|Shadows+Into+Light"
+			href="https://unpkg.com/vuetify@2.2.30/dist/vuetify.min.css"
 			rel="stylesheet"
 		/>
 		<link
-			href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css"
+			href="https://unpkg.com/animate.css@4.1.0/animate.min.css"
 			rel="stylesheet"
 		/>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.16/chance.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/fontfaceobserver/2.0.13/fontfaceobserver.standalone.js"></script>
+		<script src="https://unpkg.com/core-js-bundle@3.6.5/minified.js"></script>
+		<script src="https://unpkg.com/vue@2.6.11/dist/vue.js"></script>
+		<script src="./index.js"></script>
+		<script src="https://unpkg.com/vuetify@2.2.30/dist/vuetify.min.js"></script>
+		<script src="https://unpkg.com/@seregpie/vuesvg@19.0.0"></script>
+		<script src="https://unpkg.com/chance@1.1.6/dist/chance.min.js"></script>
+		<script src="https://unpkg.com/fontfaceobserver@2.1.0/fontfaceobserver.standalone.js"></script>
 	</head>
 	<body>
 		<v-app
-			v-cloak
 			id="app"
+			v-cloak
 		>
 			<v-navigation-drawer
-				v-model="drawer"
 				app
 				clipped
+				v-model="drawer"
 			>
-				<v-container
-					class="pa-2"
-					fluid
-					grid-list-lg
+				<div style="padding: 8px;">
+					<v-switch
+						class="ma-0 pa-0"
+						hide-details
+						label="show progress"
+						v-model="progressVisible"
+					></v-switch>
+				</div>
+				<v-divider></v-divider>
+				<div
+					style="
+						display: grid;
+						gap: 8px;
+						padding: 8px;
+					"
 				>
-					<v-layout column>
-						<v-flex>
-							<v-switch
-								v-model="progressVisible"
-								class="ma-0"
-								hide-details
-								label="show progress"
-							></v-switch>
-						</v-flex>
-						<v-flex>
-							<div>
-								<v-textarea
-									v-model="wordsText"
-									:rows="9"
-									box
-									hide-details
-									label="words & weights"
-								></v-textarea>
-							</div>
-							<div class="mt-1">
-								<v-btn
-									block
-									class="ma-0"
-									color="primary"
-									@click="generateWordsText"
-								>generate randomly</v-btn>
-							</div>
-						</v-flex>
-						<v-flex>
-							<v-select
-								v-model="fontFamily"
-								:items="fontFamilyValues"
-								box
-								hide-details
-								label="font family"
+					<v-textarea
+						:rows="9"
+						filled
+						hide-details
+						label="words & weights"
+						v-model="wordsText"
+					></v-textarea>
+					<v-btn
+						block
+						color="primary"
+						@click="generateWordsText"
+					>generate randomly</v-btn>
+				</div>
+				<v-divider></v-divider>
+				<div
+					style="
+						display: grid;
+						gap: 16px;
+						padding: 8px;
+					"
+				>
+					<v-select
+						:items="fontFamilyValues"
+						filled
+						hide-details
+						label="font family"
+						v-model="fontFamily"
+					>
+						<template v-slot:item="props">
+							<span
+								:style="{fontFamily: props.item}"
+							>{{ props.item }}</span>
+						</template>
+					</v-select>
+					<div>
+						<v-input
+							label="color"
+							hide-details
+						></v-input>
+						<v-btn-toggle
+							dense
+							mandatory
+							v-model="colorItemIndex"
+						>
+							<v-btn
+								v-for="(item, itemIndex) in colorItems"
+								:key="itemIndex"
+								:value="itemIndex"
+								icon
 							>
-								<span
-									slot="item"
-									slot-scope="props"
-									:style="{fontFamily: props.item}"
-								>{{ props.item }}</span>
-							</v-select>
-						</v-flex>
-						<v-flex>
-							<v-input
-								label="color"
-								hide-details
-							></v-input>
-							<v-btn-toggle
-								v-model="colorItemIndex"
-								mandatory
-							>
-								<v-btn
-									v-for="(item, itemIndex) in colorItems"
-									:key="itemIndex"
-									:value="itemIndex"
-									flat
+								<div
+									style="
+										display: flex;
+										height: 24px;
+										margin: 2px;
+										width: 24px;
+									"
 								>
 									<div
-										style="
-											display: flex;
-											height: 24px;
-											margin: 2px;
-											width: 24px;
-										"
-									>
-										<div
-											v-for="color in item"
-											:style="{backgroundColor: color}"
-											style="flex: 1 1 0%;"
-										></div>
-									</div>
-								</v-btn>
-							</v-btn-toggle>
-						</v-flex>
-						<v-flex>
+										v-for="color in item"
+										:style="{backgroundColor: color}"
+										style="flex: 1 1 0%;"
+									></div>
+								</div>
+							</v-btn>
+						</v-btn-toggle>
+					</div>
+					<div>
+						<v-input
+							label="rotation"
+							hide-details
+						></v-input>
+						<v-btn-toggle
+							dense
+							mandatory
+							v-model="rotationItemIndex"
+						>
+							<v-btn
+								v-for="(item, itemIndex) in rotationItems"
+								:key="itemIndex"
+								:value="itemIndex"
+								icon
+							>
+								<vue-svg
+									:src="item.svg"
+									fill="currentColor"
+									height="24"
+									width="24"
+								></vue-svg>
+							</v-btn>
+						</v-btn-toggle>
+					</div>
+					<div>
+						<div
+							style="
+								align-items: center;
+								display: flex;
+								justify-content: space-between;
+							"
+						>
 							<v-input
-								label="rotation"
+								label="spacing"
 								hide-details
 							></v-input>
-							<v-btn-toggle
-								v-model="rotationItemIndex"
-								mandatory
-							>
-								<v-btn
-									v-for="(item, itemIndex) in rotationItems"
-									:key="itemIndex"
-									:value="itemIndex"
-									flat
-								>
-									<vue-svg
-										:src="item.svg"
-										fill="currentColor"
-										height="24"
-										width="24"
-									></vue-svg>
-								</v-btn>
-							</v-btn-toggle>
-						</v-flex>
-						<v-flex>
-							<div
-								style="
-									align-items: center;
-									display: flex;
-									justify-content: space-between;
-								"
-							>
-								<v-input
-									label="spacing"
-									hide-details
-								></v-input>
-								<v-chip small>{{ Math.round(spacing * 100) }}%</v-chip>
-							</div>
-							<v-slider
-								v-model="spacingValueIndex"
-								:max="spacingValues.length - 1"
-								:min="0"
-								class="mx-2 my-0"
+							<v-chip
+								small
+							>{{ Math.round(spacing * 100) }}%</v-chip>
+						</div>
+						<v-slider
+							:max="spacingValues.length - 1"
+							:min="0"
+							hide-details
+							ticks
+							v-model="spacingValueIndex"
+						></v-slider>
+					</div>
+					<v-select
+						:items="animationItems"
+						filled
+						hide-details
+						label="enter/leave animation"
+						v-model="animation"
+					></v-select>
+					<div>
+						<div
+							style="
+								align-items: center;
+								display: flex;
+								justify-content: space-between;
+							"
+						>
+							<v-input
+								label="animation duration"
 								hide-details
-								ticks
-							></v-slider>
-						</v-flex>
-						<v-flex>
-							<v-select
-								v-model="animation"
-								:items="animationItems"
-								box
+							></v-input>
+							<v-chip
+								small
+							>{{ Math.round(animationDuration / 1000) }}s</v-chip>
+						</div>
+						<v-slider
+							:max="animationDurationValues.length - 1"
+							:min="0"
+							hide-details
+							ticks
+							v-model="animationDurationValueIndex"
+						></v-slider>
+					</div>
+					<div>
+						<div
+							style="
+								align-items: center;
+								display: flex;
+								justify-content: space-between;
+							"
+						>
+							<v-input
+								label="animation overlap"
 								hide-details
-								label="enter/leave animation"
-							></v-select>
-						</v-flex>
-						<v-flex>
-							<div
-								style="
-									align-items: center;
-									display: flex;
-									justify-content: space-between;
-								"
-							>
-								<v-input
-									label="animation duration"
-									hide-details
-								></v-input>
-								<v-chip small>{{ Math.round(animationDuration / 1000) }}s</v-chip>
-							</div>
-							<v-slider
-								v-model="animationDurationValueIndex"
-								:max="animationDurationValues.length - 1"
-								:min="0"
-								class="mx-2 my-0"
+							></v-input>
+							<v-chip
+								small
+							>{{ Math.round(animationOverlap * 100) }}%</v-chip>
+						</div>
+						<v-slider
+							:max="animationOverlapValues.length - 1"
+							:min="0"
+							hide-details
+							ticks
+							v-model="animationOverlapValueIndex"
+						></v-slider>
+					</div>
+					<v-select
+						:items="animationEasingValues"
+						filled
+						hide-details
+						label="animation easing"
+						v-model="animationEasing"
+					></v-select>
+					<div>
+						<div
+							style="
+								align-items: center;
+								display: flex;
+								justify-content: space-between;
+							"
+						>
+							<v-input
+								label="font size ratio"
 								hide-details
-								ticks
-							></v-slider>
-						</v-flex>
-						<v-flex>
-							<div
-								style="
-									align-items: center;
-									display: flex;
-									justify-content: space-between;
-								"
-							>
-								<v-input
-									label="animation overlap"
-									hide-details
-								></v-input>
-								<v-chip small>{{ Math.round(animationOverlap * 100) }}%</v-chip>
-							</div>
-							<v-slider
-								v-model="animationOverlapValueIndex"
-								:max="animationOverlapValues.length - 1"
-								:min="0"
-								class="mx-2 my-0"
-								hide-details
-								ticks
-							></v-slider>
-						</v-flex>
-						<v-flex>
-							<v-select
-								v-model="animationEasing"
-								:items="animationEasingValues"
-								box
-								hide-details
-								label="animation easing"
-							></v-select>
-						</v-flex>
-						<v-flex>
-							<div
-								style="
-									align-items: center;
-									display: flex;
-									justify-content: space-between;
-								"
-							>
-								<v-input
-									label="font size ratio"
-									hide-details
-								></v-input>
-								<v-chip small>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
-							</div>
-							<v-slider
-								v-model="fontSizeRatioValueIndex"
-								:max="fontSizeRatioValues.length - 1"
-								:min="0"
-								class="mx-2 my-0"
-								hide-details
-								ticks
-							></v-slider>
-						</v-flex>
-					</v-layout>
-				</v-container>
+							></v-input>
+							<v-chip
+								small
+							>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
+						</div>
+						<v-slider
+							:max="fontSizeRatioValues.length - 1"
+							:min="0"
+							hide-details
+							ticks
+							v-model="fontSizeRatioValueIndex"
+						></v-slider>
+					</div>
+				</div>
 			</v-navigation-drawer>
-			<v-toolbar
+			<v-app-bar
 				app
 				clipped-left
-				color="primary"
 				dark
-				dense
 			>
-				<v-toolbar-side-icon @click="drawer = !drawer"></v-toolbar-side-icon>
+				<v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 				<v-toolbar-title>VueWordCloud</v-toolbar-title>
 				<v-spacer></v-spacer>
 				<v-btn
@@ -287,13 +279,13 @@
 					icon
 					target="_blank"
 				>
-					<v-icon>fab fa-github</v-icon>
+					<v-icon>mdi-github</v-icon>
 				</v-btn>
-			</v-toolbar>
+			</v-app-bar>
 			<v-content>
 				<v-container
 					fill-height
-					hide-overflow
+					overflow-hidden
 				>
 					<div
 						style="
@@ -336,13 +328,15 @@
 								:spacing="spacing"
 								:words="words"
 							>
-								<template slot-scope="props">
+								<template v-slot="props">
 									<v-tooltip top>
-										<div
-											slot="activator"
-											style="cursor: pointer;"
-											@click="onWordClick(props.word)"
-										>{{ props.text }}</div>
+										<template v-slot:activator="{on}">
+											<div
+												style="cursor: pointer;"
+												v-on="on"
+												@click="onWordClick(props.word)"
+											>{{ props.text }}</div>
+										</template>
 										<div
 											style="text-align: center;"
 										>{{ props.text }}<br/>({{ props.weight }})</div>
@@ -378,6 +372,6 @@
 				v-model="snackbarVisible"
 			>{{ snackbarText }}</v-snackbar>
 		</v-app>
-		<script src="demo/script.js"></script>
+		<script src="./demo/script.js"></script>
 	</body>
 </html>

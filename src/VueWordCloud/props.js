@@ -1,5 +1,5 @@
-import Function_constant from '/utils/Function/constant';
-import Function_stubArray from '/utils/Function/stubArray';
+import Function_constant from '../core/Function/constant';
+import Function_stubArray from '../core/Function/stubArray';
 
 export default {
 	animationDuration: {

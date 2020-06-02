@@ -1,7 +1,13 @@
 import VueWordCloud from './VueWordCloud';
 
-if (typeof window !== 'undefined' && window.Vue) {
-	window.Vue.component(VueWordCloud.name, VueWordCloud);
+{
+	let {window} = globalThis;
+	if (window) {
+		let {Vue} = window;
+		if (Vue) {
+			Vue.component(VueWordCloud.name, VueWordCloud);
+		}
+	}
 }
 
 export default VueWordCloud;

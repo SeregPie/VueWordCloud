@@ -1,10 +1,9 @@
 (function() {
 
 	var svgNS = 'http://www.w3.org/2000/svg';
-
 	new Vue({
 		el: '#app',
-
+		vuetify: new Vuetify(),
 		data: function() {
 			return {
 				animation: undefined,
@@ -213,44 +212,49 @@
 				wordsText: undefined,
 			};
 		},
-
 		computed: {
 			animationDuration: function() {
 				return this.animationDurationValues[this.animationDurationValueIndex];
 			},
-
 			animationOverlap: function() {
 				return this.animationOverlapValues[this.animationOverlapValueIndex];
 			},
-
 			color: function() {
 				var colors = this.colorItems[this.colorItemIndex];
 				return function() {
 					return chance.pickone(colors);
 				};
 			},
-
 			enterAnimation: function() {
-				return ['animated', this.animation[0]].join(' ');
+				return [
+					'animated',
+					this.animation[0],
+				]
+					.map(function(value) {
+						return 'animate__' + value;
+					})
+					.join(' ');
 			},
-
 			fontSizeRatio: function() {
 				return this.fontSizeRatioValues[this.fontSizeRatioValueIndex];
 			},
-
 			leaveAnimation: function() {
-				return ['animated', this.animation[1]].join(' ');
+				return [
+					'animated',
+					this.animation[1],
+				]
+					.map(function(value) {
+						return 'animate__' + value;
+					})
+					.join(' ');
 			},
-
 			rotation: function() {
 				var item = this.rotationItems[this.rotationItemIndex];
 				return item.value;
 			},
-
 			spacing: function() {
 				return this.spacingValues[this.spacingValueIndex];
 			},
-
 			words: function() {
 				return this.wordsText
 					.split(/[\r\n]+/)
@@ -262,12 +266,11 @@
 					})
 					.map(function(matched) {
 						var text = matched[1];
-						var weight = Number.parseInt(matched[2]);
+						var weight = Number(matched[2]);
 						return [text, weight];
 					});
 			},
 		},
-
 		watch: {
 			progress: function(currentProgress, previousProgress) {
 				if (previousProgress) {
@@ -275,7 +278,6 @@
 				}
 			},
 		},
-
 		created: function() {
 			this.generateWordsText();
 			this.animation = chance.pickone(this.animationItems).value;
@@ -284,7 +286,6 @@
 			this.fontFamily = chance.pickone(this.fontFamilyValues);
 			this.rotationItemIndex = chance.integer({min: 0, max: this.rotationItems.length - 1});
 		},
-
 		methods: {
 			generateWordsText: function() {
 				this.wordsText = [
@@ -306,11 +307,9 @@
 					}, [])
 					.join('\n');
 			},
-
 			loadFont: function(fontFamily, fontStyle, fontWeight, text) {
 				return (new FontFaceObserver(fontFamily, {style: fontStyle, weight: fontWeight})).load(text);
 			},
-
 			onWordClick: function(word) {
 				this.snackbarVisible = true;
 				this.snackbarText = word[0];

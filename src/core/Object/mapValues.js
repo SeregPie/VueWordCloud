@@ -1,7 +1,7 @@
 export default function(object, iteratee) {
-	let returns = {};
+	let result = {};
 	Object.entries(object).forEach(([key, value]) => {
-		returns[key] = iteratee(value, key);
+		result[key] = iteratee(value, key, object);
 	});
-	return returns;
+	return result;
 }
