@@ -6,16 +6,12 @@ Generates a cloud out of the words.
 
 [Try it out!](https://seregpie.github.io/VueWordCloud/)
 
-## dependencies
-
-- [Vue](https://github.com/vuejs/vue)
-
 ## setup
 
 ### npm
 
 ```shell
-npm install vuewordcloud
+npm i vuewordcloud
 ```
 
 ### ES module
@@ -40,7 +36,6 @@ export default {
   components: {
     [VueWordCloud.name]: VueWordCloud,
   },
-  // ...
 };
 ```
 
@@ -51,12 +46,16 @@ export default {
 <script src="https://unpkg.com/vuewordcloud"></script>
 ```
 
-If Vue is detected, the component will be registered automatically.
+The component is globally available as `VueWordCloud`. If Vue is detected, the component will be registered automatically.
 
 ## usage
 
 ```html
 <vue-word-cloud
+  style="
+    height: 480px;
+    width: 640px;
+  "
   :words="[['romance', 19], ['horror', 3], ['fantasy', 7], ['adventure', 3]]"
   :color="([, weight]) => weight > 10 ? 'DeepPink' : weight > 5 ? 'RoyalBlue' : 'Indigo'"
   font-family="Roboto"
@@ -170,11 +169,3 @@ let createWorker = function(code) {
 | event | description |
 | ---: | :--- |
 | `update:progress` | The current progress of the cloud words computation. |
-
-## todo
-
-- An option to customize the animation order of the cloud words by weight, font size and distance from center.
-- An option to privide an array of colors to colorize the cloud words by weight, font size and distance from center.
-- Prevent the recomputing of cloud words when changing color only.
-- An option to switch between canvas and dom renderer.
-- Speed up the computing of cloud words and improve the placing by reducing the image pixels.
