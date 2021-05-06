@@ -11,7 +11,7 @@ Generates a cloud out of the words.
 ### npm
 
 ```shell
-npm i vuewordcloud
+npm i @seregpie/vue-word-cloud
 ```
 
 ### ES module
@@ -20,7 +20,7 @@ Register the component globally.
 
 ```javascript
 import Vue from 'vue';
-import VueWordCloud from 'vuewordcloud';
+import VueWordCloud from '@seregpie/vue-word-cloud';
 
 Vue.component(VueWordCloud.name, VueWordCloud);
 ```
@@ -30,7 +30,7 @@ Vue.component(VueWordCloud.name, VueWordCloud);
 Register the component in the scope of another component.
 
 ```javascript
-import VueWordCloud from 'vuewordcloud';
+import VueWordCloud from '@seregpie/vue-word-cloud';
 
 export default {
   components: {
@@ -43,7 +43,7 @@ export default {
 
 ```html
 <script src="https://unpkg.com/vue"></script>
-<script src="https://unpkg.com/vuewordcloud"></script>
+<script src="https://unpkg.com/@seregpie/vue-word-cloud"></script>
 ```
 
 The component is globally available as `VueWordCloud`. If Vue is detected, the component will be registered automatically.

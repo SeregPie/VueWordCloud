@@ -1,13 +1,3 @@
-import VueWordCloud from './VueWordCloud';
+import component from './components/VueWordCloud';
 
-{
-	let {window} = globalThis;
-	if (window) {
-		let {Vue} = window;
-		if (Vue) {
-			Vue.component(VueWordCloud.name, VueWordCloud);
-		}
-	}
-}
-
-export default VueWordCloud;
+export default component;

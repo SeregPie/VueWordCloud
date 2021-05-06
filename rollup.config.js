@@ -1,21 +1,19 @@
-import {terser} from 'rollup-plugin-terser';
-import buble from '@rollup/plugin-buble';
-import resolve from '@rollup/plugin-node-resolve';
+import {babel} from '@rollup/plugin-babel';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
 import serve from 'rollup-plugin-serve';
-import stringify from 'rollup-plugin-stringify';
+import {terser} from 'rollup-plugin-terser';
 
 import {main} from './package.json';
 
 let plugins = [
-	stringify({
-		plugins: [
-			buble(),
-			terser(),
-		],
+	nodeResolve(),
+	babel({
+		babelHelpers: 'bundled',
+		presets: [['@babel/preset-env', {
+			targets: 'defaults and not IE 11',
+		}]],
 	}),
-	resolve(),
-	buble({objectAssign: 'Object.assign'}),
-	terser({mangle: {properties: {regex: /^ǂ/}}}),
+	terser(),
 ];
 
 if (process.env.ROLLUP_WATCH) {
