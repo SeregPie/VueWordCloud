@@ -11,11 +11,14 @@ import {
 } from 'vue';
 
 import toCSSFont from '../utils/toCSSFont';
+import isArray from '../utils/isArray';
+import isObject from '../utils/isObject';
+import isString from '../utils/isString';
 
 export default defineComponent({
 	name: 'VueWordCloud',
 	props: {
-		/*ationDuration: {
+		/*animationDuration: {
 			type: Number,
 			default: 1000,
 		},*/
@@ -98,25 +101,58 @@ export default defineComponent({
 		let wordsRef = computed(() => {
 			let {
 				words,
-				fontFamily,
-				fontWeight,
-				fontVariant,
-				fontStyle,
+				fontFamily: defaultFontFamily,
+				fontWeight: defaultFontWeight,
+				fontVariant: defaultFontVariant,
+				fontStyle: defaultFontStyle,
 			} = props;
+			let defaultWeight = 1;
+			let result = [];
 			if (words) {
-				return words.map(({
-					text,
-					weight,
-				}) => ({
-					text,
-					weight,
-					fontFamily,
-					fontWeight,
-					fontVariant,
-					fontStyle,
-				}));
+				words.forEach(word => {
+					if (word) {
+						if (isString(word)) {
+							text = word;
+						} else
+						if (isArray(word)) {
+							[text, weight] = word;
+						} else
+						if (isObject(word)) {
+							({
+								color,
+								fontFamily,
+								fontStyle,
+								fontVariant,
+								fontWeight,
+								text,
+								weight,
+							} = word);
+						}
+					}
+				});
+				if (words.length) {
+					let maxWeight = firstWord.ǂweight;
+					let minWeight = lastWord.ǂweight;
+					if (minWeight < maxWeight) {
+						let fontSizeRange = (() => {
+							if (fontSizeRatio > 0) {
+								return 1 / fontSizeRatio;
+							}
+							if (minWeight > 0) {
+								return maxWeight / minWeight;
+							}
+							if (maxWeight < 0) {
+								return minWeight / maxWeight;
+							}
+							return 1 + maxWeight - minWeight;
+						})();
+						words.forEach(word => {
+							word.ǂfontSize = Math_map(word.ǂweight, minWeight, maxWeight, 1, fontSizeRange);
+						});
+					}
+				}
 			}
-			return [];
+			return result;
 		});
 		let elRef = shallowRef();
 		let cloudWidthRef = shallowRef(0);
@@ -134,15 +170,14 @@ export default defineComponent({
 				clearInterval(timer);
 			});
 		});
-		let timer;
-		watchEffect(() => {
+		watchEffect(onInvalidate => {
 			let words = wordsRef.value;
 			let cloudWidth = cloudWidthRef.value;
 			let cloudHeight = cloudHeightRef.value;
-			clearTimeout(timer);
-			timer = setTimeout(() => {
+			let timer = setTimeout(() => {
 				let cloudWords = words.map(({
 					fontFamily,
+					fontSize,
 					fontStyle,
 					fontVariant,
 					fontWeight,
@@ -153,7 +188,7 @@ export default defineComponent({
 					color: 'Black',
 					font: toCSSFont(
 						fontFamily,
-						8 + Math.random() * 16,
+						fontSize,
 						fontStyle,
 						fontVariant,
 						fontWeight,
@@ -165,12 +200,12 @@ export default defineComponent({
 					top: Math.random() * cloudHeight,
 					weight,
 					//word,
-				}))
+				}));
 				cloudWordsRef.value = cloudWords;
 			}, 1);
-		});
-		watch(cloudWordsRef, value => {
-			emit('update:cloudWords', value);
+			onInvalidate(() => {
+				clearTimeout(timer);
+			});
 		});
 		return (() => {
 			let cloudWords = cloudWordsRef.value;
