@@ -6,12 +6,11 @@
 		proxyRefs,
 		shallowRef,
 	} = Vue;
-	let {createVuetify} = Vuetify;
-
-	let vuetify = createVuetify();
 
 	let app = createApp({
 		components: {
+			PButton: primevue.button,
+			PInputText: primevue.inputtext,
 			VueWordCloud,
 		},
 		setup() {
@@ -71,9 +70,6 @@
 		},
 	});
 
-	(app
-		.use(vuetify)
-		.mount('body')
-	);
+	app.mount('body');
 
 })();

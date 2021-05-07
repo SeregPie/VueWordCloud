@@ -8,15 +8,15 @@
 		/>
 		<title>VueWordCloud</title>
 		<link
-			href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900"
+			href="https://unpkg.com/primevue@3/resources/primevue.min.css"
 			rel="stylesheet"
 		/>
 		<link
-			href="https://unpkg.com/@mdi/font@5/css/materialdesignicons.min.css"
+			href="https://unpkg.com/primevue@3/resources/themes/saga-blue/theme.css"
 			rel="stylesheet"
 		/>
 		<link
-			href="https://unpkg.com/vuetify@next/dist/vuetify.css"
+			href="https://unpkg.com/primeicons@4/primeicons.css"
 			rel="stylesheet"
 		/>
 		<link
@@ -29,7 +29,9 @@
 			}
 		</style>
 		<script src="https://unpkg.com/vue@3"></script>
-		<script src="https://unpkg.com/vuetify@next/dist/vuetify.js"></script>
+		<script src="https://unpkg.com/primevue@3/inputtext/inputtext.min.js"></script>
+		<script src="https://unpkg.com/primevue@3/ripple/ripple.min.js"></script>
+		<script src="https://unpkg.com/primevue@3/button/button.min.js"></script>
 		<script src="https://unpkg.com/chance@1"></script>
 		<script src="./index.js"></script>
 		<script
@@ -38,15 +40,19 @@
 		></script>
 	</head>
 	<body>
-		<v-app>
-			<v-main>
+		<div>
+			<p-button
+				label="randomize"
+				@click="input.words.regen()"
+			></p-button>
+			<div>
 				<vue-word-cloud
 					v-bind="{
 						fontFamily,
 						words,
 					}"
 				></vue-word-cloud>
-			</v-main>
-		</v-app>
+			</div>
+		</div>
 	</body>
 </html>
