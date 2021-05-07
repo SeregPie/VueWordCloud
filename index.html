@@ -7,18 +7,14 @@
 			name="viewport"
 		/>
 		<title>VueWordCloud</title>
-		<link
-			href="https://unpkg.com/primevue@3/resources/primevue.min.css"
-			rel="stylesheet"
-		/>
-		<link
-			href="https://unpkg.com/primevue@3/resources/themes/saga-blue/theme.css"
-			rel="stylesheet"
-		/>
-		<link
-			href="https://unpkg.com/primeicons@4/primeicons.css"
-			rel="stylesheet"
-		/>
+
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@^5.0.0/css/materialdesignicons.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/animate.css@^4.0.0/animate.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/quasar@2.0.0-beta.15/dist/quasar.prod.css" rel="stylesheet" type="text/css">
+
+
 		<link
 			href="https://fonts.googleapis.com/css?family=Arizonia|Berkshire+Swash|Cookie|Great+Vibes|Just+Another+Hand|Leckerli+One|Lobster+Two|Merienda+One|Oleo+Script|Pacifico"
 			rel="stylesheet"
@@ -29,9 +25,11 @@
 			}
 		</style>
 		<script src="https://unpkg.com/vue@3"></script>
-		<script src="https://unpkg.com/primevue@3/inputtext/inputtext.min.js"></script>
-		<script src="https://unpkg.com/primevue@3/ripple/ripple.min.js"></script>
-		<script src="https://unpkg.com/primevue@3/button/button.min.js"></script>
+
+
+ 		<script defer src="https://cdn.jsdelivr.net/npm/quasar@2.0.0-beta.15/dist/quasar.umd.prod.js"></script>
+
+
 		<script src="https://unpkg.com/chance@1"></script>
 		<script src="./index.js"></script>
 		<script
@@ -41,10 +39,38 @@
 	</head>
 	<body>
 		<div>
-			<p-button
-				label="randomize"
-				@click="input.words.regen()"
-			></p-button>
+			<div>
+				<q-checkbox
+					v-model="input.progress.value"
+					label="show process"
+				/>
+			</div>
+			<q-divider></q-divider>
+			<div>
+				<div>
+					<q-input
+						:auto-resize="false"
+						:rows="8"
+						filled
+						stack-label
+						label="words & weights"
+						type="textarea"
+					></q-input>
+				</div>
+				<q-btn
+					label="randomize"
+					@click="input.words.regen()"
+				></q-btn>
+			</div>
+			<div>
+				<q-select
+					v-model="input.fontFamily.value"
+					:options="input.fontFamily.values"
+					filled
+					label="font family"
+				></q-select>
+
+			</div>
 			<div>
 				<vue-word-cloud
 					v-bind="{

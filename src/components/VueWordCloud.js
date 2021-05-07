@@ -318,7 +318,8 @@ export default defineComponent({
 				controller.abort();
 			});
 			let {signal} = controller;
-			await sleep(1000);
+			await sleep(2000);
+			console.log(signal.aborted);
 			if (signal.aborted) {
 				return;
 			}

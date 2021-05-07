@@ -9,12 +9,13 @@
 
 	let app = createApp({
 		components: {
-			PButton: primevue.button,
-			PInputText: primevue.inputtext,
 			VueWordCloud,
 		},
 		setup() {
 			let input = (() => {
+				let progress = proxyRefs({
+					value: shallowRef(false),
+				});
 				let fontFamily = (() => {
 					let values = [
 						'Arizonia',
@@ -59,6 +60,7 @@
 				})();
 				return {
 					fontFamily,
+					progress,
 					words,
 				};
 			})();
@@ -70,6 +72,7 @@
 		},
 	});
 
+	app.use(Quasar);
 	app.mount('body');
 
 })();

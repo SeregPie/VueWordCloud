@@ -13,7 +13,7 @@ let plugins = [
 			targets: 'defaults and not IE 11',
 		}]],
 	}),
-	terser(),
+	//terser(),
 ];
 
 if (process.env.ROLLUP_WATCH) {

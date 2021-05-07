@@ -1,1 +1,650 @@
-!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e(require("vue")):"function"==typeof define&&define.amd?define(["vue"],e):(t="undefined"!=typeof globalThis?globalThis:t||self).VueWordCloud=e(t.Vue)}(this,(function(t){"use strict";var e=Array.isArray;function n(t){if(t){let e=typeof t;return"object"===e||"function"===e}return!1}function o(t){return"string"==typeof t}function a(t,e,n,o,a){let r=document.createElement("span");return r.style.font="1px serif",r.style.fontFamily=t,r.style.fontSize=`${e}px`,r.style.fontStyle=n,r.style.fontVariant=o,r.style.fontWeight=a,r.style.font}function r(t){return()=>t}return t.defineComponent({name:"VueWordCloud",props:{animationDuration:{type:Number,default:1e3},animationEasing:{type:String,default:"ease"},animationOverlap:{type:Number,default:1},enterAnimation:{type:[Object,String],default:r({opacity:0})},fontFamily:{type:String,default:"serif"},fontSizeRatio:{type:Number,default:0},fontStyle:{type:String,default:"normal"},fontVariant:{type:String,default:"normal"},fontWeight:{type:String,default:"normal"},leaveAnimation:{type:[Object,String],default:r({opacity:0})},spacing:{type:Number,default:0},words:{type:Array,default:function(){return[]}}},setup(r,{emit:l,slots:i}){let f=t.shallowRef(),u=t.shallowRef(0),s=t.shallowRef(0);t.onMounted((()=>{!function(e,{immediate:n=!1}={}){let o,a,r,l=!1,i=!1;a=()=>{try{e()}finally{i||r()}},r=()=>{o=requestAnimationFrame(a)};let f=n?a:r,u=()=>{i||(i=!0,cancelAnimationFrame(o))},s=()=>{l||(l=!0,u())};t.getCurrentInstance()&&t.onUnmounted(s),f()}((()=>{let t=f.value;t&&(u.value=t.offsetWidth,s.value=t.offsetHeight)}),{immediate:!0})}));let m=t.computed((()=>{let t=u.value,e=s.value;return t&&e?t/e:1}));t.computed((()=>{let t=r.animationOverlap;return t=Math.abs(t),t<1&&(t=1/t),t})),t.computed((()=>{let{animationDuration:t,enterAnimation:e,leaveAnimation:a}=r;if(n(e)&&n(a)){let n=e,o={},r=a;return Object.keys({...n,...r}).forEach((t=>{o[t]=null})),{css:!1,appear:!0,onBeforeEnter(t){Object.assign(t.style,n)},onEnter(e,n){Object.assign(e.style,o),setTimeout(n,t)},onLeave(e,n){Object.assign(e.style,r),setTimeout(n,t)}}}return o(e)&&o(a)?{duration:t,appear:!0,enterActiveClass:e,leaveActiveClass:a}:{}}));let p=t.computed((()=>{let t=r.fontSizeRatio;return t=Math.abs(t),t>1&&(t=1/t),t})),h=t.computed((()=>{let{fontFamily:t,fontStyle:l,fontVariant:i,fontWeight:f,words:u}=r,s="",m=1,p=new Map;return u.forEach((r=>{let u,{color:h,fontFamily:c=t,fontStyle:d=l,fontVariant:y=i,fontWeight:g=f,rotation:v,text:w=s,weight:b=m}=(()=>{if(o(r)){return{text:r}}if(e(r)){let[t,e]=r;return{text:t,weight:e}}return n(r)?r:{}})();{let t=a(c,1,d,y,g);for(u=JSON.stringify([w,t]);p.has(u);)u+="!"}p.set(u,{color:h,fontFamily:c,fontStyle:d,fontVariant:y,fontWeight:g,rotation:v,text:w,weight:b,word:r})})),p})),c=t.computed((()=>{let t=h.value,e=p.value,n=1/0,o=-1/0;t.forEach((({weight:t})=>{n=Math.min(n,t),o=Math.max(o,t)}));let a=n<o?e?1/e:n>0?o/n:o<0?n/o:1+o-n:1,r=new Map;return t.forEach((({weight:t},e)=>{let l=(f=1)+(t-(i=n))*(a-f)/(o-i);var i,f;r.set(e,l)})),r})),d=t.computed((()=>{let t=h.value,e=c.value,n=new Map;return t.forEach((({fontFamily:t,fontStyle:o,fontVariant:a,fontWeight:r,rotation:l,text:i},f)=>{let u=e.get(f);n.set(f,{fontFamily:t,fontSize:u,fontStyle:o,fontVariant:a,fontWeight:r,rotation:l,text:i})})),n})),y=t.shallowRef(new Map),g=t.shallowRef(0),v=t.shallowRef(0);t.watchEffect((async t=>{let e=d.value;m.value;let n=new AbortController;t((()=>{n.abort()}));let{signal:o}=n;var r;if(await(r=1e3,new Promise((t=>{setTimeout(t,r)}))),o.aborted)return;let l=0,i=0,f=0,u=0,s=new Map,p=document.createElement("canvas").getContext("2d");if(e.forEach((({fontFamily:t,fontSize:e,fontStyle:n,fontVariant:o,fontWeight:r,rotation:m=Math.random()*Math.PI,text:h},c)=>{let d,y,g=a(t,e,n,o,r);{p.font=g;let t=p.measureText(h).width+e,n=2*e,o=m,a=Math.abs(Math.cos(o)),r=Math.abs(Math.sin(o));d=t*a+n*r,y=t*r+n*a}let v=(w=l-d)+(i+d-w)*Math.random();var w;let b=((t,e)=>t+(e-t)*Math.random())(f-y,u+y);l=Math.min(l,v),i=Math.max(i,v+d),f=Math.min(f,b),u=Math.max(u,b+y),s.set(c,{left:v,rotation:m,top:b})})),o.aborted)return;let h=(l+i)/2,c=(f+u)/2,w=i-l,b=u-f;s.forEach((t=>{t.left-=h,t.top-=c})),o.aborted||(y.value=s,g.value=w,v.value=b)}));let w=t.computed((()=>{let t=g.value,e=v.value;if(t&&e){let n=u.value,o=s.value;return Math.min(n/t,o/e)}return 0})),b=t.computed((()=>{let t=h.value,e=new Map;return t.forEach((({color:t="Black"},n)=>{e.set(n,t)})),e})),M=t.computed((()=>{let t=c.value,e=y.value,n=w.value,o=new Map;return e.forEach((({left:e,top:a},r)=>{let l=t.get(r);l*=n,e*=n,a*=n,o.set(r,{fontSize:l,left:e,top:a})})),o})),S=t.computed((()=>{let t=h.value,e=b.value,n=M.value,o=y.value,r=[];return o.forEach((({rotation:o},l)=>{let{fontFamily:i,fontStyle:f,fontVariant:u,fontWeight:s,text:m,weight:p,word:h}=t.get(l),{fontSize:c,left:d,top:y}=n.get(l),g=e.get(l),v=a(i,c,f,u,s);r.push({word:h,key:l,text:m,weight:p,font:v,left:d,top:y,rotation:o,color:g})})),r}));return()=>{let e=S.value,n=(()=>{let t=i.word;return t||(({text:t})=>t)})();return t.h("div",{style:{height:"100%",position:"relative",width:"100%"},ref:f},[t.h("div",{style:{bottom:"50%",position:"absolute",right:"50%",transform:"translate(50%,50%)"}},e.map((({color:e,font:o,key:a,left:r,rotation:l,text:i,top:f,weight:u,word:s})=>t.h("div",{key:a,style:{color:e,font:o,left:`${r}px`,position:"absolute",top:`${f}px`,transform:`rotate(${l}rad)`,transformOrigin:"center",whiteSpace:"nowrap"}},n({text:i,weight:u,word:s})))))])}}})}));
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue')) :
+	typeof define === 'function' && define.amd ? define(['vue'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.VueWordCloud = factory(global.Vue));
+}(this, (function (vue) { 'use strict';
+
+	var isArray = Array.isArray;
+
+	function isObject (value) {
+	  if (value) {
+	    let type = typeof value;
+	    return type === 'object' || type === 'function';
+	  }
+
+	  return false;
+	}
+
+	function isString (value) {
+	  return typeof value === 'string';
+	}
+
+	function scaleNumber (n, inMin, inMax, outMin, outMax) {
+	  return outMin + (n - inMin) * (outMax - outMin) / (inMax - inMin);
+	}
+
+	function toCSSFont (family, size, style, variant, weight) {
+	  let el = document.createElement('span');
+	  el.style.font = '1px serif';
+	  el.style.fontFamily = family;
+	  el.style.fontSize = `${size}px`;
+	  el.style.fontStyle = style;
+	  el.style.fontVariant = variant;
+	  el.style.fontWeight = weight;
+	  return el.style.font;
+	}
+
+	function sleep (ms) {
+	  return new Promise(resolve => {
+	    setTimeout(resolve, ms);
+	  });
+	}
+
+	function useFFF (fn, {
+	  immediate = false
+	} = {}) {
+	  let stopped = false;
+	  let paused = false;
+	  let id;
+	  let loop0;
+	  let loop1;
+
+	  loop0 = () => {
+	    try {
+	      fn();
+	    } finally {
+	      if (!paused) {
+	        loop1();
+	      }
+	    }
+	  };
+
+	  loop1 = () => {
+	    id = requestAnimationFrame(loop0);
+	  };
+
+	  let start = immediate ? loop0 : loop1;
+
+	  let resume = () => {
+	    if (!stopped) {
+	      if (paused) {
+	        paused = false;
+	        start();
+	      }
+	    }
+	  };
+
+	  let pause = () => {
+	    if (!paused) {
+	      paused = true;
+	      cancelAnimationFrame(id);
+	    }
+	  };
+
+	  let stop = () => {
+	    if (!stopped) {
+	      stopped = true;
+	      pause();
+	    }
+	  };
+
+	  if (vue.getCurrentInstance()) {
+	    vue.onUnmounted(stop);
+	  }
+
+	  start();
+	  return {
+	    pause,
+	    resume,
+	    stop
+	  };
+	}
+
+	function constant (value) {
+	  return () => value;
+	}
+
+	function stubArray () {
+	  return [];
+	}
+
+	var component = vue.defineComponent({
+	  name: 'VueWordCloud',
+	  props: {
+	    animationDuration: {
+	      type: Number,
+	      default: 1000
+	    },
+	    animationEasing: {
+	      type: String,
+	      default: 'ease'
+	    },
+	    animationOverlap: {
+	      type: Number,
+	      default: 1
+	    },
+
+	    /*colorStrategy: {
+	    	type: [String, Function],
+	    	default: 'Black',
+	    },*/
+	    enterAnimation: {
+	      type: [Object, String],
+	      default: constant({
+	        opacity: 0
+	      })
+	    },
+	    fontFamily: {
+	      type: String,
+	      default: 'serif'
+	    },
+	    fontSizeRatio: {
+	      type: Number,
+	      default: 0
+	    },
+	    fontStyle: {
+	      type: String,
+	      default: 'normal'
+	    },
+	    fontVariant: {
+	      type: String,
+	      default: 'normal'
+	    },
+	    fontWeight: {
+	      type: String,
+	      default: 'normal'
+	    },
+	    leaveAnimation: {
+	      type: [Object, String],
+	      default: constant({
+	        opacity: 0
+	      })
+	    },
+
+	    /*loadFont: {
+	    	type: Function,
+	    	default(fontFamily, fontStyle, fontWeight, text) {
+	    		return document.fonts.load([fontStyle, fontWeight, '1px', fontFamily].join(' '), text);
+	    	},
+	    },*/
+
+	    /*rotationStrategy: {
+	    	type: [String, Function],
+	    	default: 0,
+	    },*/
+	    spacing: {
+	      type: Number,
+	      default: 0
+	    },
+	    words: {
+	      type: Array,
+	      default: stubArray
+	    }
+	  },
+
+	  setup(props, {
+	    emit,
+	    slots
+	  }) {
+	    let elRef = vue.shallowRef();
+	    let cloudWidthRef = vue.shallowRef(0);
+	    let cloudHeightRef = vue.shallowRef(0);
+	    vue.onMounted(() => {
+	      useFFF(() => {
+	        let el = elRef.value;
+
+	        if (el) {
+	          cloudWidthRef.value = el.offsetWidth;
+	          cloudHeightRef.value = el.offsetHeight;
+	        }
+	      }, {
+	        immediate: true
+	      });
+	    });
+	    let cloudAspectRef = vue.computed(() => {
+	      let width = cloudWidthRef.value;
+	      let height = cloudHeightRef.value;
+
+	      if (width && height) {
+	        return width / height;
+	      }
+
+	      return 1;
+	    });
+	    vue.computed(() => {
+	      let n = props.animationOverlap;
+	      n = Math.abs(n);
+
+	      if (n < 1) {
+	        n = 1 / n;
+	      }
+
+	      return n;
+	    });
+	    vue.computed(() => {
+	      let {
+	        animationDuration: duration,
+	        enterAnimation: enter,
+	        leaveAnimation: leave
+	      } = props;
+
+	      if (isObject(enter) && isObject(leave)) {
+	        let enterFrom = enter;
+	        let enterTo = {};
+	        let leaveTo = leave;
+	        Object.keys({ ...enterFrom,
+	          ...leaveTo
+	        }).forEach(key => {
+	          enterTo[key] = null;
+	        });
+	        return {
+	          css: false,
+	          appear: true,
+
+	          onBeforeEnter(el) {
+	            Object.assign(el.style, enterFrom);
+	          },
+
+	          onEnter(el, done) {
+	            Object.assign(el.style, enterTo);
+	            setTimeout(done, duration);
+	          },
+
+	          onLeave(el, done) {
+	            Object.assign(el.style, leaveTo);
+	            setTimeout(done, duration);
+	          }
+
+	        };
+	      }
+
+	      if (isString(enter) && isString(leave)) {
+	        return {
+	          duration: duration,
+	          appear: true,
+	          enterActiveClass: enter,
+	          leaveActiveClass: leave
+	        };
+	      }
+
+	      return {};
+	    });
+	    let fontSizeRatioRef = vue.computed(() => {
+	      let n = props.fontSizeRatio;
+	      n = Math.abs(n);
+
+	      if (n > 1) {
+	        n = 1 / n;
+	      }
+
+	      return n;
+	    });
+	    let cpnyWordsRef = vue.computed(() => {
+	      let {
+	        fontFamily: defaultFontFamily,
+	        fontStyle: defaultFontStyle,
+	        fontVariant: defaultFontVariant,
+	        fontWeight: defaultFontWeight,
+	        words
+	      } = props;
+	      let defaultText = '';
+	      let defaultWeight = 1;
+	      let result = new Map();
+	      words.forEach(word => {
+	        let {
+	          color,
+	          fontFamily = defaultFontFamily,
+	          fontStyle = defaultFontStyle,
+	          fontVariant = defaultFontVariant,
+	          fontWeight = defaultFontWeight,
+	          rotation,
+	          text = defaultText,
+	          weight = defaultWeight
+	        } = (() => {
+	          if (isString(word)) {
+	            let text = word;
+	            return {
+	              text
+	            };
+	          }
+
+	          if (isArray(word)) {
+	            let [text, weight] = word;
+	            return {
+	              text,
+	              weight
+	            };
+	          }
+
+	          if (isObject(word)) {
+	            return word;
+	          }
+
+	          return {};
+	        })(); // todo
+
+
+	        let key;
+	        {
+	          let font = toCSSFont(fontFamily, 1, fontStyle, fontVariant, fontWeight);
+	          key = JSON.stringify([text, font]);
+
+	          while (result.has(key)) {
+	            key += '!';
+	          }
+	        }
+	        result.set(key, {
+	          color,
+	          fontFamily,
+	          fontStyle,
+	          fontVariant,
+	          fontWeight,
+	          rotation,
+	          text,
+	          weight,
+	          word
+	        });
+	      });
+	      return result;
+	    });
+	    let omjnWordsRef = vue.computed(() => {
+	      let words = cpnyWordsRef.value;
+	      let fontSizeRatio = fontSizeRatioRef.value;
+	      let minWeight = +Infinity;
+	      let maxWeight = -Infinity;
+	      words.forEach(({
+	        weight
+	      }) => {
+	        minWeight = Math.min(minWeight, weight);
+	        maxWeight = Math.max(maxWeight, weight);
+	      });
+	      let minFontSize = 1;
+
+	      let maxFontSize = (() => {
+	        if (minWeight < maxWeight) {
+	          if (fontSizeRatio) {
+	            return 1 / fontSizeRatio;
+	          }
+
+	          if (minWeight > 0) {
+	            return maxWeight / minWeight;
+	          }
+
+	          if (maxWeight < 0) {
+	            return minWeight / maxWeight;
+	          }
+
+	          return 1 + maxWeight - minWeight;
+	        }
+
+	        return 1;
+	      })();
+
+	      let result = new Map();
+	      words.forEach(({
+	        weight
+	      }, key) => {
+	        let fontSize = scaleNumber(weight, minWeight, maxWeight, minFontSize, maxFontSize);
+	        result.set(key, fontSize);
+	      });
+	      return result;
+	    });
+	    let ijqiWordsRef = vue.computed(() => {
+	      let cpnyWords = cpnyWordsRef.value;
+	      let omjnWords = omjnWordsRef.value;
+	      let result = new Map();
+	      cpnyWords.forEach(({
+	        fontFamily,
+	        fontStyle,
+	        fontVariant,
+	        fontWeight,
+	        rotation,
+	        text
+	      }, key) => {
+	        let fontSize = omjnWords.get(key);
+	        result.set(key, {
+	          fontFamily,
+	          fontSize,
+	          fontStyle,
+	          fontVariant,
+	          fontWeight,
+	          rotation,
+	          text
+	        });
+	      });
+	      return result;
+	    });
+	    let satpWordsRef = vue.shallowRef(new Map());
+	    let satpWidthRef = vue.shallowRef(0);
+	    let satpHeightRef = vue.shallowRef(0);
+	    vue.watchEffect(async onInvalidate => {
+	      let words = ijqiWordsRef.value;
+	      cloudAspectRef.value;
+	      let controller = new AbortController();
+	      onInvalidate(() => {
+	        controller.abort();
+	      });
+	      let {
+	        signal
+	      } = controller;
+	      await sleep(2000);
+	      console.log(signal.aborted);
+
+	      if (signal.aborted) {
+	        return;
+	      }
+
+	      let ojozLeft = 0;
+	      let ojozRight = 0;
+	      let ojozTop = 0;
+	      let ojozBottom = 0;
+	      let satpWords = new Map();
+	      let canvas = document.createElement('canvas');
+	      let ctx = canvas.getContext('2d');
+	      words.forEach(({
+	        fontFamily,
+	        fontSize,
+	        fontStyle,
+	        fontVariant,
+	        fontWeight,
+	        rotation = Math.random() * Math.PI,
+	        text
+	      }, key) => {
+	        let font = toCSSFont(fontFamily, fontSize, fontStyle, fontVariant, fontWeight);
+	        let width;
+	        let height;
+	        {
+	          ctx.font = font;
+	          let x = ctx.measureText(text).width + fontSize;
+	          let y = fontSize * 2;
+	          let a = rotation;
+	          let cosA = Math.abs(Math.cos(a));
+	          let sinA = Math.abs(Math.sin(a));
+	          width = x * cosA + y * sinA;
+	          height = x * sinA + y * cosA;
+	        }
+
+	        let left = ((min, max) => min + (max - min) * Math.random())(ojozLeft - width, ojozRight + width);
+
+	        let top = ((min, max) => min + (max - min) * Math.random())(ojozTop - height, ojozBottom + height);
+
+	        ojozLeft = Math.min(ojozLeft, left);
+	        ojozRight = Math.max(ojozRight, left + width);
+	        ojozTop = Math.min(ojozTop, top);
+	        ojozBottom = Math.max(ojozBottom, top + height);
+	        satpWords.set(key, {
+	          left,
+	          rotation,
+	          top
+	        });
+	      });
+
+	      if (signal.aborted) {
+	        return;
+	      }
+
+	      let satpLeft = (ojozLeft + ojozRight) / 2;
+	      let satpTop = (ojozTop + ojozBottom) / 2;
+	      let satpWidth = ojozRight - ojozLeft;
+	      let satpHeight = ojozBottom - ojozTop;
+	      satpWords.forEach(word => {
+	        word.left -= satpLeft;
+	        word.top -= satpTop;
+	      });
+
+	      if (signal.aborted) {
+	        return;
+	      }
+
+	      satpWordsRef.value = satpWords;
+	      satpWidthRef.value = satpWidth;
+	      satpHeightRef.value = satpHeight;
+	    });
+	    let satpScalingRef = vue.computed(() => {
+	      let satpWidth = satpWidthRef.value;
+	      let satpHeight = satpHeightRef.value;
+
+	      if (satpWidth && satpHeight) {
+	        let cloudWidth = cloudWidthRef.value;
+	        let cloudHeight = cloudHeightRef.value;
+	        return Math.min(cloudWidth / satpWidth, cloudHeight / satpHeight);
+	      }
+
+	      return 0;
+	    });
+	    let btciWordsRef = vue.computed(() => {
+	      let cpnyWords = cpnyWordsRef.value;
+	      let result = new Map();
+	      cpnyWords.forEach(({
+	        color = 'Black'
+	      }, key) => {
+	        result.set(key, color);
+	      });
+	      return result;
+	    });
+	    let eicpWordsRef = vue.computed(() => {
+	      let omjnWords = omjnWordsRef.value;
+	      let satpWords = satpWordsRef.value;
+	      let satpScaling = satpScalingRef.value;
+	      let result = new Map();
+	      satpWords.forEach(({
+	        left,
+	        top
+	      }, key) => {
+	        let fontSize = omjnWords.get(key);
+	        fontSize *= satpScaling;
+	        left *= satpScaling;
+	        top *= satpScaling;
+	        result.set(key, {
+	          fontSize,
+	          left,
+	          top
+	        });
+	      });
+	      return result;
+	    });
+	    let cloudWordsRef = vue.computed(() => {
+	      let cpnyWords = cpnyWordsRef.value;
+	      let btciWords = btciWordsRef.value;
+	      let eicpWords = eicpWordsRef.value;
+	      let satpWords = satpWordsRef.value;
+	      let result = [];
+	      satpWords.forEach(({
+	        rotation
+	      }, key) => {
+	        let {
+	          fontFamily,
+	          fontStyle,
+	          fontVariant,
+	          fontWeight,
+	          text,
+	          weight,
+	          word
+	        } = cpnyWords.get(key);
+	        let {
+	          fontSize,
+	          left,
+	          top
+	        } = eicpWords.get(key);
+	        let color = btciWords.get(key);
+	        let font = toCSSFont(fontFamily, fontSize, fontStyle, fontVariant, fontWeight);
+	        result.push({
+	          word,
+	          key,
+	          text,
+	          weight,
+	          font,
+	          left,
+	          top,
+	          rotation,
+	          color
+	        });
+	      });
+	      return result;
+	    });
+	    return () => {
+	      let words = cloudWordsRef.value;
+
+	      let genWord = (() => {
+	        let slot = slots.word;
+
+	        if (slot) {
+	          return slot;
+	        }
+
+	        return ({
+	          text
+	        }) => text;
+	      })();
+
+	      return vue.h('div', {
+	        style: {
+	          height: '100%',
+	          position: 'relative',
+	          width: '100%'
+	        },
+	        ref: elRef
+	      }, [vue.h('div', {
+	        style: {
+	          bottom: '50%',
+	          position: 'absolute',
+	          right: '50%',
+	          transform: 'translate(50%,50%)'
+	        }
+	      }, words.map(({
+	        color,
+	        font,
+	        key,
+	        left,
+	        rotation,
+	        text,
+	        top,
+	        weight,
+	        word
+	      }) => {
+	        return vue.h('div', {
+	          key,
+	          style: {
+	            color: color,
+	            font: font,
+	            left: `${left}px`,
+	            position: 'absolute',
+	            top: `${top}px`,
+	            transform: `rotate(${rotation}rad)`,
+	            transformOrigin: 'center',
+	            whiteSpace: 'nowrap'
+	          }
+	        }, genWord({
+	          text,
+	          weight,
+	          word
+	        }));
+	      }))]);
+	    };
+	  }
+
+	});
+
+	return component;
+
+})));
