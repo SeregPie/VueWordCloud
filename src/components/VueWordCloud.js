@@ -3,53 +3,45 @@ import {
 	defineComponent,
 	h,
 	onMounted,
-	onUnmounted,
 	shallowRef,
 	TransitionGroup,
 	watch,
 	watchEffect,
 } from 'vue';
 
-import toCSSFont from '../utils/toCSSFont';
 import isArray from '../utils/isArray';
 import isObject from '../utils/isObject';
 import isString from '../utils/isString';
+import scaleNumber from '../utils/scaleNumber';
+import toCSSFont from '../utils/toCSSFont';
+import sleep from '../utils/sleep';
+import useFFF from '../utils/useFFF';
+import constant from '../utils/constant';
+import stubArray from '../utils/stubArray';
 
 export default defineComponent({
 	name: 'VueWordCloud',
 	props: {
-		/*animationDuration: {
+		animationDuration: {
 			type: Number,
 			default: 1000,
-		},*/
-		/*animationEasing: {
+		},
+		animationEasing: {
 			type: String,
 			default: 'ease',
-		},*/
-		/*animationOverlap: {
+		},
+		animationOverlap: {
 			type: Number,
 			default: 1,
-		},*/
-		/*color: {
+		},
+		/*colorStrategy: {
 			type: [String, Function],
 			default: 'Black',
 		},*/
-		/*createCanvas: {
-			type: Function,
-			default() {
-				return document.createElement('canvas');
-			},
-		},*/
-		/*createWorker: {
-			type: Function,
-			default(code) {
-				return new Worker(URL.createObjectURL(new Blob([code])));
-			},
-		},*/
-		/*enterAnimation: {
+		enterAnimation: {
 			type: [Object, String],
-			default: Function_constant({opacity: 0}),
-		},*/
+			default: constant({opacity: 0}),
+		},
 		fontFamily: {
 			type: String,
 			default: 'serif',
@@ -70,145 +62,417 @@ export default defineComponent({
 			type: String,
 			default: 'normal',
 		},
-		/*leaveAnimation: {
+		leaveAnimation: {
 			type: [Object, String],
-			default: Function_constant({opacity: 0}),
-		},*/
+			default: constant({opacity: 0}),
+		},
 		/*loadFont: {
 			type: Function,
 			default(fontFamily, fontStyle, fontWeight, text) {
 				return document.fonts.load([fontStyle, fontWeight, '1px', fontFamily].join(' '), text);
 			},
 		},*/
-		/*rotation: {
-			type: [Number, Function],
-			default: 0,
-		},*/
-		/*rotationUnit: {
+		/*rotationStrategy: {
 			type: [String, Function],
-			default: 'turn',
+			default: 0,
 		},*/
 		spacing: {
 			type: Number,
 			default: 0,
 		},
-		words: Array,
+		words: {
+			type: Array,
+			default: stubArray,
+		},
 	},
 	setup(props, {
 		emit,
 		slots,
 	}) {
-		let wordsRef = computed(() => {
-			let {
-				words,
-				fontFamily: defaultFontFamily,
-				fontWeight: defaultFontWeight,
-				fontVariant: defaultFontVariant,
-				fontStyle: defaultFontStyle,
-			} = props;
-			let defaultWeight = 1;
-			let result = [];
-			if (words) {
-				words.forEach(word => {
-					if (word) {
-						if (isString(word)) {
-							text = word;
-						} else
-						if (isArray(word)) {
-							[text, weight] = word;
-						} else
-						if (isObject(word)) {
-							({
-								color,
-								fontFamily,
-								fontStyle,
-								fontVariant,
-								fontWeight,
-								text,
-								weight,
-							} = word);
-						}
-					}
-				});
-				if (words.length) {
-					let maxWeight = firstWord.ǂweight;
-					let minWeight = lastWord.ǂweight;
-					if (minWeight < maxWeight) {
-						let fontSizeRange = (() => {
-							if (fontSizeRatio > 0) {
-								return 1 / fontSizeRatio;
-							}
-							if (minWeight > 0) {
-								return maxWeight / minWeight;
-							}
-							if (maxWeight < 0) {
-								return minWeight / maxWeight;
-							}
-							return 1 + maxWeight - minWeight;
-						})();
-						words.forEach(word => {
-							word.ǂfontSize = Math_map(word.ǂweight, minWeight, maxWeight, 1, fontSizeRange);
-						});
-					}
-				}
-			}
-			return result;
-		});
 		let elRef = shallowRef();
 		let cloudWidthRef = shallowRef(0);
 		let cloudHeightRef = shallowRef(0);
-		let cloudWordsRef = shallowRef([]);
 		onMounted(() => {
-			let timer = setInterval(() => {
+			useFFF(() => {
 				let el = elRef.value;
 				if (el) {
 					cloudWidthRef.value = el.offsetWidth;
 					cloudHeightRef.value = el.offsetHeight;
 				}
-			}, 1000);
-			onUnmounted(() => {
-				clearInterval(timer);
+			}, {
+				immediate: true,
 			});
 		});
-		watchEffect(onInvalidate => {
-			let words = wordsRef.value;
-			let cloudWidth = cloudWidthRef.value;
-			let cloudHeight = cloudHeightRef.value;
-			let timer = setTimeout(() => {
-				let cloudWords = words.map(({
+		let cloudAspectRef = computed(() => {
+			let width = cloudWidthRef.value;
+			let height = cloudHeightRef.value;
+			if (width && height) {
+				return width / height;
+			}
+			return 1;
+		});
+		let animationOverlapRef = computed(() => {
+			let n = props.animationOverlap;
+			n = Math.abs(n);
+			if (n < 1) {
+				n = 1 / n;
+			}
+			return n;
+		});
+		let transitionPropsRef = computed(() => {
+			let {
+				animationDuration: duration,
+				enterAnimation: enter,
+				leaveAnimation: leave,
+			} = props;
+			if (
+				isObject(enter)
+				&&
+				isObject(leave)
+			) {
+				let enterFrom = enter;
+				let enterTo = {};
+				let leaveTo = leave;
+				(Object
+					.keys({
+						...enterFrom,
+						...leaveTo,
+					})
+					.forEach(key => {
+						enterTo[key] = null;
+					})
+				);
+				return {
+					css: false,
+					appear: true,
+					onBeforeEnter(el) {
+						Object.assign(el.style, enterFrom);
+					},
+					onEnter(el, done) {
+						Object.assign(el.style, enterTo);
+						setTimeout(done, duration);
+					},
+					onLeave(el, done) {
+						Object.assign(el.style, leaveTo);
+						setTimeout(done, duration);
+					},
+				};
+			}
+			if (
+				isString(enter)
+				&&
+				isString(leave)
+			) {
+				return {
+					duration: duration,
+					appear: true,
+					enterActiveClass: enter,
+					leaveActiveClass: leave,
+				};
+			}
+			return {};
+		});
+		let fontSizeRatioRef = computed(() => {
+			let n = props.fontSizeRatio;
+			n = Math.abs(n);
+			if (n > 1) {
+				n = 1 / n;
+			}
+			return n;
+		});
+		let cpnyWordsRef = computed(() => {
+			let {
+				fontFamily: defaultFontFamily,
+				fontStyle: defaultFontStyle,
+				fontVariant: defaultFontVariant,
+				fontWeight: defaultFontWeight,
+				words,
+			} = props;
+			let defaultText = '';
+			let defaultWeight = 1;
+			let result = new Map();
+			words.forEach(word => {
+				let {
+					color,
+					fontFamily = defaultFontFamily,
+					fontStyle = defaultFontStyle,
+					fontVariant = defaultFontVariant,
+					fontWeight = defaultFontWeight,
+					rotation,
+					text = defaultText,
+					weight = defaultWeight,
+				} = (() => {
+					if (isString(word)) {
+						let text = word;
+						return {text};
+					}
+					if (isArray(word)) {
+						let [
+							text,
+							weight,
+						] = word;
+						return {
+							text,
+							weight,
+						};
+					}
+					if (isObject(word)) {
+						return word;
+					}
+					return {};
+				})();
+				// todo
+				let key;
+				{
+					let font = toCSSFont(
+						fontFamily,
+						1,
+						fontStyle,
+						fontVariant,
+						fontWeight,
+					);
+					key = JSON.stringify([text, font]);
+					while (result.has(key)) {
+						key += '!';
+					}
+				}
+				result.set(key, {
+					color,
+					fontFamily,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+					rotation,
+					text,
+					weight,
+					word,
+				});
+			});
+			return result;
+		});
+		let omjnWordsRef = computed(() => {
+			let words = cpnyWordsRef.value;
+			let fontSizeRatio = fontSizeRatioRef.value;
+			let minWeight = +Infinity;
+			let maxWeight = -Infinity;
+			words.forEach(({weight}) => {
+				minWeight = Math.min(minWeight, weight);
+				maxWeight = Math.max(maxWeight, weight);
+			});
+			let minFontSize = 1;
+			let maxFontSize = (() => {
+				if (minWeight < maxWeight) {
+					if (fontSizeRatio) {
+						return 1 / fontSizeRatio;
+					}
+					if (minWeight > 0) {
+						return maxWeight / minWeight;
+					}
+					if (maxWeight < 0) {
+						return minWeight / maxWeight;
+					}
+					return 1 + maxWeight - minWeight;
+				}
+				return 1;
+			})();
+			let result = new Map();
+			words.forEach(({weight}, key) => {
+				let fontSize = scaleNumber(weight, minWeight, maxWeight, minFontSize, maxFontSize);
+				result.set(key, fontSize);
+			});
+			return result;
+		});
+		let ijqiWordsRef = computed(() => {
+			let cpnyWords = cpnyWordsRef.value;
+			let omjnWords = omjnWordsRef.value;
+			let result = new Map();
+			cpnyWords.forEach(({
+				fontFamily,
+				fontStyle,
+				fontVariant,
+				fontWeight,
+				rotation,
+				text,
+			}, key) => {
+				let fontSize = omjnWords.get(key);
+				result.set(key, {
 					fontFamily,
 					fontSize,
 					fontStyle,
 					fontVariant,
 					fontWeight,
+					rotation,
 					text,
-					weight,
-					//word,
-				}) => ({
-					color: 'Black',
-					font: toCSSFont(
-						fontFamily,
-						fontSize,
-						fontStyle,
-						fontVariant,
-						fontWeight,
-					),
-					key: Math.random(),
-					left: Math.random() * cloudWidth,
-					rotation: Math.random() * Math.PI,
-					text,
-					top: Math.random() * cloudHeight,
-					weight,
-					//word,
-				}));
-				cloudWordsRef.value = cloudWords;
-			}, 1);
-			onInvalidate(() => {
-				clearTimeout(timer);
+				});
 			});
+			return result;
+		});
+		let satpWordsRef = shallowRef(new Map());
+		let satpWidthRef = shallowRef(0);
+		let satpHeightRef = shallowRef(0);
+		watchEffect(async onInvalidate => {
+			let words = ijqiWordsRef.value;
+			let cloudAspect = cloudAspectRef.value;
+			let controller = new AbortController();
+			onInvalidate(() => {
+				controller.abort();
+			});
+			let {signal} = controller;
+			await sleep(1000);
+			if (signal.aborted) {
+				return;
+			}
+			let ojozLeft = 0;
+			let ojozRight = 0;
+			let ojozTop = 0;
+			let ojozBottom = 0;
+			let satpWords = new Map();
+			let canvas = document.createElement('canvas');
+			let ctx = canvas.getContext('2d');
+			words.forEach(({
+				fontFamily,
+				fontSize,
+				fontStyle,
+				fontVariant,
+				fontWeight,
+				rotation = Math.random() * Math.PI,
+				text,
+			}, key) => {
+				let font = toCSSFont(
+					fontFamily,
+					fontSize,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+				);
+				let width;
+				let height;
+				{
+					ctx.font = font;
+					let x = ctx.measureText(text).width + fontSize;
+					let y = fontSize * 2;
+					let a = rotation;
+					let cosA = Math.abs(Math.cos(a));
+					let sinA = Math.abs(Math.sin(a));
+					width = x * cosA + y * sinA;
+					height = x * sinA + y * cosA;
+				}
+				let left = ((min, max) => min + (max - min) * Math.random())(ojozLeft - width, ojozRight + width);
+				let top = ((min, max) => min + (max - min) * Math.random())(ojozTop - height, ojozBottom + height);
+				ojozLeft = Math.min(ojozLeft, left);
+				ojozRight = Math.max(ojozRight, left + width);
+				ojozTop = Math.min(ojozTop, top);
+				ojozBottom = Math.max(ojozBottom, top + height);
+				satpWords.set(key, {
+					left,
+					rotation,
+					top,
+				});
+			});
+			if (signal.aborted) {
+				return;
+			}
+			let satpLeft = (ojozLeft + ojozRight) / 2;
+			let satpTop = (ojozTop + ojozBottom) / 2;
+			let satpWidth = ojozRight - ojozLeft;
+			let satpHeight = ojozBottom - ojozTop;
+			satpWords.forEach(word => {
+				word.left -= satpLeft;
+				word.top -= satpTop;
+			});
+			if (signal.aborted) {
+				return;
+			}
+			satpWordsRef.value = satpWords;
+			satpWidthRef.value = satpWidth;
+			satpHeightRef.value = satpHeight;
+		});
+		let satpScalingRef = computed(() => {
+			let satpWidth = satpWidthRef.value;
+			let satpHeight = satpHeightRef.value;
+			if (satpWidth && satpHeight) {
+				let cloudWidth = cloudWidthRef.value;
+				let cloudHeight = cloudHeightRef.value;
+				return Math.min(cloudWidth / satpWidth, cloudHeight / satpHeight);
+			}
+			return 0;
+		});
+		let btciWordsRef = computed(() => {
+			let cpnyWords = cpnyWordsRef.value;
+			let result = new Map();
+			cpnyWords.forEach(({
+				color = 'Black',
+			}, key) => {
+				result.set(key, color);
+			});
+			return result;
+		});
+		let eicpWordsRef = computed(() => {
+			let omjnWords = omjnWordsRef.value;
+			let satpWords = satpWordsRef.value;
+			let satpScaling = satpScalingRef.value;
+			let result = new Map();
+			satpWords.forEach(({
+				left,
+				top,
+			}, key) => {
+				let fontSize = omjnWords.get(key);
+				fontSize *= satpScaling;
+				left *= satpScaling;
+				top *= satpScaling;
+				result.set(key, {
+					fontSize,
+					left,
+					top,
+				});
+			});
+			return result;
+		});
+		let cloudWordsRef = computed(() => {
+			let cpnyWords = cpnyWordsRef.value;
+			let btciWords = btciWordsRef.value;
+			let eicpWords = eicpWordsRef.value;
+			let satpWords = satpWordsRef.value;
+			let result = [];
+			satpWords.forEach(({rotation}, key) => {
+				let {
+					fontFamily,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+					text,
+					weight,
+					word,
+				} = cpnyWords.get(key);
+				let {
+					fontSize,
+					left,
+					top,
+				} = eicpWords.get(key);
+				let color = btciWords.get(key);
+				let font = toCSSFont(
+					fontFamily,
+					fontSize,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+				);
+				result.push({
+					word,
+					key,
+					text,
+					weight,
+					font,
+					left,
+					top,
+					rotation,
+					color,
+				});
+			});
+			return result;
 		});
 		return (() => {
-			let cloudWords = cloudWordsRef.value;
+			let words = cloudWordsRef.value;
 			let genWord = (() => {
 				let slot = slots.word;
 				if (slot) {
@@ -236,7 +500,7 @@ export default defineComponent({
 							transform: 'translate(50%,50%)',
 						},
 					},
-					cloudWords.map(({
+					words.map(({
 						color,
 						font,
 						key,
@@ -245,44 +509,28 @@ export default defineComponent({
 						text,
 						top,
 						weight,
-						//word,
+						word,
 					}) => {
 						return h(
 							'div',
 							{
 								key,
 								style: {
+									color: color,
+									font: font,
 									left: `${left}px`,
 									position: 'absolute',
 									top: `${top}px`,
+									transform: `rotate(${rotation}rad)`,
+									transformOrigin: 'center',
+									whiteSpace: 'nowrap',
 								},
 							},
-							[h(
-								'div',
-								{
-									style: {
-										bottom: '50%',
-										color: color,
-										font: font,
-										position: 'absolute',
-										right: '50%',
-										transform: [
-											'translate(50%,50%)',
-											`rotate(${rotation}rad)`,
-										].join(' '),
-										whiteSpace: 'nowrap',
-									},
-								},
-								genWord({
-									color,
-									font,
-									left,
-									text,
-									top,
-									weight,
-									//word,
-								}),
-							)],
+							genWord({
+								text,
+								weight,
+								word,
+							}),
 						);
 					}),
 				)],
