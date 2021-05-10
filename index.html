@@ -73,6 +73,27 @@
 						></q-select>
 
 					</div>
+					<div class="q-pa-md">
+						<div
+							style="
+								align-items: center;
+								display: flex;
+								justify-content: space-between;
+							"
+						>
+							<div
+							>spacing</div>
+							<q-chip
+								class="q-ma-none"
+								:ripple="false"
+							>{{ input.spacing.valueFormatted }}</q-chip>
+						</div>
+						<q-slider
+							v-model="input.spacing.index"
+							:max="input.spacing.max"
+							markers
+						></q-slider>
+					</div>
 				</q-drawer>
 
 				<q-page-container>

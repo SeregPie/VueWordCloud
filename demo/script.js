@@ -12,20 +12,6 @@
 			VueWordCloud,
 		},
 		setup() {
-			let genWords = (() => {
-				// todo
-				return (Array
-					.from({length: chance.integer({min: 16, max: 256})})
-					.map(() => {
-						let weight = chance.weighted([9, 8, 7, 6, 5, 4, 3, 2, 1], [1, 2, 4, 8, 16, 32, 62, 128, 256]);
-						let text = chance.word();
-						return [text, weight];
-					})
-					.sort((word, otherWord) => {
-						return otherWord[1] - word[1];
-					})
-				);
-			});
 			let input = {
 				animation: (() => {
 					let items = [
@@ -62,9 +48,14 @@
 				})(),
 				animationDuration: (() => {
 					let values = [0, 1000, 5000, 10000];
-					let valueRef = shallowRef(values[2]);
+					let indexRef = shallowRef(2);
 					return proxyRefs({
-						value: valueRef,
+						index: indexRef,
+						max: values.length - 1,
+						value: computed(() => {
+							let index = indexRef.value;
+							return values[index];
+						}),
 						values,
 					});
 				})(),
@@ -85,9 +76,14 @@
 				})(),
 				animationOverlap: (() => {
 					let values = [0, 1/4, 1/2, 1];
-					let valueRef = shallowRef(values[1]);
+					let indexRef = shallowRef(1);
 					return proxyRefs({
-						value: valueRef,
+						index: indexRef,
+						max: values.length - 1,
+						value: computed(() => {
+							let index = indexRef.value;
+							return values[index];
+						}),
 						values,
 					});
 				})(),
@@ -113,34 +109,60 @@
 				})(),
 				fontSizeRatio: (() => {
 					let values = [0, 1/16, 1/4, 1];
-					let valueRef = shallowRef(values[0]);
+					let indexRef = shallowRef(0);
 					return proxyRefs({
-						value: valueRef,
+						index: indexRef,
+						max: values.length - 1,
+						value: computed(() => {
+							let index = indexRef.value;
+							return values[index];
+						}),
 						values,
 					});
 				})(),
 				rotationStrategy: undefined,
 				spacing: (() => {
 					let values = [0, 1/4, 1/2, 1, 2];
-					let valueRef = shallowRef(values[1]);
+					let indexRef = shallowRef(1);
+					let valueRef = computed(() => {
+						let index = indexRef.value;
+						return values[index];
+					});
 					return proxyRefs({
+						index: indexRef,
+						max: values.length - 1,
 						value: valueRef,
+						valueFormatted: computed(() => {
+							let n = valueRef.value;
+							return n.toLocaleString('en', {
+								style: 'percent',
+							});
+						}),
 						values,
 					});
 				})(),
 				words: (() => {
 					let gen = (() => {
-						return (genWords()
-							.map(([word, weight]) => `${word} ${weight}`)
+						// todo
+						return (Array
+							.from({length: chance.integer({min: 16, max: 256})})
+							.map(() => {
+								let weight = chance.weighted([9, 8, 7, 6, 5, 4, 3, 2, 1], [1, 2, 4, 8, 16, 32, 62, 128, 256]);
+								let text = chance.word();
+								return {text, weight};
+							})
+							.sort((word, otherWord) => {
+								return otherWord.weight - word.weight;
+							})
+							.map(({text, weight}) => `${text} ${weight}`)
 							.join('\n')
 						);
 					});
 					let valueRef = shallowRef(gen());
-					let regen = (() => {
-						valueRef.value = gen();
-					});
 					return proxyRefs({
-						regen,
+						regen() {
+							valueRef.value = gen();
+						},
 						value: valueRef,
 					});
 				})(),
