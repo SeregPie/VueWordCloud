@@ -23,6 +23,16 @@
 			href="https://unpkg.com/quasar@next/dist/quasar.prod.css"
 			rel="stylesheet"
 		/>
+		<style>
+			:root {
+				--q-space-base: 16px;
+				--q-space-xs: calc(var(--q-space-base) * .25);
+				--q-space-sm: calc(var(--q-space-base) * .5);
+				--q-space-md: var(--q-space-base);
+				--q-space-lg: calc(var(--q-space-base) * 1.5);
+				--q-space-xl: calc(var(--q-space-base) * 3);
+			}
+		</style>
 		<link
 			href="https://fonts.googleapis.com/css?family=Arizonia|Berkshire+Swash|Cookie|Great+Vibes|Just+Another+Hand|Leckerli+One|Lobster+Two|Merienda+One|Oleo+Script|Pacifico"
 			rel="stylesheet"
@@ -38,38 +48,63 @@
 	</head>
 	<body>
 		<div id="q-app">
-			<q-layout view="lHh lpR fFf">
-				<q-header elevated class="bg-primary text-white">
+			<q-layout view="lhh lpr fff">
+				<q-header elevated>
 					<q-toolbar>
-						<q-btn dense flat round icon="menu"
+						<q-btn
+							dense
+							flat
+							icon="mdi-menu"
+							round
 							@click="ui.drawer.toggle()"
 						></q-btn>
 
 						<q-toolbar-title>VueWordCloud</q-toolbar-title>
+						<q-btn
+							dense
+							flat
+							href="https://github.com/SeregPie/VueWordCloud"
+							icon="mdi-github"
+							round
+							target="_blank"
+							type="a"
+						></q-btn>
 					</q-toolbar>
 				</q-header>
-				<q-drawer show-if-above v-model="ui.drawer.visible" side="left" elevated>
-					<div>
-						<div>
+				<q-drawer
+					v-model="ui.drawer.visible"
+					elevated
+				>
+					<div
+						style="
+							display: grid;
+							gap: var(--q-space-md);
+							padding: var(--q-space-sm);
+						"
+					>
+						<div
+							style="
+								display: grid;
+								gap: var(--q-space-xs);
+							"
+						>
 							<q-input
-								v-model="input.words.value"
-								:auto-resize="false"
-								:rows="8"
+								v-model="ui.input.words.value"
+								:rows="9"
 								filled
-								stack-label
+								input-style="resize: none"
 								label="words & weights"
 								type="textarea"
 							></q-input>
+							<q-btn
+								color="primary"
+								label="generate randomly"
+								@click="ui.input.words.regen()"
+							></q-btn>
 						</div>
-						<q-btn
-							label="randomize"
-							@click="input.words.regen()"
-						></q-btn>
-					</div>
-					<div>
 						<q-select
-							v-model="input.fontFamily.value"
-							:options="input.fontFamily.values"
+							v-model="ui.input.fontFamily.value"
+							:options="ui.input.fontFamily.values"
 							filled
 							label="font family"
 						>
@@ -83,45 +118,99 @@
 								</q-item>
 							</template>
 						</q-select>
-					</div>
-					<div class="q-pa-md">
-						<div
-							style="
-								align-items: center;
-								display: flex;
-								justify-content: space-between;
-							"
+						<div>color strategy</div>
+						<div>rotation strategy</div>
+						<q-field
+							filled
+							label="spacing"
+							stack-label
 						>
-							<div
-							>spacing</div>
-							<q-chip
-								class="q-ma-none"
-								:ripple="false"
-							>{{ input.spacing.valueFormatted }}</q-chip>
-						</div>
-						<q-slider
-							v-model="input.spacing.index"
-							:max="input.spacing.max"
-							markers
-						></q-slider>
+							<q-slider
+								v-model="ui.input.spacing.index"
+								:label-value="ui.input.spacing.valueFormatted"
+								:max="ui.input.spacing.max"
+								label
+								label-always
+								markers
+							></q-slider>
+						</q-field>
+						<q-field
+							filled
+							label="font size ratio"
+							stack-label
+						>
+							<q-slider
+								v-model="ui.input.fontSizeRatio.index"
+								:label-value="ui.input.fontSizeRatio.valueFormatted"
+								:max="ui.input.fontSizeRatio.max"
+								label
+								label-always
+								markers
+							></q-slider>
+						</q-field>
+						<q-select
+							v-model="ui.input.animation.value"
+							:options="ui.input.animation.items"
+							emit-value
+							filled
+							label="enter/leave animation"
+							map-options
+						></q-select>
+						<q-field
+							filled
+							label="animation duration"
+							stack-label
+						>
+							<q-slider
+								v-model="ui.input.animationDuration.index"
+								:label-value="ui.input.animationDuration.valueFormatted"
+								:max="ui.input.animationDuration.max"
+								label
+								label-always
+								markers
+							></q-slider>
+						</q-field>
+						<q-field
+							filled
+							label="animation overlap"
+							stack-label
+						>
+							<q-slider
+								v-model="ui.input.animationOverlap.index"
+								:label-value="ui.input.animationOverlap.valueFormatted"
+								:max="ui.input.animationOverlap.max"
+								label
+								label-always
+								markers
+							></q-slider>
+						</q-field>
+						<q-select
+							v-model="ui.input.animationEasing.value"
+							:options="ui.input.animationEasing.values"
+							filled
+							label="animation easing"
+						></q-select>
 					</div>
 				</q-drawer>
 				<q-page-container>
-					<vue-word-cloud
-						v-bind="{
-							animationDuration,
-							animationEasing,
-							animationOverlap,
-							colorStrategy,
-							enterAnimation,
-							fontFamily,
-							fontSizeRatio,
-							leaveAnimation,
-							rotationStrategy,
-							spacing,
-							words,
-						}"
-					></vue-word-cloud>
+					<q-page>
+						<vue-word-cloud
+							style="position: absolute"
+							v-bind="{
+								animationDuration,
+								animationEasing,
+								animationOverlap,
+								colorStrategy,
+								enterAnimation,
+								fontFamily,
+								fontSizeRatio,
+								leaveAnimation,
+								rotationStrategy,
+								spacing,
+								words,
+							}"
+						></vue-word-cloud>
+					</q-page>
 				</q-page-container>
 			</q-layout>
 		</div>
