@@ -41,7 +41,9 @@
 			<q-layout view="lHh lpR fFf">
 				<q-header elevated class="bg-primary text-white">
 					<q-toolbar>
-						<q-btn dense flat round icon="menu" @click="ui.drawer.toggle()" />
+						<q-btn dense flat round icon="menu"
+							@click="ui.drawer.toggle()"
+						></q-btn>
 
 						<q-toolbar-title>VueWordCloud</q-toolbar-title>
 					</q-toolbar>
@@ -70,8 +72,17 @@
 							:options="input.fontFamily.values"
 							filled
 							label="font family"
-						></q-select>
-
+						>
+							<template v-slot:option="{itemProps, opt}">
+								<q-item v-bind="itemProps">
+									<q-item-section>
+										<span
+											:style="{fontFamily: opt}"
+										>{{ opt }}</span>
+									</q-item-section>
+								</q-item>
+							</template>
+						</q-select>
 					</div>
 					<div class="q-pa-md">
 						<div
@@ -95,7 +106,6 @@
 						></q-slider>
 					</div>
 				</q-drawer>
-
 				<q-page-container>
 					<vue-word-cloud
 						v-bind="{
