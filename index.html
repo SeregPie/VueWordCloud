@@ -26,10 +26,11 @@
 		<style>
 			:root {
 				--q-space-base: 16px;
-				--q-space-xs: calc(var(--q-space-base) * .25);
-				--q-space-sm: calc(var(--q-space-base) * .5);
+				--q-space-none: 0;
+				--q-space-xs: calc(var(--q-space-base) * 1/4);
+				--q-space-sm: calc(var(--q-space-base) * 1/2);
 				--q-space-md: var(--q-space-base);
-				--q-space-lg: calc(var(--q-space-base) * 1.5);
+				--q-space-lg: calc(var(--q-space-base) * 3/2);
 				--q-space-xl: calc(var(--q-space-base) * 3);
 			}
 		</style>
@@ -58,7 +59,6 @@
 							round
 							@click="ui.drawer.toggle()"
 						></q-btn>
-
 						<q-toolbar-title>VueWordCloud</q-toolbar-title>
 						<q-btn
 							dense

@@ -183,7 +183,6 @@
 	  },
 
 	  setup(props, {
-	    emit,
 	    slots
 	  }) {
 	    let elRef = vue.shallowRef();
@@ -200,74 +199,6 @@
 	      }, {
 	        immediate: true
 	      });
-	    });
-	    let cloudAspectRef = vue.computed(() => {
-	      let width = cloudWidthRef.value;
-	      let height = cloudHeightRef.value;
-
-	      if (width && height) {
-	        return width / height;
-	      }
-
-	      return 1;
-	    });
-	    vue.computed(() => {
-	      let n = props.animationOverlap;
-	      n = Math.abs(n);
-
-	      if (n < 1) {
-	        n = 1 / n;
-	      }
-
-	      return n;
-	    });
-	    vue.computed(() => {
-	      let {
-	        animationDuration: duration,
-	        enterAnimation: enter,
-	        leaveAnimation: leave
-	      } = props;
-
-	      if (isObject(enter) && isObject(leave)) {
-	        let enterFrom = enter;
-	        let enterTo = {};
-	        let leaveTo = leave;
-	        Object.keys({ ...enterFrom,
-	          ...leaveTo
-	        }).forEach(key => {
-	          enterTo[key] = null;
-	        });
-	        return {
-	          css: false,
-	          appear: true,
-
-	          onBeforeEnter(el) {
-	            Object.assign(el.style, enterFrom);
-	          },
-
-	          onEnter(el, done) {
-	            Object.assign(el.style, enterTo);
-	            setTimeout(done, duration);
-	          },
-
-	          onLeave(el, done) {
-	            Object.assign(el.style, leaveTo);
-	            setTimeout(done, duration);
-	          }
-
-	        };
-	      }
-
-	      if (isString(enter) && isString(leave)) {
-	        return {
-	          duration: duration,
-	          appear: true,
-	          enterActiveClass: enter,
-	          leaveActiveClass: leave
-	        };
-	      }
-
-	      return {};
 	    });
 	    let fontSizeRatioRef = vue.computed(() => {
 	      let n = props.fontSizeRatio;
@@ -419,7 +350,6 @@
 	    let satpHeightRef = vue.shallowRef(0);
 	    vue.watchEffect(async onInvalidate => {
 	      let words = ijqiWordsRef.value;
-	      cloudAspectRef.value;
 	      let controller = new AbortController();
 	      onInvalidate(() => {
 	        controller.abort();
