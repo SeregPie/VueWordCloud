@@ -108,7 +108,6 @@ export default defineComponent({
 			}
 			return n;
 		});
-
 		let cpnyWordsRef = computed(() => {
 			let {
 				fontFamily: defaultFontFamily,

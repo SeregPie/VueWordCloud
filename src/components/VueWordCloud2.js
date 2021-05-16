@@ -103,74 +103,10 @@ export default defineComponent({
 				immediate: true,
 			});
 		});
-		let cloudAspectRef = computed(() => {
-			let width = cloudWidthRef.value;
-			let height = cloudHeightRef.value;
-			if (width && height) {
-				return width / height;
-			}
-			return 1;
-		});
-		let animationOverlapRef = computed(() => {
-			let n = props.animationOverlap;
-			n = Math.abs(n);
-			if (n < 1) {
-				n = 1 / n;
-			}
-			return n;
-		});
-		let transitionPropsRef = computed(() => {
-			let {
-				animationDuration: duration,
-				enterAnimation: enter,
-				leaveAnimation: leave,
-			} = props;
-			if (
-				isObject(enter)
-				&&
-				isObject(leave)
-			) {
-				let enterFrom = enter;
-				let enterTo = {};
-				let leaveTo = leave;
-				(Object
-					.keys({
-						...enterFrom,
-						...leaveTo,
-					})
-					.forEach(key => {
-						enterTo[key] = null;
-					})
-				);
-				return {
-					css: false,
-					appear: true,
-					onBeforeEnter(el) {
-						Object.assign(el.style, enterFrom);
-					},
-					onEnter(el, done) {
-						Object.assign(el.style, enterTo);
-						setTimeout(done, duration);
-					},
-					onLeave(el, done) {
-						Object.assign(el.style, leaveTo);
-						setTimeout(done, duration);
-					},
-				};
-			}
-			if (
-				isString(enter)
-				&&
-				isString(leave)
-			) {
-				return {
-					duration: duration,
-					appear: true,
-					enterActiveClass: enter,
-					leaveActiveClass: leave,
-				};
-			}
-			return {};
+		// get words
+		//
+		watchEffect(() => {
+
 		});
 		let fontSizeRatioRef = computed(() => {
 			let n = props.fontSizeRatio;
@@ -273,27 +209,6 @@ export default defineComponent({
 			});
 			return result;
 		});
-		{
-			let a0 = aRef.value;
-			let bAsync = bAsyncRef.value;
-			let b = await b;
-		}
-		let bAsyncRef = ccc(async () => {
-			let a1 = a1Ref.value;
-
-		});
-		let satpWordsAsyncRef = ccc(async () => {
-			let cpnyWords = cpnyWordsRef.value;
-			let fontSizeRatio = fontSizeRatioRef.value;
-			do async
-		});
-		let htcoWordsRef = shallowRef([]);
-		let btciWordsAsyncRef = ccc(async () => {
-			let words = htcoWordsRef.value;
-			let cloudWidth = cloudWidthRef.value;
-			let cloudHeight = cloudHeightRef.value;
-
-		});
 		watchEffect(() => {
 			let fontSizeRatio = fontSizeRatioRef.value;
 
@@ -327,38 +242,6 @@ export default defineComponent({
 			});
 			words = await btciWordsAsyncRef
 		});
-		let omjnWordsRef = computed(() => {
-			let words = cpnyWordsRef.value;
-			let fontSizeRatio = fontSizeRatioRef.value;
-			let minWeight = +Infinity;
-			let maxWeight = -Infinity;
-			words.forEach(({weight}) => {
-				minWeight = Math.min(minWeight, weight);
-				maxWeight = Math.max(maxWeight, weight);
-			});
-			let minFontSize = 1;
-			let maxFontSize = (() => {
-				if (minWeight < maxWeight) {
-					if (fontSizeRatio) {
-						return 1 / fontSizeRatio;
-					}
-					if (minWeight > 0) {
-						return maxWeight / minWeight;
-					}
-					if (maxWeight < 0) {
-						return minWeight / maxWeight;
-					}
-					return 1 + maxWeight - minWeight;
-				}
-				return 1;
-			})();
-			let result = new Map();
-			words.forEach(({weight}, key) => {
-				let fontSize = scaleNumber(weight, minWeight, maxWeight, minFontSize, maxFontSize);
-				result.set(key, fontSize);
-			});
-			return result;
-		});
 		let ijqiWordsRef = computed(() => {
 			let cpnyWords = cpnyWordsRef.value;
 			let omjnWords = omjnWordsRef.value;
@@ -388,15 +271,16 @@ export default defineComponent({
 		let satpWidthRef = shallowRef(0);
 		let satpHeightRef = shallowRef(0);
 		watchEffect(async onInvalidate => {
-			let words = ijqiWordsRef.value;
-			let cloudAspect = cloudAspectRef.value;
 			let controller = new AbortController();
 			onInvalidate(() => {
 				controller.abort();
 			});
 			let {signal} = controller;
-			await sleep(2000);
-			console.log(signal.aborted);
+
+			let words = ijqiWordsRef.value;
+			let cloudWidth = cloudWidthRef.value;
+			let cloudHeight = cloudHeightRef.value;
+			await sleep(1);
 			if (signal.aborted) {
 				return;
 			}
@@ -480,57 +364,12 @@ export default defineComponent({
 			}
 			return 0;
 		});
-		let btciWordsRef = computed(() => {
-			let satpWords = satpWordsRef.value;
-			let result = [];
-			satpWords.forEach(({
-				color = 'Black',
-			}, key) => {
-				result.set(key, color);
+		watchEffect(() => {
+			let words = cloudWordsRef.value;
+			words.forEach(word => {
+				let {color = 'Black'} = item;
+				Object.assign(word, {color});
 			});
-			return result;
-		});
-		let cloudWordsRef = computed(() => {
-			let btciWords = btciWordsRef.value;
-			let satpWords = satpWordsRef.value;
-			let result = [];
-			satpWords.forEach(({
-				rotation}, key) => {
-				let {
-					fontFamily,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-					text,
-					weight,
-					word,
-				} = cpnyWords.get(key);
-				let {
-					fontSize,
-					left,
-					top,
-				} = eicpWords.get(key);
-				let color = btciWords.get(key);
-				let font = toCSSFont(
-					fontFamily,
-					fontSize,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-				);
-				result.push({
-					word,
-					key,
-					text,
-					weight,
-					font,
-					left,
-					top,
-					rotation,
-					color,
-				});
-			});
-			return result;
 		});
 		return (() => {
 			let words = cloudWordsRef.value;
