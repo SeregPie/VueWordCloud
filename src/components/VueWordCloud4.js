@@ -4,8 +4,6 @@ import {
 	h,
 	onMounted,
 	shallowRef,
-	TransitionGroup,
-	watch,
 	watchEffect,
 } from 'vue';
 
@@ -86,7 +84,6 @@ export default defineComponent({
 		},
 	},
 	setup(props, {
-		emit,
 		slots,
 	}) {
 		let elRef = shallowRef();
@@ -103,11 +100,6 @@ export default defineComponent({
 				immediate: true,
 			});
 		});
-		// get words
-		//
-		watchEffect(() => {
-
-		});
 		let fontSizeRatioRef = computed(() => {
 			let n = props.fontSizeRatio;
 			n = Math.abs(n);
@@ -115,29 +107,6 @@ export default defineComponent({
 				n = 1 / n;
 			}
 			return n;
-		});
-		let wordsRef = computed(() => {
-			let {words} = props;
-			return words.map(word => {
-				if (isString(word)) {
-					let text = word;
-					return {text};
-				}
-				if (isArray(word)) {
-					let [
-						text,
-						weight,
-					] = word;
-					return {
-						text,
-						weight,
-					};
-				}
-				if (isObject(word)) {
-					return word;
-				}
-				return {};
-			});
 		});
 		let cpnyWordsRef = computed(() => {
 			let {
@@ -209,10 +178,9 @@ export default defineComponent({
 			});
 			return result;
 		});
-		watchEffect(() => {
+		let omjnWordsRef = computed(() => {
+			let words = cpnyWordsRef.value;
 			let fontSizeRatio = fontSizeRatioRef.value;
-
-			words = normalizeWords(words);
 			let minWeight = +Infinity;
 			let maxWeight = -Infinity;
 			words.forEach(({weight}) => {
@@ -235,12 +203,12 @@ export default defineComponent({
 				}
 				return 1;
 			})();
-			words.forEach(word => {
-				let {weight} = word;
+			let result = new Map();
+			words.forEach(({weight}, key) => {
 				let fontSize = scaleNumber(weight, minWeight, maxWeight, minFontSize, maxFontSize);
-				Object.assign(word, {fontSize});
+				result.set(key, fontSize);
 			});
-			words = await btciWordsAsyncRef
+			return result;
 		});
 		let ijqiWordsRef = computed(() => {
 			let cpnyWords = cpnyWordsRef.value;
@@ -271,16 +239,14 @@ export default defineComponent({
 		let satpWidthRef = shallowRef(0);
 		let satpHeightRef = shallowRef(0);
 		watchEffect(async onInvalidate => {
+			let words = ijqiWordsRef.value;
 			let controller = new AbortController();
 			onInvalidate(() => {
 				controller.abort();
 			});
 			let {signal} = controller;
-
-			let words = ijqiWordsRef.value;
-			let cloudWidth = cloudWidthRef.value;
-			let cloudHeight = cloudHeightRef.value;
-			await sleep(1);
+			await sleep(2000);
+			console.log(signal.aborted);
 			if (signal.aborted) {
 				return;
 			}
@@ -349,11 +315,6 @@ export default defineComponent({
 			satpWidthRef.value = satpWidth;
 			satpHeightRef.value = satpHeight;
 		});
-
-
-		let vvoqWordsRef = computed(() => {
-
-		});
 		let satpScalingRef = computed(() => {
 			let satpWidth = satpWidthRef.value;
 			let satpHeight = satpHeightRef.value;
@@ -364,12 +325,79 @@ export default defineComponent({
 			}
 			return 0;
 		});
-		watchEffect(() => {
-			let words = cloudWordsRef.value;
-			words.forEach(word => {
-				let {color = 'Black'} = item;
-				Object.assign(word, {color});
+		let btciWordsRef = computed(() => {
+			let cpnyWords = cpnyWordsRef.value;
+			let result = new Map();
+			cpnyWords.forEach(({
+				color = 'Black',
+			}, key) => {
+				result.set(key, color);
 			});
+			return result;
+		});
+		let eicpWordsRef = computed(() => {
+			let omjnWords = omjnWordsRef.value;
+			let satpWords = satpWordsRef.value;
+			let satpScaling = satpScalingRef.value;
+			let result = new Map();
+			satpWords.forEach(({
+				left,
+				top,
+			}, key) => {
+				let fontSize = omjnWords.get(key);
+				fontSize *= satpScaling;
+				left *= satpScaling;
+				top *= satpScaling;
+				result.set(key, {
+					fontSize,
+					left,
+					top,
+				});
+			});
+			return result;
+		});
+		let cloudWordsRef = computed(() => {
+			let cpnyWords = cpnyWordsRef.value;
+			let btciWords = btciWordsRef.value;
+			let eicpWords = eicpWordsRef.value;
+			let satpWords = satpWordsRef.value;
+			let result = [];
+			satpWords.forEach(({rotation}, key) => {
+				let {
+					fontFamily,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+					text,
+					weight,
+					word,
+				} = cpnyWords.get(key);
+				let {
+					fontSize,
+					left,
+					top,
+				} = eicpWords.get(key);
+				let color = btciWords.get(key);
+				let font = toCSSFont(
+					fontFamily,
+					fontSize,
+					fontStyle,
+					fontVariant,
+					fontWeight,
+				);
+				result.push({
+					word,
+					key,
+					text,
+					weight,
+					font,
+					left,
+					top,
+					rotation,
+					color,
+				});
+			});
+			return result;
 		});
 		return (() => {
 			let words = cloudWordsRef.value;

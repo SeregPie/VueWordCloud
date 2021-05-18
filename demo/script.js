@@ -5,9 +5,6 @@
 		createApp,
 		proxyRefs,
 		shallowRef,
-
-		watchEffect,
-		ref,
 	} = Vue;
 
 	let app = createApp({
@@ -15,35 +12,6 @@
 			VueWordCloud,
 		},
 		setup() {
-			let itemsRef = ref([
-				{color: 'Red'},
-				{color: 'Green'},
-				{},
-			]);
-			watchEffect(() => {
-				console.log('!!!!!!!!');
-				let items = itemsRef.value;
-				items.forEach(item => {
-					let {color = 'Black'} = item;
-					Object.assign(item, {color});
-				});
-			});
-			setInterval(() => {
-				itemsRef.value = (Array
-					.from({length: chance.integer({min: 1, max: 4})})
-					.map(() => {
-						if (chance.bool()) {
-							let color = chance.color();
-							return {color};
-						}
-						return {};
-					})
-				);
-			}, 1000);
-			watchEffect(() => {
-				let items = itemsRef.value;
-				console.log(JSON.stringify(items));
-			});
 			let genWords = (() => {
 				// todo
 				return (Array
