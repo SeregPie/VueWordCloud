@@ -20,13 +20,6 @@ import useFFF from '../utils/useFFF';
 import constant from '../utils/constant';
 import stubArray from '../utils/stubArray';
 
-let ebcx = ((key, keys) => {
-	for (let i = 0, s = key; keys.has(key); i++) {
-		key = JSON.stringify([s, i]);
-	}
-	return key;
-});
-
 export default defineComponent({
 	name: 'VueWordCloud',
 	props: {
@@ -155,15 +148,18 @@ export default defineComponent({
 					}
 					return {};
 				})();
-				let key = ebcx({
-					fontFamily,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-					text,
-				}, newKeys);
+				let key;
+				{
+					let i = 0;
+					do {
+						key = JSON.stringify([text, i]);
+						i++;
+					} while (newKeys.has(key));
+					newKeys.add(key);
+				}
 				let cloudWord = cloudWords.get(key);
 				if (cloudWord) {
+					console.log('UPDATE', key);
 					Object.assign(cloudWord, {
 						color,
 						fontFamily,
@@ -176,6 +172,7 @@ export default defineComponent({
 						word,
 					});
 				} else {
+					console.log('CREATE', key);
 					cloudWords.set(key, {
 						color,
 						fontFamily,
@@ -191,6 +188,7 @@ export default defineComponent({
 			});
 			oldKeys.forEach(key => {
 				if (!newKeys.has(key)) {
+					console.log('DELETE', key);
 					cloudWords.delete(key);
 				}
 			});
@@ -236,6 +234,7 @@ export default defineComponent({
 			});
 		});
 		watchEffect(() => {
+			console.log('watchEffect 3');
 			let words = cloudWords;
 			let cloudWidth = cloudWidthRef.value;
 			let cloudHeight = cloudHeightRef.value;
@@ -297,6 +296,7 @@ export default defineComponent({
 			});
 		});
 		watchEffect(() => {
+			console.log('watchEffect 4');
 			let words = cloudWords;
 			words.forEach(word => {
 				let {color = 'Black'} = word;

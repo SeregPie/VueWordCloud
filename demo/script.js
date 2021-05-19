@@ -230,6 +230,7 @@
 				spacing: computed(() => ui.input.spacing.value),
 				ui,
 				words: computed(() => {
+					ui.input.fontSizeRatio.value;
 					return (ui.input.words.value
 						.split(/[\r\n]+/)
 						.map(line => /^(.+)\s+(-?\d+)$/.exec(line))
@@ -237,7 +238,11 @@
 						.map(matched => {
 							let text = matched[1];
 							let weight = Number(matched[2]);
-							return [text, weight];
+							let color;
+							if (chance.bool()) {
+								color = chance.color();
+							}
+							return {text, weight, color};
 						})
 					);
 				}),

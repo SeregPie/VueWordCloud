@@ -102,14 +102,6 @@
 	  return [];
 	}
 
-	let ebcx = (key, keys) => {
-	  for (let i = 0, s = key; keys.has(key); i++) {
-	    key = JSON.stringify([s, i]);
-	  }
-
-	  return key;
-	};
-
 	var component = vue.defineComponent({
 	  name: 'VueWordCloud',
 	  props: {
@@ -250,16 +242,21 @@
 	          return {};
 	        })();
 
-	        let key = ebcx({
-	          fontFamily,
-	          fontStyle,
-	          fontVariant,
-	          fontWeight,
-	          text
-	        }, newKeys);
+	        let key;
+	        {
+	          let i = 0;
+
+	          do {
+	            key = JSON.stringify([text, i]);
+	            i++;
+	          } while (newKeys.has(key));
+
+	          newKeys.add(key);
+	        }
 	        let cloudWord = cloudWords.get(key);
 
 	        if (cloudWord) {
+	          console.log('UPDATE', key);
 	          Object.assign(cloudWord, {
 	            color,
 	            fontFamily,
@@ -272,6 +269,7 @@
 	            word
 	          });
 	        } else {
+	          console.log('CREATE', key);
 	          cloudWords.set(key, {
 	            color,
 	            fontFamily,
@@ -287,6 +285,7 @@
 	      });
 	      oldKeys.forEach(key => {
 	        if (!newKeys.has(key)) {
+	          console.log('DELETE', key);
 	          cloudWords.delete(key);
 	        }
 	      });
@@ -346,6 +345,7 @@
 	      });
 	    });
 	    vue.watchEffect(() => {
+	      console.log('watchEffect 3');
 	      let words = cloudWords;
 	      cloudWidthRef.value;
 	      cloudHeightRef.value;
@@ -401,6 +401,7 @@
 	      });
 	    });
 	    vue.watchEffect(() => {
+	      console.log('watchEffect 4');
 	      let words = cloudWords;
 	      words.forEach(word => {
 	        let {
