@@ -20,13 +20,6 @@ import useFFF from '../utils/useFFF';
 import constant from '../utils/constant';
 import stubArray from '../utils/stubArray';
 
-let ebcx = ((key, keys) => {
-	for (let i = 0, s = key; keys.has(key); i++) {
-		key = JSON.stringify([s, i]);
-	}
-	return key;
-});
-
 export default defineComponent({
 	name: 'VueWordCloud',
 	props: {
@@ -111,9 +104,9 @@ export default defineComponent({
 				immediate: true,
 			});
 		});
-		let cloudWords = reactive(new Map());
+		let cloudWords = reactive({});
 		watchEffect(() => {
-			console.log('watchEffect 1');
+			console.log('watchEffect');
 			let {
 				fontFamily: defaultFontFamily,
 				fontStyle: defaultFontStyle,
@@ -123,8 +116,8 @@ export default defineComponent({
 			} = props;
 			let defaultText = '';
 			let defaultWeight = 1;
-			let oldKeys = new Set(cloudWords.keys());
-			let newKeys = new Set();
+			let oldKeys = new Set(Object.keys(cloudWords));
+			let keys = new Set();
 			words.forEach(word => {
 				let {
 					color,
@@ -155,14 +148,22 @@ export default defineComponent({
 					}
 					return {};
 				})();
-				let key = ebcx({
-					fontFamily,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-					text,
-				}, newKeys);
-				let cloudWord = cloudWords.get(key);
+				let fontFace = {
+					family: fontFamily,
+					style: fontStyle,
+					variant: fontVariant,
+					weight: fontWeight,
+				};
+				let key;
+				{
+					let i = 0;
+					do {
+						key = JSON.stringify([text, fontFace, i]);
+						console.log(key);
+					} while (keys.has(key));
+					keys.add(key);
+				}
+				let cloudWord = cloudWords[key];
 				if (cloudWord) {
 					Object.assign(cloudWord, {
 						color,
@@ -176,7 +177,7 @@ export default defineComponent({
 						word,
 					});
 				} else {
-					cloudWords.set(key, {
+					cloudWords[key] = {
 						color,
 						fontFamily,
 						fontStyle,
@@ -186,12 +187,12 @@ export default defineComponent({
 						text,
 						weight,
 						word,
-					});
+					};
 				}
 			});
 			oldKeys.forEach(key => {
-				if (!newKeys.has(key)) {
-					cloudWords.delete(key);
+				if (!keys.has(key)) {
+					delete cloudWords[key];
 				}
 			});
 		});
@@ -203,8 +204,7 @@ export default defineComponent({
 			}
 			return n;
 		});
-		watchEffect(() => {
-			console.log('watchEffect 2');
+		/*watchEffect(() => {
 			let words = cloudWords;
 			let fontSizeRatio = fontSizeRatioRef.value;
 			let minWeight = +Infinity;
@@ -234,8 +234,8 @@ export default defineComponent({
 				let size = scaleNumber(weight, minWeight, maxWeight, minSize, maxSize);
 				Object.assign(word, {size});
 			});
-		});
-		watchEffect(() => {
+		});*/
+		/*watchEffect(() => {
 			let words = cloudWords;
 			let cloudWidth = cloudWidthRef.value;
 			let cloudHeight = cloudHeightRef.value;
@@ -285,7 +285,7 @@ export default defineComponent({
 					left,
 					rotation,
 					top,
-				});
+				})
 			});
 			let satpLeft = (ojozLeft + ojozRight) / 2;
 			let satpTop = (ojozTop + ojozBottom) / 2;
@@ -302,7 +302,7 @@ export default defineComponent({
 				let {color = 'Black'} = word;
 				Object.assign(word, {color});
 			});
-		});
+		});*/
 		return (() => {
 			let genWord = (() => {
 				let slot = slots['word'];
@@ -331,7 +331,7 @@ export default defineComponent({
 							transform: 'translate(50%,50%)',
 						},
 					},
-					[...cloudWords.values()].map(({
+					/*[...cloudWords.values()].map(({
 						color,
 						font,
 						key,
@@ -363,7 +363,7 @@ export default defineComponent({
 								word,
 							}),
 						);
-					}),
+					}),*/
 				)],
 			);
 		});

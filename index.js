@@ -19,6 +19,21 @@
 	  return typeof value === 'string';
 	}
 
+	function scaleNumber (n, inMin, inMax, outMin, outMax) {
+	  return outMin + (n - inMin) * (outMax - outMin) / (inMax - inMin);
+	}
+
+	function toCSSFont (family, size, style, variant, weight) {
+	  let el = document.createElement('span');
+	  el.style.font = '1px serif';
+	  el.style.fontFamily = family;
+	  el.style.fontSize = `${size}px`;
+	  el.style.fontStyle = style;
+	  el.style.fontVariant = variant;
+	  el.style.fontWeight = weight;
+	  return el.style.font;
+	}
+
 	function useFFF (fn, {
 	  immediate = false
 	} = {}) {
@@ -86,6 +101,14 @@
 	function stubArray () {
 	  return [];
 	}
+
+	let ebcx = (key, keys) => {
+	  for (let i = 0, s = key; keys.has(key); i++) {
+	    key = JSON.stringify([s, i]);
+	  }
+
+	  return key;
+	};
 
 	var component = vue.defineComponent({
 	  name: 'VueWordCloud',
@@ -180,9 +203,9 @@
 	        immediate: true
 	      });
 	    });
-	    let cloudWords = vue.reactive({});
+	    let cloudWords = vue.reactive(new Map());
 	    vue.watchEffect(() => {
-	      console.log('watchEffect');
+	      console.log('watchEffect 1');
 	      let {
 	        fontFamily: defaultFontFamily,
 	        fontStyle: defaultFontStyle,
@@ -192,8 +215,8 @@
 	      } = props;
 	      let defaultText = '';
 	      let defaultWeight = 1;
-	      let oldKeys = new Set(Object.keys(cloudWords));
-	      let keys = new Set();
+	      let oldKeys = new Set(cloudWords.keys());
+	      let newKeys = new Set();
 	      words.forEach(word => {
 	        let {
 	          color,
@@ -227,24 +250,14 @@
 	          return {};
 	        })();
 
-	        let fontFace = {
-	          family: fontFamily,
-	          style: fontStyle,
-	          variant: fontVariant,
-	          weight: fontWeight
-	        };
-	        let key;
-	        {
-	          let i = 0;
-
-	          do {
-	            key = JSON.stringify([text, fontFace, i]);
-	            console.log(key);
-	          } while (keys.has(key));
-
-	          keys.add(key);
-	        }
-	        let cloudWord = cloudWords[key];
+	        let key = ebcx({
+	          fontFamily,
+	          fontStyle,
+	          fontVariant,
+	          fontWeight,
+	          text
+	        }, newKeys);
+	        let cloudWord = cloudWords.get(key);
 
 	        if (cloudWord) {
 	          Object.assign(cloudWord, {
@@ -259,7 +272,7 @@
 	            word
 	          });
 	        } else {
-	          cloudWords[key] = {
+	          cloudWords.set(key, {
 	            color,
 	            fontFamily,
 	            fontStyle,
@@ -269,16 +282,16 @@
 	            text,
 	            weight,
 	            word
-	          };
+	          });
 	        }
 	      });
 	      oldKeys.forEach(key => {
-	        if (!keys.has(key)) {
-	          delete cloudWords[key];
+	        if (!newKeys.has(key)) {
+	          cloudWords.delete(key);
 	        }
 	      });
 	    });
-	    vue.computed(() => {
+	    let fontSizeRatioRef = vue.computed(() => {
 	      let n = props.fontSizeRatio;
 	      n = Math.abs(n);
 
@@ -288,109 +301,118 @@
 
 	      return n;
 	    });
-	    /*watchEffect(() => {
-	    	let words = cloudWords;
-	    	let fontSizeRatio = fontSizeRatioRef.value;
-	    	let minWeight = +Infinity;
-	    	let maxWeight = -Infinity;
-	    	words.forEach(({weight}) => {
-	    		minWeight = Math.min(minWeight, weight);
-	    		maxWeight = Math.max(maxWeight, weight);
-	    	});
-	    	let minSize = 1;
-	    	let maxSize = (() => {
-	    		if (minWeight < maxWeight) {
-	    			if (fontSizeRatio) {
-	    				return 1 / fontSizeRatio;
-	    			}
-	    			if (minWeight > 0) {
-	    				return maxWeight / minWeight;
-	    			}
-	    			if (maxWeight < 0) {
-	    				return minWeight / maxWeight;
-	    			}
-	    			return 1 + maxWeight - minWeight;
-	    		}
-	    		return 1;
-	    	})();
-	    	words.forEach(word => {
-	    		let {weight} = word;
-	    		let size = scaleNumber(weight, minWeight, maxWeight, minSize, maxSize);
-	    		Object.assign(word, {size});
-	    	});
-	    });*/
+	    vue.watchEffect(() => {
+	      console.log('watchEffect 2');
+	      let words = cloudWords;
+	      let fontSizeRatio = fontSizeRatioRef.value;
+	      let minWeight = +Infinity;
+	      let maxWeight = -Infinity;
+	      words.forEach(({
+	        weight
+	      }) => {
+	        minWeight = Math.min(minWeight, weight);
+	        maxWeight = Math.max(maxWeight, weight);
+	      });
+	      let minSize = 1;
 
-	    /*watchEffect(() => {
-	    	let words = cloudWords;
-	    	let cloudWidth = cloudWidthRef.value;
-	    	let cloudHeight = cloudHeightRef.value;
-	    	let ojozLeft = 0;
-	    	let ojozRight = 0;
-	    	let ojozTop = 0;
-	    	let ojozBottom = 0;
-	    	let satpWords = new Map();
-	    	let canvas = document.createElement('canvas');
-	    	let ctx = canvas.getContext('2d');
-	    	words.forEach(word => {
-	    		let {
-	    			fontFamily,
-	    			fontSize,
-	    			fontStyle,
-	    			fontVariant,
-	    			fontWeight,
-	    			rotation = Math.random() * Math.PI,
-	    			text,
-	    		} = word;
-	    		let font = toCSSFont(
-	    			fontFamily,
-	    			fontSize,
-	    			fontStyle,
-	    			fontVariant,
-	    			fontWeight,
-	    		);
-	    		let width;
-	    		let height;
-	    		{
-	    			ctx.font = font;
-	    			let x = ctx.measureText(text).width + fontSize;
-	    			let y = fontSize * 2;
-	    			let a = rotation;
-	    			let cosA = Math.abs(Math.cos(a));
-	    			let sinA = Math.abs(Math.sin(a));
-	    			width = x * cosA + y * sinA;
-	    			height = x * sinA + y * cosA;
-	    		}
-	    		let left = ((min, max) => min + (max - min) * Math.random())(ojozLeft - width, ojozRight + width);
-	    		let top = ((min, max) => min + (max - min) * Math.random())(ojozTop - height, ojozBottom + height);
-	    		ojozLeft = Math.min(ojozLeft, left);
-	    		ojozRight = Math.max(ojozRight, left + width);
-	    		ojozTop = Math.min(ojozTop, top);
-	    		ojozBottom = Math.max(ojozBottom, top + height);
-	    		Object.assign(word, {
-	    			left,
-	    			rotation,
-	    			top,
-	    		})
-	    	});
-	    	let satpLeft = (ojozLeft + ojozRight) / 2;
-	    	let satpTop = (ojozTop + ojozBottom) / 2;
-	    	let satpWidth = ojozRight - ojozLeft;
-	    	let satpHeight = ojozBottom - ojozTop;
-	    	words.forEach(word => {
-	    		word.left -= satpLeft;
-	    		word.top -= satpTop;
-	    	});
+	      let maxSize = (() => {
+	        if (minWeight < maxWeight) {
+	          if (fontSizeRatio) {
+	            return 1 / fontSizeRatio;
+	          }
+
+	          if (minWeight > 0) {
+	            return maxWeight / minWeight;
+	          }
+
+	          if (maxWeight < 0) {
+	            return minWeight / maxWeight;
+	          }
+
+	          return 1 + maxWeight - minWeight;
+	        }
+
+	        return 1;
+	      })();
+
+	      words.forEach(word => {
+	        let {
+	          weight
+	        } = word;
+	        let size = scaleNumber(weight, minWeight, maxWeight, minSize, maxSize);
+	        Object.assign(word, {
+	          size
+	        });
+	      });
 	    });
-	    watchEffect(() => {
-	    	let words = cloudWords;
-	    	words.forEach(word => {
-	    		let {color = 'Black'} = word;
-	    		Object.assign(word, {color});
-	    	});
-	    });*/
+	    vue.watchEffect(() => {
+	      let words = cloudWords;
+	      cloudWidthRef.value;
+	      cloudHeightRef.value;
+	      let ojozLeft = 0;
+	      let ojozRight = 0;
+	      let ojozTop = 0;
+	      let ojozBottom = 0;
+	      let canvas = document.createElement('canvas');
+	      let ctx = canvas.getContext('2d');
+	      words.forEach(word => {
+	        let {
+	          fontFamily,
+	          fontSize,
+	          fontStyle,
+	          fontVariant,
+	          fontWeight,
+	          rotation = Math.random() * Math.PI,
+	          text
+	        } = word;
+	        let font = toCSSFont(fontFamily, fontSize, fontStyle, fontVariant, fontWeight);
+	        let width;
+	        let height;
+	        {
+	          ctx.font = font;
+	          let x = ctx.measureText(text).width + fontSize;
+	          let y = fontSize * 2;
+	          let a = rotation;
+	          let cosA = Math.abs(Math.cos(a));
+	          let sinA = Math.abs(Math.sin(a));
+	          width = x * cosA + y * sinA;
+	          height = x * sinA + y * cosA;
+	        }
 
+	        let left = ((min, max) => min + (max - min) * Math.random())(ojozLeft - width, ojozRight + width);
+
+	        let top = ((min, max) => min + (max - min) * Math.random())(ojozTop - height, ojozBottom + height);
+
+	        ojozLeft = Math.min(ojozLeft, left);
+	        ojozRight = Math.max(ojozRight, left + width);
+	        ojozTop = Math.min(ojozTop, top);
+	        ojozBottom = Math.max(ojozBottom, top + height);
+	        Object.assign(word, {
+	          left,
+	          rotation,
+	          top
+	        });
+	      });
+	      let satpLeft = (ojozLeft + ojozRight) / 2;
+	      let satpTop = (ojozTop + ojozBottom) / 2;
+	      words.forEach(word => {
+	        word.left -= satpLeft;
+	        word.top -= satpTop;
+	      });
+	    });
+	    vue.watchEffect(() => {
+	      let words = cloudWords;
+	      words.forEach(word => {
+	        let {
+	          color = 'Black'
+	        } = word;
+	        Object.assign(word, {
+	          color
+	        });
+	      });
+	    });
 	    return () => {
-	      (() => {
+	      let genWord = (() => {
 	        let slot = slots['word'];
 
 	        if (slot) {
@@ -416,41 +438,35 @@
 	          right: '50%',
 	          transform: 'translate(50%,50%)'
 	        }
-	      }
-	      /*[...cloudWords.values()].map(({
-	      	color,
-	      	font,
-	      	key,
-	      	left,
-	      	rotation,
-	      	text,
-	      	top,
-	      	weight,
-	      	word,
+	      }, [...cloudWords.values()].map(({
+	        color,
+	        font,
+	        key,
+	        left,
+	        rotation,
+	        text,
+	        top,
+	        weight,
+	        word
 	      }) => {
-	      	return h(
-	      		'div',
-	      		{
-	      			key,
-	      			style: {
-	      				color: color,
-	      				font: font,
-	      				left: `${left}px`,
-	      				position: 'absolute',
-	      				top: `${top}px`,
-	      				transform: `rotate(${rotation}rad)`,
-	      				transformOrigin: 'center',
-	      				whiteSpace: 'nowrap',
-	      			},
-	      		},
-	      		genWord({
-	      			text,
-	      			weight,
-	      			word,
-	      		}),
-	      	);
-	      }),*/
-	      )]);
+	        return vue.h('div', {
+	          key,
+	          style: {
+	            color: color,
+	            font: font,
+	            left: `${left}px`,
+	            position: 'absolute',
+	            top: `${top}px`,
+	            transform: `rotate(${rotation}rad)`,
+	            transformOrigin: 'center',
+	            whiteSpace: 'nowrap'
+	          }
+	        }, genWord({
+	          text,
+	          weight,
+	          word
+	        }));
+	      }))]);
 	    };
 	  }
 
