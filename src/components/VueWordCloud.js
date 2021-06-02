@@ -16,7 +16,7 @@ import isString from '../utils/isString';
 import scaleNumber from '../utils/scaleNumber';
 import toCSSFont from '../utils/toCSSFont';
 import sleep from '../utils/sleep';
-import useFFF from '../utils/useFFF';
+import qhak from '../utils/qhak';
 import constant from '../utils/constant';
 import stubArray from '../utils/stubArray';
 
@@ -94,7 +94,7 @@ export default defineComponent({
 		let cloudWidthRef = shallowRef(0);
 		let cloudHeightRef = shallowRef(0);
 		onMounted(() => {
-			useFFF(() => {
+			qhak(() => {
 				let el = elRef.value;
 				if (el) {
 					cloudWidthRef.value = el.offsetWidth;
@@ -104,203 +104,41 @@ export default defineComponent({
 				immediate: true,
 			});
 		});
-		let cloudWords = reactive(new Map());
-		watchEffect(() => {
-			console.log('watchEffect 1');
+		let cloudWordsRef = shallowRef([]);
+		watchEffect(async onInvalidate => {
+			let controller = new AbortController();
+			onInvalidate(() => {
+				controller.abort();
+			});
+			let {signal} = controller;
 			let {
-				fontFamily: defaultFontFamily,
-				fontStyle: defaultFontStyle,
-				fontVariant: defaultFontVariant,
-				fontWeight: defaultFontWeight,
+				fontFamily,
+				fontSizeRatio,
+				fontStyle,
+				fontVariant,
+				fontWeight,
+				rotation,
 				words,
 			} = props;
-			let defaultText = '';
-			let defaultWeight = 1;
-			let oldKeys = new Set(cloudWords.keys());
-			let newKeys = new Set();
-			words.forEach(word => {
-				let {
-					color,
-					fontFamily = defaultFontFamily,
-					fontStyle = defaultFontStyle,
-					fontVariant = defaultFontVariant,
-					fontWeight = defaultFontWeight,
-					rotation,
-					text = defaultText,
-					weight = defaultWeight,
-				} = (() => {
-					if (isString(word)) {
-						let text = word;
-						return {text};
-					}
-					if (isArray(word)) {
-						let [
-							text,
-							weight,
-						] = word;
-						return {
-							text,
-							weight,
-						};
-					}
-					if (isObject(word)) {
-						return word;
-					}
-					return {};
-				})();
-				let key;
-				{
-					let i = 0;
-					do {
-						key = JSON.stringify([text, i]);
-						i++;
-					} while (newKeys.has(key));
-					newKeys.add(key);
-				}
-				let cloudWord = cloudWords.get(key);
-				if (cloudWord) {
-					console.log('UPDATE', key);
-					Object.assign(cloudWord, {
-						color,
-						fontFamily,
-						fontStyle,
-						fontVariant,
-						fontWeight,
-						rotation,
-						text,
-						weight,
-						word,
-					});
-				} else {
-					console.log('CREATE', key);
-					cloudWords.set(key, {
-						color,
-						fontFamily,
-						fontStyle,
-						fontVariant,
-						fontWeight,
-						rotation,
-						text,
-						weight,
-						word,
-					});
-				}
-			});
-			oldKeys.forEach(key => {
-				if (!newKeys.has(key)) {
-					console.log('DELETE', key);
-					cloudWords.delete(key);
-				}
-			});
-		});
-		let fontSizeRatioRef = computed(() => {
-			let n = props.fontSizeRatio;
-			n = Math.abs(n);
-			if (n > 1) {
-				n = 1 / n;
-			}
-			return n;
-		});
-		watchEffect(() => {
-			console.log('watchEffect 2');
-			let words = cloudWords;
-			let fontSizeRatio = fontSizeRatioRef.value;
-			let minWeight = +Infinity;
-			let maxWeight = -Infinity;
-			words.forEach(({weight}) => {
-				minWeight = Math.min(minWeight, weight);
-				maxWeight = Math.max(maxWeight, weight);
-			});
-			let minSize = 1;
-			let maxSize = (() => {
-				if (minWeight < maxWeight) {
-					if (fontSizeRatio) {
-						return 1 / fontSizeRatio;
-					}
-					if (minWeight > 0) {
-						return maxWeight / minWeight;
-					}
-					if (maxWeight < 0) {
-						return minWeight / maxWeight;
-					}
-					return 1 + maxWeight - minWeight;
-				}
-				return 1;
-			})();
-			words.forEach(word => {
-				let {weight} = word;
-				let size = scaleNumber(weight, minWeight, maxWeight, minSize, maxSize);
-				Object.assign(word, {size});
-			});
-		});
-		watchEffect(() => {
-			console.log('watchEffect 3');
-			let words = cloudWords;
 			let cloudWidth = cloudWidthRef.value;
 			let cloudHeight = cloudHeightRef.value;
-			let ojozLeft = 0;
-			let ojozRight = 0;
-			let ojozTop = 0;
-			let ojozBottom = 0;
-			let satpWords = new Map();
-			let canvas = document.createElement('canvas');
-			let ctx = canvas.getContext('2d');
-			words.forEach(word => {
-				let {
-					fontFamily,
-					fontSize,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-					rotation = Math.random() * Math.PI,
-					text,
-				} = word;
-				let font = toCSSFont(
-					fontFamily,
-					fontSize,
-					fontStyle,
-					fontVariant,
-					fontWeight,
-				);
-				let width;
-				let height;
-				{
-					ctx.font = font;
-					let x = ctx.measureText(text).width + fontSize;
-					let y = fontSize * 2;
-					let a = rotation;
-					let cosA = Math.abs(Math.cos(a));
-					let sinA = Math.abs(Math.sin(a));
-					width = x * cosA + y * sinA;
-					height = x * sinA + y * cosA;
-				}
-				let left = ((min, max) => min + (max - min) * Math.random())(ojozLeft - width, ojozRight + width);
-				let top = ((min, max) => min + (max - min) * Math.random())(ojozTop - height, ojozBottom + height);
-				ojozLeft = Math.min(ojozLeft, left);
-				ojozRight = Math.max(ojozRight, left + width);
-				ojozTop = Math.min(ojozTop, top);
-				ojozBottom = Math.max(ojozBottom, top + height);
-				Object.assign(word, {
-					left,
-					rotation,
-					top,
-				});
+			let cloudWords = await WordCloud(words, cloudWidth, cloudHeight, {
+				fontFamily,
+				fontSizeRatio,
+				fontStyle,
+				fontVariant,
+				fontWeight,
+				rotation,
+				signal,
 			});
-			let satpLeft = (ojozLeft + ojozRight) / 2;
-			let satpTop = (ojozTop + ojozBottom) / 2;
-			let satpWidth = ojozRight - ojozLeft;
-			let satpHeight = ojozBottom - ojozTop;
-			words.forEach(word => {
-				word.left -= satpLeft;
-				word.top -= satpTop;
-			});
+			cloudWordsRef.value = cloudWords;
 		});
 		watchEffect(() => {
-			console.log('watchEffect 4');
-			let words = cloudWords;
-			words.forEach(word => {
-				let {color = 'Black'} = word;
-				Object.assign(word, {color});
+			let cloudWords = cloudWordsRef.value;
+			cloudWords.forEach(cloudWord => {
+				let {word} = cloudWord;
+				let {color = 'Black'} = WordCloud.xmax(word);
+				Object.assign(cloudWord, {color});
 			});
 		});
 		return (() => {
@@ -331,7 +169,7 @@ export default defineComponent({
 							transform: 'translate(50%,50%)',
 						},
 					},
-					[...cloudWords.values()].map(({
+					cloudWords.map(({
 						color,
 						font,
 						key,

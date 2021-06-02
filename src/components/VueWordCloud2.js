@@ -16,7 +16,7 @@ import isString from '../utils/isString';
 import scaleNumber from '../utils/scaleNumber';
 import toCSSFont from '../utils/toCSSFont';
 import sleep from '../utils/sleep';
-import useFFF from '../utils/useFFF';
+import useFFF from '../utils/qhak';
 import constant from '../utils/constant';
 import stubArray from '../utils/stubArray';
 

@@ -256,7 +256,6 @@
 	        let cloudWord = cloudWords.get(key);
 
 	        if (cloudWord) {
-	          console.log('UPDATE', key);
 	          Object.assign(cloudWord, {
 	            color,
 	            fontFamily,
