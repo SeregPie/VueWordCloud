@@ -196,7 +196,7 @@ export default {
 
 						let gridWorker = createWorker(PixelGridWorker);
 
-						let process = {
+						this.progress = {
 							completedWords: 0,
 							totalWords: words.length,
 						};
@@ -205,13 +205,12 @@ export default {
 							.resolve()
 							.then(() => {
 								context.throwIfInterrupted();
-								this.progress = process;
 
 								return Worker_postMessage(gridWorker, elementAspect);
 							})
 							.then(() => {
 								context.throwIfInterrupted();
-								process.completedWords++;
+								this.progress.completedWords++;
 
 								let promise = Promise.resolve();
 								words.reduce((previousWord, currentWord, index) => {
@@ -252,7 +251,7 @@ export default {
 										})
 										.then(([imageLeft, imageTop]) => {
 											context.throwIfInterrupted();
-											process.completedWords++;
+											this.progress.completedWords++;
 
 											currentWord.ǂimageLeft = imageLeft;
 											currentWord.ǂimageTop = imageTop;
