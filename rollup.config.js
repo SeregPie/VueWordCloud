@@ -35,7 +35,7 @@ export default {
 	plugins,
 	output: {
 		file: main,
-		format: 'umd',
+
 		name: 'VueWordCloud',
 		globals,
 	},

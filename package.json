@@ -1,6 +1,6 @@
 {
 	"name": "vuewordcloud",
-	"version": "18.7.11",
+	"version": "19.0.0",
 	"description": "Generates a cloud out of the words.",
 	"keywords": [
 		"cloud",
@@ -24,14 +24,12 @@
 	"devDependencies": {
 		"@rollup/plugin-buble": "^0.21.3",
 		"@rollup/plugin-node-resolve": "^8.0.0",
-		"eslint": "^7.1.0",
-		"eslint-config-seregpie": "^1.0.1",
 		"rollup": "^2.12.0",
 		"rollup-plugin-serve": "^1.0.1",
 		"rollup-plugin-stringify": "^19.0.2",
 		"rollup-plugin-terser": "^6.1.0"
 	},
 	"peerDependencies": {
-		"vue": "^2.6.11"
+		"vue": "^3"
 	}
 }
