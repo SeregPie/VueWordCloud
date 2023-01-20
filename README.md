@@ -2,6 +2,10 @@
 
 Generates a cloud out of the words.
 
+## Vue 3
+
+For Vue 3 use the version >18.
+
 ## demo
 
 [Try it out!](https://seregpie.github.io/VueWordCloud/)

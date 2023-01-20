@@ -1,17 +1,19 @@
-export default function(h) {
+import { h } from 'vue';
+
+export default function() {
 	let {
-		$scopedSlots,
+		$slots,
 		animationEasing,
 		animationOptions,
 		cloudWords,
 		separateAnimationDelay,
 		separateAnimationDuration,
 	} = this;
-	$scopedSlots = {
+	$slots = {
 		default({text}) {
 			return text;
 		},
-		...$scopedSlots,
+		...$slots,
 	};
 	return h(
 		'div',
@@ -97,7 +99,7 @@ export default function(h) {
 								),
 							},
 						},
-						[$scopedSlots.default({
+						[$slots.default({
 							color,
 							font,
 							left,
