@@ -21,7 +21,7 @@
 			rel="stylesheet"
 		/>
 		<link
-			href="https://unpkg.com/vuetify@2.2.30/dist/vuetify.min.css"
+			href="https://unpkg.com/vuetify@3.0.3/dist/vuetify.min.css"
 			rel="stylesheet"
 		/>
 		<link
@@ -29,348 +29,247 @@
 			rel="stylesheet"
 		/>
 		<script src="https://unpkg.com/core-js-bundle@3.6.5/minified.js"></script>
-		<script src="https://unpkg.com/vue@2.6.11/dist/vue.js"></script>
-		<script src="./docs.js"></script>
-		<script src="https://unpkg.com/vuetify@2.2.30/dist/vuetify.min.js"></script>
-		<script src="https://unpkg.com/@seregpie/vuesvg@19.0.0"></script>
+		<script src="https://unpkg.com/vue@3.2.45/dist/vue.global.js"></script>
+		<script src="https://unpkg.com/vuetify@3.0.3/dist/vuetify.min.js"></script>
+		<!-- TODO vuesvg with vue3 script src="https://unpkg.com/@seregpie/vuesvg@19.0.0"></script-->
 		<script src="https://unpkg.com/chance@1.1.6/dist/chance.min.js"></script>
 		<script src="https://unpkg.com/fontfaceobserver@2.1.0/fontfaceobserver.standalone.js"></script>
+		<script src="./index.js"></script>
 	</head>
 	<body>
-		<v-app
-			id="app"
-			v-cloak
-		>
-			<v-navigation-drawer
-				app
-				clipped
-				v-model="drawer"
-			>
-				<div style="padding: 8px;">
-					<v-switch
-						class="ma-0 pa-0"
-						hide-details
-						label="show progress"
-						v-model="progressVisible"
-					></v-switch>
-				</div>
-				<v-divider></v-divider>
-				<div
-					style="
-						display: grid;
-						gap: 8px;
-						padding: 8px;
-					"
-				>
-					<v-textarea
-						:rows="9"
-						filled
-						hide-details
-						label="words & weights"
-						v-model="wordsText"
-					></v-textarea>
-					<v-btn
-						block
-						color="primary"
-						@click="generateWordsText"
-					>generate randomly</v-btn>
-				</div>
-				<v-divider></v-divider>
-				<div
-					style="
-						display: grid;
-						gap: 16px;
-						padding: 8px;
-					"
-				>
-					<v-select
-						:items="fontFamilyValues"
-						filled
-						hide-details
-						label="font family"
-						v-model="fontFamily"
-					>
-						<template v-slot:item="props">
-							<span
-								:style="{fontFamily: props.item}"
-							>{{ props.item }}</span>
-						</template>
-					</v-select>
-					<div>
-						<v-input
-							label="color"
-							hide-details
-						></v-input>
-						<v-btn-toggle
-							dense
-							mandatory
-							v-model="colorItemIndex"
-						>
-							<v-btn
-								v-for="(item, itemIndex) in colorItems"
-								:key="itemIndex"
-								:value="itemIndex"
-								icon
-							>
-								<div
-									style="
-										display: flex;
-										height: 24px;
-										margin: 2px;
-										width: 24px;
-									"
+		<v-app id="app" v-cloak>
+      <v-layout>
+			  <v-app-bar app clipped-left dark>
+			  	<v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+			  	<v-toolbar-title>VueWordCloud</v-toolbar-title>
+			  	<v-spacer></v-spacer>
+			  	<v-btn href="https://github.com/SeregPie/VueWordCloud" icon target="_blank">
+			  		<v-icon>mdi-github</v-icon>
+			  	</v-btn>
+			  </v-app-bar>
+			  <v-navigation-drawer app clipped v-model="drawer">
+			  	<div style="padding: 8px;">
+			  		<v-switch
+			  			hide-details="auto"
+			  			label="show progress"
+              color="info"
+			  			v-model="progressVisible"
+			  		></v-switch>
+			  	</div>
+			  	<v-divider></v-divider>
+			  	<div style="display: grid; gap: 8px; padding: 8px;">
+			  		<v-textarea
+			  			:rows="9"
+			  			filled
+			  			hide-details="auto"
+			  			label="words & weights"
+			  			v-model="wordsText"
+			  		></v-textarea>
+			  		<v-btn block color="primary" @click="generateWordsText">generate randomly</v-btn>
+			  	</div>
+			  	<v-divider></v-divider>
+			  	<div style="display: grid; gap: 16px; padding: 8px;">
+			  		<v-select
+			  			:items="fontFamilyValues"
+			  			:variant="'filled'"
+			  			hide-details="auto"
+			  			label="font family"
+			  			v-model="fontFamily"
+			  			:menu-props="{
+			  			    closeOnClick: true,
+			  			    closeOnContentClick: true,
+			  			}"
+			  		>
+			  			<template v-slot:selection="{ item }">
+			  				<span :style="{fontFamily: item.title}">{{ item.title }}</span>
+			  			</template>
+			  			<template v-slot:item="{ item }" >
+			  				<v-list-item
+									:style="{fontFamily: item.title}"
+									:value="item.value"
+									:title="item.title"
+									@click="fontFamily = item.title"
 								>
-									<div
-										v-for="color in item"
-										:style="{backgroundColor: color}"
-										style="flex: 1 1 0%;"
-									></div>
-								</div>
-							</v-btn>
-						</v-btn-toggle>
-					</div>
-					<div>
-						<v-input
-							label="rotation"
-							hide-details
-						></v-input>
-						<v-btn-toggle
-							dense
-							mandatory
-							v-model="rotationItemIndex"
-						>
-							<v-btn
-								v-for="(item, itemIndex) in rotationItems"
-								:key="itemIndex"
-								:value="itemIndex"
-								icon
-							>
-								<vue-svg
-									:src="item.svg"
-									fill="currentColor"
-									height="24"
-									width="24"
-								></vue-svg>
-							</v-btn>
-						</v-btn-toggle>
-					</div>
-					<div>
-						<div
-							style="
-								align-items: center;
-								display: flex;
-								justify-content: space-between;
-							"
-						>
-							<v-input
-								label="spacing"
-								hide-details
-							></v-input>
-							<v-chip
-								small
-							>{{ Math.round(spacing * 100) }}%</v-chip>
-						</div>
-						<v-slider
-							:max="spacingValues.length - 1"
-							:min="0"
-							hide-details
-							ticks
-							v-model="spacingValueIndex"
-						></v-slider>
-					</div>
-					<v-select
-						:items="animationItems"
-						filled
-						hide-details
-						label="enter/leave animation"
-						v-model="animation"
-					></v-select>
-					<div>
-						<div
-							style="
-								align-items: center;
-								display: flex;
-								justify-content: space-between;
-							"
-						>
-							<v-input
-								label="animation duration"
-								hide-details
-							></v-input>
-							<v-chip
-								small
-							>{{ Math.round(animationDuration / 1000) }}s</v-chip>
-						</div>
-						<v-slider
-							:max="animationDurationValues.length - 1"
-							:min="0"
-							hide-details
-							ticks
-							v-model="animationDurationValueIndex"
-						></v-slider>
-					</div>
-					<div>
-						<div
-							style="
-								align-items: center;
-								display: flex;
-								justify-content: space-between;
-							"
-						>
-							<v-input
-								label="animation overlap"
-								hide-details
-							></v-input>
-							<v-chip
-								small
-							>{{ Math.round(animationOverlap * 100) }}%</v-chip>
-						</div>
-						<v-slider
-							:max="animationOverlapValues.length - 1"
-							:min="0"
-							hide-details
-							ticks
-							v-model="animationOverlapValueIndex"
-						></v-slider>
-					</div>
-					<v-select
-						:items="animationEasingValues"
-						filled
-						hide-details
-						label="animation easing"
-						v-model="animationEasing"
-					></v-select>
-					<div>
-						<div
-							style="
-								align-items: center;
-								display: flex;
-								justify-content: space-between;
-							"
-						>
-							<v-input
-								label="font size ratio"
-								hide-details
-							></v-input>
-							<v-chip
-								small
-							>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
-						</div>
-						<v-slider
-							:max="fontSizeRatioValues.length - 1"
-							:min="0"
-							hide-details
-							ticks
-							v-model="fontSizeRatioValueIndex"
-						></v-slider>
-					</div>
-				</div>
-			</v-navigation-drawer>
-			<v-app-bar
-				app
-				clipped-left
-				dark
-			>
-				<v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-				<v-toolbar-title>VueWordCloud</v-toolbar-title>
-				<v-spacer></v-spacer>
-				<v-btn
-					href="https://github.com/SeregPie/VueWordCloud"
-					icon
-					target="_blank"
-				>
-					<v-icon>mdi-github</v-icon>
-				</v-btn>
-			</v-app-bar>
-			<v-content>
-				<v-container
-					fill-height
-					overflow-hidden
-				>
-					<div
-						style="
-							height: 100%;
-							position: relative;
-							width: 100%;
-						"
-					>
-						<div
-							:style="(progressVisible && progress)
-								? {
-									filter: 'blur(8px)',
-									opacity: 0.3,
-									pointerEvents: 'none',
-									transform: 'scale(0.7,0.7)',
-								}
-								: {}
-							"
-							style="
-								bottom: 0;
-								left: 0;
-								position: absolute;
-								right: 0;
-								top: 0;
-								transition-duration: 1s;
-							"
-						>
-							<vue-word-cloud
-								:animation-duration="animationDuration"
-								:animation-easing="animationEasing"
-								:animation-overlap="animationOverlap"
-								:color="color"
-								:enter-animation="enterAnimation"
-								:font-family="fontFamily"
-								:font-size-ratio="fontSizeRatio"
-								:leave-animation="leaveAnimation"
-								:load-font="loadFont"
-								:progress.sync="progress"
-								:rotation="rotation"
-								:spacing="spacing"
-								:words="words"
-							>
-								<template v-slot="props">
-									<v-tooltip top>
-										<template v-slot:activator="{on}">
-											<div
-												style="cursor: pointer;"
-												v-on="on"
-												@click="onWordClick(props.word)"
-											>{{ props.text }}</div>
-										</template>
-										<div
-											style="text-align: center;"
-										>{{ props.text }}<br/>({{ props.weight }})</div>
-									</v-tooltip>
-								</template>
-							</vue-word-cloud>
-						</div>
-						<v-scale-transition>
-							<v-progress-circular
-								v-if="progressVisible && progress"
-								:rotate="-90"
-								:size="200"
-								:value="(progress.completedWords / progress.totalWords) * 100"
-								:width="20"
-								class="v-no-animation"
-								color="primary"
-								style="
-									bottom: 0;
-									left: 0;
-									margin: auto;
-									position: absolute;
-									right: 0;
-									top: 0;
-								"
-							>{{ progress.completedWords }} of {{ progress.totalWords }}</v-progress-circular>
-						</v-scale-transition>
-					</div>
-				</v-container>
-			</v-content>
-			<v-snackbar
-				:timeout="2000"
-				bottom
-				v-model="snackbarVisible"
-			>{{ snackbarText }}</v-snackbar>
+ 			  			  </v-list-item>
+			  			</template>
+			  		</v-select>
+			  		<div>
+			  			<v-label text="color"></v-label>
+			  			<v-btn-toggle mandatory="true" v-model="colorItemIndex">
+			  				<v-btn
+			  					v-for="(item, itemIndex) in colorItems"
+			  					:key="itemIndex"
+			  					:value="itemIndex"
+			  					icon
+			  				>
+			  					<div
+			  						style="
+			  							display: flex;
+			  							height: 24px;
+			  							margin: 2px;
+			  							width: 24px;
+			  						"
+			  					>
+			  						<div
+			  							v-for="color in item"
+			  							:style="{backgroundColor: color}"
+			  							style="flex: 1 1 0%;"
+			  						></div>
+			  					</div>
+			  				</v-btn>
+			  			</v-btn-toggle>
+			  		</div>
+			  		<div>
+			  			<v-label text="rotation"></v-label>
+			  			<v-btn-toggle mandatory="true" v-model="rotationItemIndex">
+			  				<v-btn
+			  					v-for="(item, itemIndex) in rotationItems"
+			  					:key="itemIndex"
+			  					:value="itemIndex"
+			  					icon
+                  >
+			  					<span v-html="item.svg"></span>
+			  				</v-btn>
+			  			</v-btn-toggle>
+			  		</div>
+			  		<div>
+			  			<div style="align-items: center; display: flex; justify-content: space-between;">
+			  				<v-label text="spacing"></v-label>
+			  				<v-chip small>{{ Math.round(spacing * 100) }}%</v-chip>
+			  			</div>
+			  			<v-slider
+			  				:max="spacingValues.length - 1"
+			  				:min="0"
+                :step="1"
+			  				hide-details="auto"
+			  				:show-ticks="true"
+			  				v-model="spacingValueIndex"
+			  			></v-slider>
+			  		</div>
+			  		<v-select
+			  			:items="animationItems"
+			  			:variant="'filled'"
+			  			hide-details="auto"
+			  			label="enter/leave animation"
+			  			v-model="animation"
+			  			return-object
+			  		></v-select>
+			  		<div>
+			  			<div style="align-items: center; display: flex; justify-content: space-between;">
+			  				<v-label text="animation duration"></v-label>
+			  				<v-chip small>{{ Math.round(animationDuration / 1000) }}s</v-chip>
+			  			</div>
+			  			<v-slider
+			  				:max="animationDurationValues.length - 1"
+			  				:min="0"
+                :step="1"
+			  				hide-details="auto"
+			  				:show-ticks="true"
+			  				v-model="animationDurationValueIndex"
+			  			></v-slider>
+			  		</div>
+			  		<div>
+			  			<div style="align-items: center; display: flex; justify-content: space-between;">
+			  				<v-label text="animation overlap"></v-label>
+			  				<v-chip small>{{ Math.round(animationOverlap * 100) }}%</v-chip>
+			  			</div>
+			  			<v-slider
+			  				:max="animationOverlapValues.length - 1"
+			  				:min="0"
+                :step="1"
+			  				hide-details="auto"
+			  				:show-ticks="true"
+			  				v-model="animationOverlapValueIndex"
+			  			></v-slider>
+			  		</div>
+			  		<v-select
+			  			:items="animationEasingValues"
+			  			filled
+			  			hide-details="auto"
+			  			label="animation easing"
+			  			v-model="animationEasing"
+			  		></v-select>
+			  		<div>
+			  			<div style="align-items: center; display: flex; justify-content: space-between;">
+                <v-label text="font size ratio" ></v-label>
+			  				<v-chip small>{{ Math.round(fontSizeRatio * 100) }}%</v-chip>
+			  			</div>
+			  			<v-slider
+			  				:max="fontSizeRatioValues.length - 1"
+			  				:min="0"
+                :step="1"
+			  				hide-details="auto"
+			  				:show-ticks="true"
+			  				v-model="fontSizeRatioValueIndex"
+			  			></v-slider>
+			  		</div>
+			  	</div>
+			  </v-navigation-drawer>
+			  <v-main class="h-screen">
+			  		<div style="height: 100%; position: relative; width: 100%;">
+              <div
+						  	:style="(progressVisible && progress)
+						  		? {
+						  			filter: 'blur(8px)',
+						  			opacity: 0.3,
+						  			pointerEvents: 'none',
+						  			transform: 'scale(0.7,0.7)',
+						  		}
+						  		: {}
+						  	"
+						  	style="
+						  		bottom: 0;
+						  		left: 0;
+						  		position: absolute;
+						  		right: 0;
+						  		top: 0;
+						  		transition-duration: 1s;
+						  	"
+						  >
+			  		  		<vue-word-cloud
+                	:animation-duration="animationDuration"
+						  		:animation-easing="animationEasing"
+						  		:animation-overlap="animationOverlap"
+						  		:color="color"
+						  		:enter-animation="enterAnimation"
+						  		:font-family="fontFamily"
+						  		:font-size-ratio="fontSizeRatio"
+						  		:leave-animation="leaveAnimation"
+						  		:load-font="loadFont"
+						  		v-model:progress="progress"
+						  		:rotation="rotation"
+						  		:spacing="spacing"
+						  		:words="words"
+						  	>
+						  		<template v-slot="props">
+						  			<div style="cursor: pointer;" @click="onWordClick(props.word)">
+                      {{ props.text }}
+                      <v-tooltip activator="parent" location="top">{{ props.text }} ({{ props.weight }})</v-tooltip>
+                    </div>
+						  		</template>
+						  	</vue-word-cloud>
+						  </div>
+						  <v-scale-transition>
+						  	<v-progress-circular
+						  		v-if="progress"
+						  		:size="200"
+						  		:model-value="Math.round((progress.completedWords / progress.totalWords) * 100)"
+						  		:width="20"
+						  		color="primary"
+						  		style="
+						  			bottom: 0;
+						  			left: 0;
+						  			margin: auto;
+						  			position: absolute;
+						  			right: 0;
+						  			top: 0;
+						  		"
+						  	>{{ progress.completedWords }} of {{ progress.totalWords }}</v-progress-circular>
+						  </v-scale-transition>
+			  		</div>
+			  </v-main>
+			  <v-snackbar :timeout="2000" bottom v-model="snackbarVisible">{{ snackbarText }}</v-snackbar>
+      </v-layout>
 		</v-app>
 		<script src="./demo/script.js"></script>
 	</body>
