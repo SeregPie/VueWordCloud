@@ -14,6 +14,7 @@
 	"license": "MIT",
 	"author": "Sergej Sintschilin <seregpie@gmail.com>",
 	"files": [],
+	"type": "module",
 	"main": "index.js",
 	"repository": "github:SeregPie/VueWordCloud",
 	"scripts": {
